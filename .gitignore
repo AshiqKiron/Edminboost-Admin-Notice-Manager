@@ -1,0 +1,12 @@
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+*.pem
+*.key
+vendor/
+node_modules/
+.phpunit.result.cache
+composer.lock
+package-lock.json

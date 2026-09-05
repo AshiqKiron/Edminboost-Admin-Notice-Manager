@@ -1,0 +1,61 @@
+/**
+ * Admin Notice Manager — plugin admin styles.
+ *
+ * @package EdminBoost\AdminNoticeManager
+ */
+
+.edminboost-anm-wrap {
+	max-width: 960px;
+}
+
+.edminboost-anm-wrap .edminboost-anm-hero {
+	margin: 1.5em 0 2em;
+}
+
+.edminboost-anm-wrap .edminboost-anm-hero__lead {
+	font-size: 14px;
+	color: #646970;
+	max-width: 640px;
+}
+
+.edminboost-anm-card {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	padding: 20px 24px;
+	margin-bottom: 20px;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.edminboost-anm-card h2 {
+	margin-top: 0;
+	padding-top: 0;
+	font-size: 16px;
+}
+
+.edminboost-anm-card p:last-child {
+	margin-bottom: 0;
+}
+
+.edminboost-anm-settings .form-table th {
+	width: 220px;
+}
+
+.edminboost-anm-status {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.6;
+}
+
+.edminboost-anm-status.is-active {
+	background: #edfaef;
+	color: #007017;
+}
+
+.edminboost-anm-status.is-inactive {
+	background: #fcf0f1;
+	color: #8a2424;
+}
