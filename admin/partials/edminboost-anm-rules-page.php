@@ -76,22 +76,19 @@ $edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
 		<?php endif; ?>
 	</div>
 
-	<div class="edminboost-anm-card edminboost-anm-card--flush edminboost-anm-wp-presets">
-		<div class="edminboost-anm-card__heading edminboost-anm-wp-presets__heading">
-			<div>
-				<h2><?php esc_html_e( 'Default WordPress Notices', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
-				<p class="description"><?php esc_html_e( 'Common core admin notices you can convert into filter rules with one click.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
-			</div>
+	<div class="postbox edminboost-anm-wp-presets">
+		<div class="postbox-header">
+			<h2 class="hndle"><?php esc_html_e( 'Default WordPress Notices', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
 		</div>
+		<div class="inside">
 		<?php if ( ! empty( $wp_presets ) ) : ?>
-			<table class="edminboost-anm-table widefat">
+			<table class="wp-list-table widefat fixed striped edminboost-anm-table edminboost-anm-wp-presets-table">
 				<thead>
 					<tr>
-						<th><?php esc_html_e( 'Source', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
-						<th><?php esc_html_e( 'Notice Preview', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
-						<th><?php esc_html_e( 'Type', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
-						<th><?php esc_html_e( 'Status', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
-						<th><?php esc_html_e( 'Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="col" class="manage-column column-source"><?php esc_html_e( 'Source Plugin', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="col" class="manage-column column-message"><?php esc_html_e( 'Notice Message Preview', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="col" class="manage-column column-type"><?php esc_html_e( 'Type', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="col" class="manage-column column-actions"><?php esc_html_e( 'Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -99,33 +96,29 @@ $edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
 						<?php
 						$edminboost_anm_is_converted = ! empty( $preset['converted'] );
 						?>
-						<tr class="edminboost-anm-wp-preset-row <?php echo $edminboost_anm_is_converted ? 'is-converted-to-rule' : ''; ?>" data-preset-id="<?php echo esc_attr( $preset['id'] ?? '' ); ?>">
-							<td><?php echo esc_html( $preset['source'] ?? __( 'WordPress Core', EDMINBOOST_ANM_TEXT_DOMAIN ) ); ?></td>
-							<td>
-								<strong><?php echo esc_html( $preset['name'] ?? '' ); ?></strong>
-								<br /><span class="description"><?php echo esc_html( $preset['message'] ?? '' ); ?></span>
-							</td>
-							<td><span class="edminboost-anm-badge edminboost-anm-badge--<?php echo esc_attr( $preset['type'] ?? 'info' ); ?>"><?php echo esc_html( EDMINBOOST_ANM_Inbox::get_type_label( $preset['type'] ?? 'info' ) ); ?></span></td>
-							<td class="edminboost-anm-wp-preset-status">
-								<?php if ( $edminboost_anm_is_converted ) : ?>
-									<span class="edminboost-anm-badge edminboost-anm-badge--converted">
-										<span class="dashicons dashicons-yes-alt" aria-hidden="true"></span>
-										<?php esc_html_e( 'Converted to rule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
-									</span>
-								<?php else : ?>
-									<span class="edminboost-anm-muted"><?php esc_html_e( 'Not converted', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></span>
-								<?php endif; ?>
-							</td>
-							<td class="edminboost-anm-actions">
-								<button type="button" class="button button-small edminboost-anm-wp-preset-convert" data-preset-id="<?php echo esc_attr( $preset['id'] ?? '' ); ?>" <?php disabled( $edminboost_anm_is_converted ); ?>>
+						<tr data-preset-id="<?php echo esc_attr( $preset['id'] ?? '' ); ?>">
+							<td class="column-source"><?php echo esc_html( $preset['source'] ?? __( 'WordPress Core', EDMINBOOST_ANM_TEXT_DOMAIN ) ); ?></td>
+							<td class="column-message"><?php echo esc_html( $preset['message'] ?? '' ); ?></td>
+							<td class="column-type"><span class="edminboost-anm-badge edminboost-anm-badge--<?php echo esc_attr( $preset['type'] ?? 'info' ); ?>"><?php echo esc_html( EDMINBOOST_ANM_Inbox::get_type_label( $preset['type'] ?? 'info' ) ); ?></span></td>
+							<td class="edminboost-anm-actions column-actions">
+								<button type="button" class="button button-small edminboost-anm-wp-preset-convert<?php echo $edminboost_anm_is_converted ? ' is-converted-to-rule' : ''; ?>" data-preset-id="<?php echo esc_attr( $preset['id'] ?? '' ); ?>" aria-pressed="<?php echo $edminboost_anm_is_converted ? 'true' : 'false'; ?>"<?php echo $edminboost_anm_is_converted ? ' title="' . esc_attr__( 'Converted to rule. Click again to undo.', EDMINBOOST_ANM_TEXT_DOMAIN ) . '"' : ''; ?>>
 									<?php esc_html_e( 'Convert to Rule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
 								</button>
 							</td>
 						</tr>
 					<?php endforeach; ?>
 				</tbody>
+				<tfoot>
+					<tr>
+						<th scope="col" class="manage-column column-source"><?php esc_html_e( 'Source Plugin', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="col" class="manage-column column-message"><?php esc_html_e( 'Notice Message Preview', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="col" class="manage-column column-type"><?php esc_html_e( 'Type', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="col" class="manage-column column-actions"><?php esc_html_e( 'Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+					</tr>
+				</tfoot>
 			</table>
 		<?php endif; ?>
+		</div>
 	</div>
 
 	<div class="edminboost-anm-modal" id="edminboost-anm-rule-modal" aria-hidden="true" role="dialog" aria-labelledby="edminboost-anm-rule-modal-title">

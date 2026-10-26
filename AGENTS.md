@@ -21,9 +21,9 @@ WordPress plugin that intercepts, filters, and organizes admin notices from a ce
 edminboost-admin-notice-manager.php   # constants, requires, lifecycle hooks
 includes/
   class-edminboost-anm-plugin.php     # hook orchestrator
-  class-edminboost-anm-admin.php      # menus, settings UI, assets
+  class-edminboost-anm-admin.php      # menus, inbox list helpers, assets
   class-edminboost-anm-settings.php   # defaults, get, sanitize
-  class-edminboost-anm-notices.php    # notice panel + styling
+  class-edminboost-anm-notices.php    # admin bar panel (link/dropdown)
   class-edminboost-anm-interceptor.php
   class-edminboost-anm-inbox.php
   class-edminboost-anm-rules.php
@@ -38,7 +38,10 @@ admin/
   css/edminboost-anm-admin.css
   js/edminboost-anm-admin.js
   js/edminboost-anm-interceptor.js
+  js/edminboost-anm-notices.js
   partials/edminboost-anm-{dashboard,inbox,rules,settings}-page.php
+  partials/edminboost-anm-inbox-table-rows.php
+  partials/edminboost-anm-notice-panel-dropdown.php
 languages/  uninstall.php  readme.txt  composer.json
 ```
 
@@ -46,7 +49,7 @@ languages/  uninstall.php  readme.txt  composer.json
 - `EDMINBOOST_ANM_Plugin::run()` wires i18n, admin menu/settings/assets, and on `init`: notices, interceptor, AJAX, digest.
 - Settings: primary option via `EDMINBOOST_ANM_Settings` (Settings API group `edminboost_anm_settings_group`). Rules and inbox stored in separate options.
 - Options API only — no custom tables. No REST API.
-- AJAX for dashboard/rules/inbox/importer actions; weekly digest via WP-Cron; optional webhook (user URL, off by default).
+- AJAX for dashboard/rules/inbox (including `edminboost_anm_inbox_list` sort), importer, capture, WP preset conversion; weekly digest via WP-Cron; optional webhook (user URL, off by default).
 
 ## Admin Pages
 
@@ -59,6 +62,18 @@ Use `EDMINBOOST_ANM_Admin::PAGE_SLUG` — never hardcode slug strings.
 | Rules | `PAGE_SLUG . '-rules'` | `render_rules_page()` |
 | Settings | `PAGE_SLUG . '-settings'` | `render_settings_page()` |
 
+## Notable AJAX actions
+
+Registered in `EDMINBOOST_ANM_Ajax::register_hooks()` — all use `verify_request()` unless noted.
+
+| Action | Purpose |
+|--------|---------|
+| `edminboost_anm_inbox_list` | Return sorted/filtered inbox `<tr>` HTML |
+| `edminboost_anm_inbox_action` | Row/bulk inbox mutations |
+| `edminboost_anm_convert_wp_preset` | Create/undo rule from WP preset |
+| `edminboost_anm_capture_notice` | Interceptor capture endpoint |
+| `edminboost_anm_seed_test_notices` / `edminboost_anm_trigger_test_notices` | `verify_debug_request()` |
+
 ## Extension Hooks
 
 - `edminboost_anm_settings_defaults` — filter default settings
@@ -66,6 +81,7 @@ Use `EDMINBOOST_ANM_Admin::PAGE_SLUG` — never hardcode slug strings.
 - `edminboost_anm_sanitize_settings` — filter sanitized settings on save
 - `edminboost_anm_notices_loaded` — after notice manager hooks register
 - `edminboost_anm_upsell_preset_phrases` — filter upsell phrase preset list
+- `edminboost_anm_wp_notice_presets` — filter WordPress core notice presets (Rules UI)
 
 ## Cursor Rules
 
@@ -86,4 +102,5 @@ Persistent AI guidance lives in `.cursor/rules/`:
 - Add `index.php` silence files when creating new directories.
 - Update `readme.txt` changelog for user-facing changes.
 - Update `uninstall.php` (and deactivator for cron) when adding stored options or schedules.
-- New AJAX actions: register in `EDMINBOOST_ANM_Ajax`, use `verify_request()`, document in compliance rules if behavior is sensitive.
+- New AJAX actions: register in `EDMINBOOST_ANM_Ajax`, use `verify_request()` (or `verify_debug_request()` for debug-only).
+- Shared inbox row markup: update `edminboost-anm-inbox-table-rows.php` once for both full page and AJAX list responses.

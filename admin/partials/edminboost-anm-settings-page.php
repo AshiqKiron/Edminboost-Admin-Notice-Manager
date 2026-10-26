@@ -58,8 +58,40 @@ $edminboost_anm_builtin_count  = count( EDMINBOOST_ANM_Rules::get_builtin_preset
 					<td>
 						<label for="edminboost-anm-notice-panel">
 							<input type="checkbox" id="edminboost-anm-notice-panel" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[notice_panel][enabled]" value="1" <?php checked( ! empty( $settings['notice_panel']['enabled'] ) ); ?> />
-							<?php esc_html_e( 'Show a Notices shortcut in the admin bar', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+							<?php esc_html_e( 'Show notices in the WordPress admin bar', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
 						</label>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="edminboost-anm-notice-panel-style"><?php esc_html_e( 'Panel style', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label></th>
+					<td>
+						<select id="edminboost-anm-notice-panel-style" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[notice_panel][style]">
+							<option value="link" <?php selected( $settings['notice_panel']['style'] ?? 'link', 'link' ); ?>><?php esc_html_e( 'Text link with count', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+							<option value="dropdown" <?php selected( $settings['notice_panel']['style'] ?? 'link', 'dropdown' ); ?>><?php esc_html_e( 'Notification dropdown (bell icon)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+						</select>
+						<p class="description"><?php esc_html_e( 'Dropdown style opens a Facebook-like notice box listing recent inbox items.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+					</td>
+				</tr>
+				<?php
+				$edminboost_anm_panel_style = $settings['notice_panel']['style'] ?? 'link';
+				?>
+				<tr class="edminboost-anm-notice-panel-badge-row" <?php echo 'dropdown' !== $edminboost_anm_panel_style ? ' hidden' : ''; ?>>
+					<th scope="row"><label for="edminboost-anm-notice-panel-badge"><?php esc_html_e( 'Red indicator', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label></th>
+					<td>
+						<select id="edminboost-anm-notice-panel-badge" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[notice_panel][badge_style]">
+							<option value="count" <?php selected( $settings['notice_panel']['badge_style'] ?? 'count', 'count' ); ?>><?php esc_html_e( 'Number badge', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+							<option value="dot" <?php selected( $settings['notice_panel']['badge_style'] ?? 'count', 'dot' ); ?>><?php esc_html_e( 'Dot only (no count)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+						</select>
+						<p class="description"><?php esc_html_e( 'How unread notices appear on the bell icon when using the notification dropdown.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="edminboost-anm-notice-panel-position"><?php esc_html_e( 'Panel position', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label></th>
+					<td>
+						<select id="edminboost-anm-notice-panel-position" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[notice_panel][position]">
+							<option value="default" <?php selected( $settings['notice_panel']['position'] ?? 'default', 'default' ); ?>><?php esc_html_e( 'Default admin bar slot', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+							<option value="before_profile" <?php selected( $settings['notice_panel']['position'] ?? 'default', 'before_profile' ); ?>><?php esc_html_e( 'Top right, beside “Howdy” profile menu', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+						</select>
 					</td>
 				</tr>
 			</table>

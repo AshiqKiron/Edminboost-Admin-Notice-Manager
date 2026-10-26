@@ -53,6 +53,11 @@ Yes. When uninstalled, all plugin options are removed from the database.
 == Changelog ==
 
 = 1.1.1 =
+* Add admin bar panel style and position options: notification dropdown (bell icon) and placement beside the Howdy profile menu.
+* Add red indicator option for the dropdown bell: number badge or dot-only.
+* Add Default WordPress Notices section on Auto-Rules with one-click convert and a converted-state button tooltip.
+* Inbox and preset Convert to Rule buttons show a converted tooltip on hover; state persists after refresh and can be undone with another click.
+* Inbox column headers use WordPress list-table styles; sorting updates via AJAX without a full page reload.
 * Add custom upsell blacklist phrases in Settings (one per line), merged with the built-in preset list.
 * Add WP_DEBUG-only test notice generator on the Dashboard (seed inbox or trigger live interception).
 * Rename Dashboard live feed to “Live Blocked Feed” with “View more” linking to Notice Inbox; store up to 100 feed preview entries.

@@ -142,12 +142,23 @@ class EDMINBOOST_ANM_Rules {
 	 */
 	public static function get( $id ) {
 		foreach ( self::get_all() as $rule ) {
-			if ( isset( $rule['id'] ) && $rule['id'] === $id ) {
+			if ( self::id_matches( $rule['id'] ?? '', $id ) ) {
 				return $rule;
 			}
 		}
 
 		return null;
+	}
+
+	/**
+	 * Compare stored and requested rule IDs (case-insensitive).
+	 *
+	 * @param string $stored    ID from rules storage.
+	 * @param string $requested ID from request/UI.
+	 * @return bool
+	 */
+	private static function id_matches( $stored, $requested ) {
+		return sanitize_key( (string) $stored ) === sanitize_key( (string) $requested );
 	}
 
 	/**
@@ -178,14 +189,14 @@ class EDMINBOOST_ANM_Rules {
 		}
 
 		$rules = self::get_all();
-		$id    = ! empty( $data['id'] ) ? sanitize_key( $data['id'] ) : 'rule_' . wp_generate_password( 8, false );
+		$id    = ! empty( $data['id'] ) ? sanitize_key( $data['id'] ) : sanitize_key( 'rule_' . wp_generate_password( 8, false ) );
 
 		$existing_hits   = 0;
 		$created         = time();
 		$wp_notice_preset = '';
 
 		foreach ( $rules as $rule ) {
-			if ( $rule['id'] === $id ) {
+			if ( self::id_matches( $rule['id'] ?? '', $id ) ) {
 				$existing_hits    = (int) ( $rule['hit_count'] ?? 0 );
 				$created          = (int) ( $rule['created'] ?? time() );
 				$wp_notice_preset = sanitize_key( $rule['wp_notice_preset'] ?? '' );
@@ -214,7 +225,7 @@ class EDMINBOOST_ANM_Rules {
 
 		$found = false;
 		foreach ( $rules as $index => $rule ) {
-			if ( $rule['id'] === $id ) {
+			if ( self::id_matches( $rule['id'] ?? '', $id ) ) {
 				$rules[ $index ] = $new_rule;
 				$found           = true;
 				break;
@@ -237,11 +248,10 @@ class EDMINBOOST_ANM_Rules {
 	 * @return bool
 	 */
 	public static function delete( $id ) {
-		$id    = sanitize_key( $id );
 		$rules = array_filter(
 			self::get_all(),
 			static function ( $rule ) use ( $id ) {
-				return ( $rule['id'] ?? '' ) !== $id;
+				return ! self::id_matches( $rule['id'] ?? '', $id );
 			}
 		);
 
@@ -259,7 +269,7 @@ class EDMINBOOST_ANM_Rules {
 		$rules = self::get_all();
 
 		foreach ( $rules as $index => $rule ) {
-			if ( ( $rule['id'] ?? '' ) === sanitize_key( $id ) ) {
+			if ( self::id_matches( $rule['id'] ?? '', $id ) ) {
 				$rules[ $index ]['enabled'] = (bool) $enabled;
 				self::save_all( $rules );
 				return $rules[ $index ];
@@ -583,5 +593,48 @@ class EDMINBOOST_ANM_Rules {
 		EDMINBOOST_ANM_Inbox::mark_converted_to_rule( $inbox_id, $rule['id'] );
 
 		return $rule;
+	}
+
+	/**
+	 * Remove a rule created from an inbox notice and clear the inbox link.
+	 *
+	 * @param string $inbox_id Inbox notice ID.
+	 * @return true|WP_Error
+	 */
+	public static function unconvert_inbox( $inbox_id ) {
+		$notice = EDMINBOOST_ANM_Inbox::get( $inbox_id );
+
+		if ( ! $notice ) {
+			return new WP_Error( 'not_found', __( 'Notice not found.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
+		}
+
+		$rule_id = sanitize_key( $notice['converted_rule_id'] ?? '' );
+
+		if ( '' !== $rule_id ) {
+			self::delete( $rule_id );
+		}
+
+		EDMINBOOST_ANM_Inbox::clear_converted_to_rule( $inbox_id );
+
+		return true;
+	}
+
+	/**
+	 * Remove a rule created from a WordPress notice preset.
+	 *
+	 * @param string $preset_id Preset slug.
+	 * @return true|WP_Error
+	 */
+	public static function unconvert_wp_preset( $preset_id ) {
+		$preset_id = sanitize_key( $preset_id );
+		$rule      = self::find_rule_by_wp_preset( $preset_id );
+
+		if ( ! $rule ) {
+			return new WP_Error( 'not_converted', __( 'No rule exists for this notice preset.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
+		}
+
+		self::delete( $rule['id'] ?? '' );
+
+		return true;
 	}
 }

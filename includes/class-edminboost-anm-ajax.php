@@ -28,6 +28,7 @@ class EDMINBOOST_ANM_Ajax {
 			'edminboost_anm_delete_rule',
 			'edminboost_anm_convert_wp_preset',
 			'edminboost_anm_inbox_action',
+			'edminboost_anm_inbox_list',
 			'edminboost_anm_capture_notice',
 			'edminboost_anm_run_importer',
 			'edminboost_anm_import_rules',
@@ -182,13 +183,56 @@ class EDMINBOOST_ANM_Ajax {
 		$this->verify_request();
 
 		$preset_id = sanitize_key( wp_unslash( $_POST['preset_id'] ?? '' ) );
-		$result    = EDMINBOOST_ANM_Rules::create_from_wp_preset( $preset_id );
+		$undo      = ! empty( $_POST['undo'] );
+
+		if ( $undo ) {
+			$result = EDMINBOOST_ANM_Rules::unconvert_wp_preset( $preset_id );
+			if ( is_wp_error( $result ) ) {
+				wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+			}
+			wp_send_json_success( array( 'converted' => false ) );
+			return;
+		}
+
+		$result = EDMINBOOST_ANM_Rules::create_from_wp_preset( $preset_id );
 
 		if ( is_wp_error( $result ) ) {
 			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
 		}
 
-		wp_send_json_success( array( 'rule' => $result ) );
+		wp_send_json_success(
+			array(
+				'rule'      => $result,
+				'converted' => true,
+			)
+		);
+	}
+
+	/**
+	 * Inbox list refresh (sort / filter without full page reload).
+	 *
+	 * @return void
+	 */
+	public function handle_inbox_list() {
+		$this->verify_request();
+
+		$list_args = EDMINBOOST_ANM_Admin::parse_inbox_list_args( wp_unslash( $_POST ) );
+		$slice     = EDMINBOOST_ANM_Admin::get_inbox_list_slice( $list_args );
+
+		wp_send_json_success(
+			array(
+				'rows'    => EDMINBOOST_ANM_Admin::render_inbox_table_rows_html( $slice['notices'] ),
+				'orderby' => $list_args['orderby'],
+				'order'   => $list_args['order'],
+				'showing' => sprintf(
+					/* translators: 1: start number, 2: end number, 3: total count */
+					__( 'Showing %1$d–%2$d of %3$d notices', EDMINBOOST_ANM_TEXT_DOMAIN ),
+					$slice['start'],
+					$slice['end'],
+					$slice['total']
+				),
+			)
+		);
 	}
 
 	/**
@@ -217,7 +261,19 @@ class EDMINBOOST_ANM_Ajax {
 				if ( is_wp_error( $result ) ) {
 					wp_send_json_error( array( 'message' => $result->get_error_message() ) );
 				}
-				wp_send_json_success( array( 'rule' => $result ) );
+				wp_send_json_success(
+					array(
+						'rule'      => $result,
+						'converted' => true,
+					)
+				);
+				return;
+			case 'unconvert':
+				$result = EDMINBOOST_ANM_Rules::unconvert_inbox( $id );
+				if ( is_wp_error( $result ) ) {
+					wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+				}
+				wp_send_json_success( array( 'converted' => false ) );
 				return;
 			case 'bulk':
 				$bulk = sanitize_key( wp_unslash( $_POST['bulk_action'] ?? '' ) );

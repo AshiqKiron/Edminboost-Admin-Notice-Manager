@@ -75,7 +75,10 @@ class EDMINBOOST_ANM_Settings {
 			'enabled'           => false,
 			'hide_core_notices' => false,
 			'notice_panel'      => array(
-				'enabled' => true,
+				'enabled'     => true,
+				'style'       => 'link',
+				'position'    => 'default',
+				'badge_style' => 'count',
 			),
 			'upsell_preset'     => array(
 				'enabled'         => false,
@@ -186,8 +189,29 @@ class EDMINBOOST_ANM_Settings {
 			? $input['notice_panel']
 			: array();
 
+		$allowed_styles = array( 'link', 'dropdown' );
+		$panel_style      = sanitize_key( $panel_input['style'] ?? 'link' );
+		if ( ! in_array( $panel_style, $allowed_styles, true ) ) {
+			$panel_style = 'link';
+		}
+
+		$allowed_positions = array( 'default', 'before_profile' );
+		$panel_position    = sanitize_key( $panel_input['position'] ?? 'default' );
+		if ( ! in_array( $panel_position, $allowed_positions, true ) ) {
+			$panel_position = 'default';
+		}
+
+		$allowed_badge_styles = array( 'count', 'dot' );
+		$panel_badge_style    = sanitize_key( $panel_input['badge_style'] ?? 'count' );
+		if ( ! in_array( $panel_badge_style, $allowed_badge_styles, true ) ) {
+			$panel_badge_style = 'count';
+		}
+
 		$output['notice_panel'] = array(
-			'enabled' => ! empty( $panel_input['enabled'] ),
+			'enabled'     => ! empty( $panel_input['enabled'] ),
+			'style'       => $panel_style,
+			'position'    => $panel_position,
+			'badge_style' => $panel_badge_style,
 		);
 
 		$upsell_input = isset( $input['upsell_preset'] ) && is_array( $input['upsell_preset'] )

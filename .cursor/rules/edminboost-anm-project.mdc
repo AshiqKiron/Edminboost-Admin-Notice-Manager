@@ -32,7 +32,10 @@ admin/
   css/edminboost-anm-admin.css
   js/edminboost-anm-admin.js
   js/edminboost-anm-interceptor.js
+  js/edminboost-anm-notices.js
   partials/edminboost-anm-{dashboard,inbox,rules,settings}-page.php
+  partials/edminboost-anm-inbox-table-rows.php
+  partials/edminboost-anm-notice-panel-dropdown.php
 languages/  uninstall.php  readme.txt  composer.json
 AGENTS.md   .cursor/rules/
 ```
@@ -45,11 +48,13 @@ AGENTS.md   .cursor/rules/
 - **Options API only** — no custom database tables.
 - **Stored options** (via `EDMINBOOST_ANM_Settings` constants): `edminboost_anm_settings`, `edminboost_anm_rules`, `edminboost_anm_inbox`, `edminboost_anm_stats`, `edminboost_anm_version`. All seeded on activation with `autoload => false`.
 - Global kill switch: `enabled` in settings. Most features also check `EDMINBOOST_ANM_Settings::is_enabled()`.
-- **AJAX**: `EDMINBOOST_ANM_Ajax` — privileged `wp_ajax_*` actions + `admin_post_edminboost_anm_export_rules`.
+- **AJAX**: `EDMINBOOST_ANM_Ajax` — privileged `wp_ajax_*` actions (inbox list/sort, rules, capture, importer, debug seeds) + `admin_post_edminboost_anm_export_rules`. Debug-only handlers use `verify_debug_request()`.
+- **Inbox list UI**: `EDMINBOOST_ANM_Admin::parse_inbox_list_args()`, `get_inbox_list_slice()`, `render_inbox_table_rows_html()` — shared by inbox page and `edminboost_anm_inbox_list` AJAX.
+- **Admin bar notice panel**: `EDMINBOOST_ANM_Notices` — link or dropdown style; optional position before profile; badge count or dot (`notice_panel` settings).
 - **Cron**: `EDMINBOOST_ANM_Digest` — weekly digest when enabled; schedule synced on settings save; cleared on deactivate/uninstall.
 - **External requests**: `EDMINBOOST_ANM_Webhook::maybe_send()` posts JSON to a user-configured URL only when webhook is enabled (opt-in). No telemetry or vendor tracking.
 - Admin UI: `EDMINBOOST_ANM_Admin` + partials. Plugins screen row meta includes Docs link (`EDMINBOOST_ANM_PLUGIN_DOCS_URL`).
-- Plugin-screen assets via `EDMINBOOST_ANM_Admin::is_plugin_screen()`. Notice CSS on all wp-admin when panel features active. Interceptor JS on all wp-admin when plugin enabled.
+- Plugin-screen assets via `EDMINBOOST_ANM_Admin::is_plugin_screen()` (inbox enqueues core `list-tables` style). Notice CSS on all wp-admin when plugin enabled. Dropdown panel JS (`edminboost-anm-notices`) when `notice_panel.style` is `dropdown`. Interceptor JS on all wp-admin when plugin enabled.
 
 ## Admin Pages
 
@@ -91,6 +96,7 @@ Project prefix: `edminboost_anm` (use `edminboost-anm` in slugs/handles). Distin
 - `edminboost_anm_sanitize_settings` — filter sanitized settings on save
 - `edminboost_anm_notices_loaded` — after notice manager hooks register
 - `edminboost_anm_upsell_preset_phrases` — filter built-in upsell phrase list
+- `edminboost_anm_wp_notice_presets` — filter WordPress core notice preset definitions (Rules page)
 
 ## Scope & Change Discipline
 

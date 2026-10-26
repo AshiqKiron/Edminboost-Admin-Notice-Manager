@@ -254,6 +254,26 @@ class EDMINBOOST_ANM_Inbox {
 	}
 
 	/**
+	 * Remove the converted-rule link from an inbox notice.
+	 *
+	 * @param string $id Notice ID.
+	 * @return bool
+	 */
+	public static function clear_converted_to_rule( $id ) {
+		$notices = self::get_all();
+
+		foreach ( $notices as $index => $notice ) {
+			if ( self::id_matches( $notice['id'] ?? '', $id ) ) {
+				unset( $notices[ $index ]['converted_rule_id'] );
+				self::save_all( $notices );
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Whether the notice has an active converted rule.
 	 *
 	 * @param array $notice Notice row.

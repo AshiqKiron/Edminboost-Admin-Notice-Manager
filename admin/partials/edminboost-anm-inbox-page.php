@@ -22,46 +22,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! function_exists( 'edminboost_anm_render_inbox_sortable_th' ) ) {
 	/**
-	 * Render a sortable inbox table column header.
+	 * Render a sortable inbox table column header (WordPress list-table markup).
 	 *
-	 * @param string $column   Sort key.
-	 * @param string $label    Column label.
-	 * @param string $orderby  Current orderby.
-	 * @param string $order    Current order.
-	 * @param string $base_url Base inbox URL.
-	 * @param string $filter   Active filter.
-	 * @param string $search   Search query.
+	 * @param string $column  Sort key.
+	 * @param string $label   Column label.
+	 * @param string $orderby Current orderby.
+	 * @param string $order   Current order.
 	 * @return void
 	 */
-	function edminboost_anm_render_inbox_sortable_th( $column, $label, $orderby, $order, $base_url, $filter, $search ) {
-	$is_active  = $orderby === $column;
-	$next_order = ( $is_active && 'asc' === $order ) ? 'desc' : 'asc';
-	$classes    = 'manage-column column-' . sanitize_key( $column ) . ' sortable';
-	if ( $is_active ) {
-		$classes .= ' sorted ' . sanitize_html_class( $order );
-	}
-
-	$url_args = array(
-		'orderby' => $column,
-		'order'   => $next_order,
-		's'       => $search,
-	);
-	if ( 'all' !== $filter ) {
-		$url_args['filter'] = $filter;
-	}
-
-	$sort_url = add_query_arg( $url_args, $base_url );
-	?>
-	<th scope="col" class="<?php echo esc_attr( $classes ); ?>" aria-sort="<?php echo $is_active ? esc_attr( 'asc' === $order ? 'ascending' : 'descending' ) : esc_attr( 'none' ); ?>">
-		<a href="<?php echo esc_url( $sort_url ); ?>">
-			<span><?php echo esc_html( $label ); ?></span>
-			<span class="sorting-indicators">
-				<span class="sorting-indicator asc" aria-hidden="true"></span>
-				<span class="sorting-indicator desc" aria-hidden="true"></span>
-			</span>
-		</a>
-	</th>
-	<?php
+	function edminboost_anm_render_inbox_sortable_th( $column, $label, $orderby, $order ) {
+		$is_active = $orderby === $column;
+		$classes   = 'manage-column column-' . sanitize_key( $column ) . ' sortable';
+		if ( $is_active ) {
+			$classes .= ' sorted ' . sanitize_html_class( $order );
+		}
+		?>
+		<th scope="col" class="<?php echo esc_attr( $classes ); ?>" aria-sort="<?php echo $is_active ? esc_attr( 'asc' === $order ? 'ascending' : 'descending' ) : esc_attr( 'none' ); ?>">
+			<a href="#" class="edminboost-anm-inbox-sort" data-orderby="<?php echo esc_attr( $column ); ?>">
+				<span><?php echo esc_html( $label ); ?></span>
+				<span class="sorting-indicators">
+					<span class="sorting-indicator asc" aria-hidden="true"></span>
+					<span class="sorting-indicator desc" aria-hidden="true"></span>
+				</span>
+			</a>
+		</th>
+		<?php
 	}
 }
 
@@ -76,7 +61,12 @@ $edminboost_anm_tabs = array(
 	'upsells'  => __( 'Upsells', EDMINBOOST_ANM_TEXT_DOMAIN ),
 );
 ?>
-<div class="wrap edminboost-anm-wrap edminboost-anm-wrap--wide" data-edminboost-anm-inbox>
+<div class="wrap edminboost-anm-wrap edminboost-anm-wrap--wide" data-edminboost-anm-inbox
+	data-inbox-filter="<?php echo esc_attr( $filter ); ?>"
+	data-inbox-search="<?php echo esc_attr( $search ); ?>"
+	data-inbox-page="<?php echo esc_attr( (string) $page ); ?>"
+	data-inbox-orderby="<?php echo esc_attr( $orderby ); ?>"
+	data-inbox-order="<?php echo esc_attr( $order ); ?>">
 	<header class="edminboost-anm-page-header">
 		<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 		<form class="edminboost-anm-search" method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>">
@@ -116,62 +106,31 @@ $edminboost_anm_tabs = array(
 	</nav>
 
 	<div class="edminboost-anm-card edminboost-anm-card--flush">
-		<?php if ( ! empty( $notices ) ) : ?>
-			<table class="edminboost-anm-table widefat">
+		<?php if ( ! empty( $notices ) || $total > 0 ) : ?>
+			<table class="wp-list-table widefat fixed striped edminboost-anm-table edminboost-anm-inbox-table">
 				<thead>
 					<tr>
-						<td class="check-column"><input type="checkbox" id="edminboost-anm-select-all" aria-label="<?php esc_attr_e( 'Select all', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" /></td>
+						<td id="cb" class="manage-column column-cb check-column"><input type="checkbox" id="edminboost-anm-select-all" aria-label="<?php esc_attr_e( 'Select all', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" /></td>
 						<?php
-						edminboost_anm_render_inbox_sortable_th( 'source', __( 'Source Plugin', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order, $edminboost_anm_base_url, $filter, $search );
-						edminboost_anm_render_inbox_sortable_th( 'message', __( 'Notice Message Preview', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order, $edminboost_anm_base_url, $filter, $search );
-						edminboost_anm_render_inbox_sortable_th( 'type', __( 'Type', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order, $edminboost_anm_base_url, $filter, $search );
-						edminboost_anm_render_inbox_sortable_th( 'status', __( 'Actions', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order, $edminboost_anm_base_url, $filter, $search );
+						edminboost_anm_render_inbox_sortable_th( 'source', __( 'Source Plugin', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order );
+						edminboost_anm_render_inbox_sortable_th( 'message', __( 'Notice Message Preview', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order );
+						edminboost_anm_render_inbox_sortable_th( 'type', __( 'Type', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order );
 						?>
+						<th scope="col" class="manage-column column-actions"><?php esc_html_e( 'Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 					</tr>
 				</thead>
-				<tbody>
-					<?php foreach ( $notices as $notice ) : ?>
-						<?php
-						$edminboost_anm_is_converted = EDMINBOOST_ANM_Inbox::is_converted_to_rule( $notice );
-						?>
-						<tr data-notice-id="<?php echo esc_attr( $notice['id'] ); ?>" class="<?php echo $edminboost_anm_is_converted ? 'is-converted-to-rule' : ''; ?>">
-							<th scope="row" class="check-column">
-								<input type="checkbox" class="edminboost-anm-notice-check" value="<?php echo esc_attr( $notice['id'] ); ?>" aria-label="<?php esc_attr_e( 'Select notice', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" />
-							</th>
-							<td><?php echo esc_html( $notice['source_plugin'] ?? '' ); ?></td>
-							<td>
-								<?php echo esc_html( wp_html_excerpt( $notice['message'] ?? '', 60, '…' ) ); ?>
-								<?php if ( $edminboost_anm_is_converted ) : ?>
-									<br /><span class="edminboost-anm-badge edminboost-anm-badge--converted edminboost-anm-inbox-converted-badge">
-										<span class="dashicons dashicons-yes-alt" aria-hidden="true"></span>
-										<?php esc_html_e( 'Converted to rule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
-									</span>
-								<?php endif; ?>
-							</td>
-							<td><span class="edminboost-anm-badge edminboost-anm-badge--<?php echo esc_attr( $notice['type'] ?? 'info' ); ?>"><?php echo esc_html( EDMINBOOST_ANM_Inbox::get_type_label( $notice['type'] ?? 'info' ) ); ?></span></td>
-							<td class="edminboost-anm-actions">
-								<button type="button" class="button button-small edminboost-anm-inbox-read" data-id="<?php echo esc_attr( $notice['id'] ); ?>"><?php esc_html_e( 'Read', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
-								<div class="edminboost-anm-dropdown">
-									<button type="button" class="button button-small edminboost-anm-dropdown__toggle" aria-expanded="false"><?php esc_html_e( 'Snooze', EDMINBOOST_ANM_TEXT_DOMAIN ); ?> ▾</button>
-									<div class="edminboost-anm-dropdown__menu">
-										<button type="button" class="edminboost-anm-inbox-snooze" data-id="<?php echo esc_attr( $notice['id'] ); ?>" data-duration="1d"><?php esc_html_e( '1 Day', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
-										<button type="button" class="edminboost-anm-inbox-snooze" data-id="<?php echo esc_attr( $notice['id'] ); ?>" data-duration="7d"><?php esc_html_e( '7 Days', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
-									</div>
-								</div>
-								<button type="button" class="button button-small edminboost-anm-inbox-convert" data-id="<?php echo esc_attr( $notice['id'] ); ?>" <?php disabled( $edminboost_anm_is_converted ); ?>><?php esc_html_e( 'Convert to Rule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
-							</td>
-						</tr>
-					<?php endforeach; ?>
+				<tbody id="edminboost-anm-inbox-rows">
+					<?php include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-inbox-table-rows.php'; ?>
 				</tbody>
 				<tfoot>
 					<tr>
-						<td class="check-column"><input type="checkbox" aria-label="<?php esc_attr_e( 'Select all', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" /></td>
+						<td class="manage-column column-cb check-column"><input type="checkbox" aria-label="<?php esc_attr_e( 'Select all', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" /></td>
 						<?php
-						edminboost_anm_render_inbox_sortable_th( 'source', __( 'Source Plugin', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order, $edminboost_anm_base_url, $filter, $search );
-						edminboost_anm_render_inbox_sortable_th( 'message', __( 'Notice Message Preview', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order, $edminboost_anm_base_url, $filter, $search );
-						edminboost_anm_render_inbox_sortable_th( 'type', __( 'Type', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order, $edminboost_anm_base_url, $filter, $search );
-						edminboost_anm_render_inbox_sortable_th( 'status', __( 'Actions', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order, $edminboost_anm_base_url, $filter, $search );
+						edminboost_anm_render_inbox_sortable_th( 'source', __( 'Source Plugin', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order );
+						edminboost_anm_render_inbox_sortable_th( 'message', __( 'Notice Message Preview', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order );
+						edminboost_anm_render_inbox_sortable_th( 'type', __( 'Type', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order );
 						?>
+						<th scope="col" class="manage-column column-actions"><?php esc_html_e( 'Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 					</tr>
 				</tfoot>
 			</table>
@@ -193,7 +152,7 @@ $edminboost_anm_tabs = array(
 			</select>
 			<button type="button" class="button edminboost-anm-bulk-apply"><?php esc_html_e( 'Apply', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
 		</div>
-		<p class="edminboost-anm-pagination">
+		<p class="edminboost-anm-pagination" data-edminboost-anm-inbox-showing>
 			<?php
 			echo esc_html(
 				sprintf(

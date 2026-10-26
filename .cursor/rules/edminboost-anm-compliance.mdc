@@ -16,6 +16,8 @@ See `edminboost-anm-project.mdc`, `edminboost-anm-standards.mdc`, `edminboost-an
 - Use `EDMINBOOST_ANM_Settings::CAPABILITY` on admin pages and privileged handlers.
 - Settings API: `sanitize_callback` via `EDMINBOOST_ANM_Settings::sanitize()`, `show_in_rest => false`.
 - AJAX: `EDMINBOOST_ANM_Ajax::verify_request()` — `check_ajax_referer( 'edminboost_anm_admin', 'nonce' )` + capability check. Mirror pattern for new actions.
+- Inbox sort/filter AJAX (`edminboost_anm_inbox_list`): same verification; returned row HTML must escape all notice fields in the partial.
+- Debug seed/trigger AJAX: `verify_debug_request()` — requires `EDMINBOOST_ANM_Debug::is_available()`.
 - Rule export: `admin_post_edminboost_anm_export_rules` — nonce + capability before download.
 - SQL: `$wpdb->prepare()` only; prefer Options API (`edminboost_anm_*`) over custom tables.
 - Inbox notice HTML: treat as untrusted; use `wp_kses_post()` or equivalent on display; sanitize fields on capture.

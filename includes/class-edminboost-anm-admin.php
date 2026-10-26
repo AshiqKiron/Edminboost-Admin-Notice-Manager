@@ -128,10 +128,16 @@ class EDMINBOOST_ANM_Admin {
 			return;
 		}
 
+		$style_deps = array();
+		if ( false !== strpos( (string) $hook_suffix, self::PAGE_SLUG . '-inbox' ) ) {
+			wp_enqueue_style( 'list-tables' );
+			$style_deps[] = 'list-tables';
+		}
+
 		wp_enqueue_style(
 			'edminboost-anm-admin',
 			EDMINBOOST_ANM_PLUGIN_URL . 'admin/css/edminboost-anm-admin.css',
-			array(),
+			$style_deps,
 			EDMINBOOST_ANM_VERSION
 		);
 	}
@@ -189,7 +195,8 @@ class EDMINBOOST_ANM_Admin {
 				'seedError'       => __( 'Could not seed test notices.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'triggerError'    => __( 'Could not trigger live test notices.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'viewInbox'       => __( 'View Inbox', EDMINBOOST_ANM_TEXT_DOMAIN ),
-				'convertedToRule' => __( 'Converted to rule', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'convertedToRule'  => __( 'Converted to rule', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'undoConversion'   => __( 'Converted to rule. Click again to undo.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'alreadyConverted' => __( 'Already converted to a rule.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			),
 		);
@@ -251,6 +258,80 @@ class EDMINBOOST_ANM_Admin {
 	}
 
 	/**
+	 * Parse inbox list query arguments from a request array.
+	 *
+	 * @param array $source Request parameters.
+	 * @return array
+	 */
+	public static function parse_inbox_list_args( $source ) {
+		$filter  = sanitize_key( $source['filter'] ?? 'all' );
+		$search  = sanitize_text_field( $source['s'] ?? '' );
+		$page    = max( 1, (int) ( $source['paged'] ?? 1 ) );
+		$orderby = sanitize_key( $source['orderby'] ?? 'date' );
+		$order   = strtolower( sanitize_key( $source['order'] ?? 'desc' ) );
+
+		if ( ! in_array( $orderby, array( 'source', 'message', 'type', 'date' ), true ) ) {
+			$orderby = 'date';
+		}
+		if ( ! in_array( $order, array( 'asc', 'desc' ), true ) ) {
+			$order = 'date' === $orderby ? 'desc' : 'asc';
+		}
+
+		return array(
+			'filter'  => $filter,
+			'search'  => $search,
+			'page'    => $page,
+			'orderby' => $orderby,
+			'order'   => $order,
+		);
+	}
+
+	/**
+	 * Fetch a paginated inbox slice for the list table.
+	 *
+	 * @param array $args List arguments from parse_inbox_list_args().
+	 * @return array
+	 */
+	public static function get_inbox_list_slice( $args ) {
+		$per_page = 20;
+
+		$all_notices = EDMINBOOST_ANM_Inbox::query(
+			array(
+				'filter'   => $args['filter'],
+				'search'   => $args['search'],
+				'per_page' => 9999,
+				'orderby'  => $args['orderby'],
+				'order'    => $args['order'],
+			)
+		);
+
+		$total  = count( $all_notices );
+		$offset = ( $args['page'] - 1 ) * $per_page;
+
+		return array(
+			'notices'  => array_slice( $all_notices, $offset, $per_page ),
+			'total'    => $total,
+			'page'     => $args['page'],
+			'per_page' => $per_page,
+			'start'    => $total > 0 ? $offset + 1 : 0,
+			'end'      => min( $args['page'] * $per_page, $total ),
+		);
+	}
+
+	/**
+	 * Render inbox table body rows.
+	 *
+	 * @param array $notices Notice rows.
+	 * @return string
+	 */
+	public static function render_inbox_table_rows_html( $notices ) {
+		ob_start();
+		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-inbox-table-rows.php';
+
+		return (string) ob_get_clean();
+	}
+
+	/**
 	 * Render the inbox page.
 	 *
 	 * @return void
@@ -261,34 +342,18 @@ class EDMINBOOST_ANM_Admin {
 		}
 
 		$settings = EDMINBOOST_ANM_Settings::get();
-		$filter   = sanitize_key( wp_unslash( $_GET['filter'] ?? 'all' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$search   = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$page     = max( 1, (int) ( $_GET['paged'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$orderby  = sanitize_key( wp_unslash( $_GET['orderby'] ?? 'date' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$order    = strtolower( sanitize_key( wp_unslash( $_GET['order'] ?? 'desc' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$list_args = self::parse_inbox_list_args( wp_unslash( $_GET ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$slice     = self::get_inbox_list_slice( $list_args );
 
-		if ( ! in_array( $orderby, array( 'source', 'message', 'type', 'status', 'date' ), true ) ) {
-			$orderby = 'date';
-		}
-		if ( ! in_array( $order, array( 'asc', 'desc' ), true ) ) {
-			$order = 'date' === $orderby ? 'desc' : 'asc';
-		}
-
-		$all_notices = EDMINBOOST_ANM_Inbox::query(
-			array(
-				'filter'   => $filter,
-				'search'   => $search,
-				'per_page' => 9999,
-				'orderby'  => $orderby,
-				'order'    => $order,
-			)
-		);
-
-		$per_page    = 20;
-		$total       = count( $all_notices );
-		$offset      = ( $page - 1 ) * $per_page;
-		$notices     = array_slice( $all_notices, $offset, $per_page );
-		$counts      = EDMINBOOST_ANM_Inbox::get_counts();
+		$filter   = $list_args['filter'];
+		$search   = $list_args['search'];
+		$page     = $list_args['page'];
+		$orderby  = $list_args['orderby'];
+		$order    = $list_args['order'];
+		$notices  = $slice['notices'];
+		$total    = $slice['total'];
+		$per_page = $slice['per_page'];
+		$counts   = EDMINBOOST_ANM_Inbox::get_counts();
 
 		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-inbox-page.php';
 	}

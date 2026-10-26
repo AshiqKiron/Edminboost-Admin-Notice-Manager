@@ -196,6 +196,151 @@
 		root.querySelectorAll('.edminboost-anm-modal-close, .edminboost-anm-modal__backdrop').forEach(function (el) {
 			el.addEventListener('click', closeModal);
 		});
+
+		root.querySelectorAll('.edminboost-anm-wp-preset-convert').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var isConverted = btn.classList.contains('is-converted-to-rule');
+				var payload = { preset_id: btn.dataset.presetId };
+				if (isConverted) {
+					payload.undo = '1';
+				}
+				apiPost('edminboost_anm_convert_wp_preset', payload).then(function (result) {
+					if (!result.success) {
+						window.alert((result.data && result.data.message) || (data.i18n && data.i18n.actionError) || 'Action failed.');
+						return;
+					}
+					if (isConverted) {
+						unmarkWpPresetConverted(btn.closest('tr'));
+					} else {
+						markWpPresetConverted(btn.closest('tr'));
+					}
+				});
+			});
+		});
+	}
+
+	function setConvertButtonConverted(btn, converted) {
+		if (!btn) {
+			return;
+		}
+		var convertedTooltip = (data.i18n && data.i18n.undoConversion) || 'Converted to rule. Click again to undo.';
+		btn.classList.toggle('is-converted-to-rule', converted);
+		btn.setAttribute('aria-pressed', converted ? 'true' : 'false');
+		if (converted) {
+			btn.setAttribute('title', convertedTooltip);
+		} else {
+			btn.removeAttribute('title');
+		}
+	}
+
+	function markWpPresetConverted(row) {
+		setConvertButtonConverted(row ? row.querySelector('.edminboost-anm-wp-preset-convert') : null, true);
+	}
+
+	function unmarkWpPresetConverted(row) {
+		setConvertButtonConverted(row ? row.querySelector('.edminboost-anm-wp-preset-convert') : null, false);
+	}
+
+	function markInboxConverted(row) {
+		setConvertButtonConverted(row ? row.querySelector('.edminboost-anm-inbox-convert') : null, true);
+	}
+
+	function unmarkInboxConverted(row) {
+		setConvertButtonConverted(row ? row.querySelector('.edminboost-anm-inbox-convert') : null, false);
+	}
+
+	function updateInboxSortHeaders(table, orderby, order) {
+		if (!table) {
+			return;
+		}
+
+		table.querySelectorAll('th.sortable').forEach(function (th) {
+			var link = th.querySelector('.edminboost-anm-inbox-sort');
+			var column = link ? link.dataset.orderby : '';
+			var isActive = column === orderby;
+
+			th.classList.remove('sorted', 'asc', 'desc');
+			th.setAttribute('aria-sort', isActive ? (order === 'asc' ? 'ascending' : 'descending') : 'none');
+			if (isActive) {
+				th.classList.add('sorted', order);
+			}
+		});
+	}
+
+	function updateInboxUrlState(root, orderby, order) {
+		var params = new URLSearchParams(window.location.search);
+		if ('date' === orderby && 'desc' === order) {
+			params.delete('orderby');
+			params.delete('order');
+		} else {
+			params.set('orderby', orderby);
+			params.set('order', order);
+		}
+		var query = params.toString();
+		var nextUrl = window.location.pathname + (query ? '?' + query : '') + window.location.hash;
+		window.history.replaceState({}, '', nextUrl);
+
+		var searchForm = root.querySelector('.edminboost-anm-search');
+		if (!searchForm) {
+			return;
+		}
+		var orderbyInput = searchForm.querySelector('input[name="orderby"]');
+		var orderInput = searchForm.querySelector('input[name="order"]');
+		if ('date' === orderby && 'desc' === order) {
+			if (orderbyInput) {
+				orderbyInput.remove();
+			}
+			if (orderInput) {
+				orderInput.remove();
+			}
+			return;
+		}
+		if (!orderbyInput) {
+			orderbyInput = document.createElement('input');
+			orderbyInput.type = 'hidden';
+			orderbyInput.name = 'orderby';
+			searchForm.appendChild(orderbyInput);
+		}
+		if (!orderInput) {
+			orderInput = document.createElement('input');
+			orderInput.type = 'hidden';
+			orderInput.name = 'order';
+			searchForm.appendChild(orderInput);
+		}
+		orderbyInput.value = orderby;
+		orderInput.value = order;
+	}
+
+	function fetchInboxRows(root, orderby, order) {
+		var tbody = root.querySelector('#edminboost-anm-inbox-rows');
+		var table = root.querySelector('.edminboost-anm-inbox-table');
+		if (!tbody) {
+			return;
+		}
+
+		tbody.classList.add('is-loading');
+
+		apiPost('edminboost_anm_inbox_list', {
+			filter: root.dataset.inboxFilter || 'all',
+			s: root.dataset.inboxSearch || '',
+			paged: root.dataset.inboxPage || '1',
+			orderby: orderby,
+			order: order
+		}).then(function (result) {
+			tbody.classList.remove('is-loading');
+			if (!result.success) {
+				return;
+			}
+			tbody.innerHTML = result.data.rows || '';
+			root.dataset.inboxOrderby = result.data.orderby || orderby;
+			root.dataset.inboxOrder = result.data.order || order;
+			updateInboxSortHeaders(table, root.dataset.inboxOrderby, root.dataset.inboxOrder);
+			updateInboxUrlState(root, root.dataset.inboxOrderby, root.dataset.inboxOrder);
+			var showing = root.querySelector('[data-edminboost-anm-inbox-showing]');
+			if (showing && result.data.showing) {
+				showing.textContent = result.data.showing;
+			}
+		});
 	}
 
 	function initInboxTable() {
@@ -204,63 +349,90 @@
 			return;
 		}
 
-		var selectAll = document.getElementById('edminboost-anm-select-all');
-
-		if (selectAll) {
-			selectAll.addEventListener('change', function () {
+		root.addEventListener('change', function (event) {
+			if (event.target.id === 'edminboost-anm-select-all') {
 				root.querySelectorAll('.edminboost-anm-notice-check').forEach(function (cb) {
-					cb.checked = selectAll.checked;
+					cb.checked = event.target.checked;
 				});
-			});
-		}
+			}
+		});
 
-		root.querySelectorAll('.edminboost-anm-dropdown__toggle').forEach(function (btn) {
-			btn.addEventListener('click', function () {
-				var dropdown = btn.closest('.edminboost-anm-dropdown');
+		root.addEventListener('click', function (event) {
+			var sortLink = event.target.closest('.edminboost-anm-inbox-sort');
+			if (sortLink) {
+				event.preventDefault();
+				var orderby = sortLink.dataset.orderby;
+				var currentOrderby = root.dataset.inboxOrderby || 'date';
+				var currentOrder = root.dataset.inboxOrder || 'desc';
+				var order = 'asc';
+				if (orderby === currentOrderby) {
+					order = 'asc' === currentOrder ? 'desc' : 'asc';
+				} else if ('date' === orderby) {
+					order = 'desc';
+				}
+				fetchInboxRows(root, orderby, order);
+				return;
+			}
+
+			var dropdownToggle = event.target.closest('.edminboost-anm-dropdown__toggle');
+			if (dropdownToggle) {
+				var dropdown = dropdownToggle.closest('.edminboost-anm-dropdown');
 				if (dropdown) {
 					dropdown.classList.toggle('is-open');
 				}
-			});
-		});
+				return;
+			}
 
-		root.querySelectorAll('.edminboost-anm-inbox-read').forEach(function (btn) {
-			btn.addEventListener('click', function () {
-				apiPost('edminboost_anm_inbox_action', { inbox_action: 'read', id: btn.dataset.id }).then(function (result) {
+			var readBtn = event.target.closest('.edminboost-anm-inbox-read');
+			if (readBtn) {
+				apiPost('edminboost_anm_inbox_action', { inbox_action: 'read', id: readBtn.dataset.id }).then(function (result) {
 					if (result.success) {
-						btn.closest('tr').classList.add('is-read');
+						readBtn.closest('tr').classList.add('is-read');
 					}
 				});
-			});
-		});
+				return;
+			}
 
-		root.querySelectorAll('.edminboost-anm-inbox-snooze').forEach(function (btn) {
-			btn.addEventListener('click', function () {
+			var snoozeBtn = event.target.closest('.edminboost-anm-inbox-snooze');
+			if (snoozeBtn) {
 				apiPost('edminboost_anm_inbox_action', {
 					inbox_action: 'snooze',
-					id: btn.dataset.id,
-					duration: btn.dataset.duration
+					id: snoozeBtn.dataset.id,
+					duration: snoozeBtn.dataset.duration
 				}).then(function (result) {
 					if (result.success) {
 						window.location.reload();
 					}
 				});
-			});
-		});
+				return;
+			}
 
-		root.querySelectorAll('.edminboost-anm-inbox-convert').forEach(function (btn) {
-			btn.addEventListener('click', function () {
-				apiPost('edminboost_anm_inbox_action', { inbox_action: 'convert', id: btn.dataset.id }).then(function (result) {
-					if (result.success) {
-						window.alert((data.i18n && data.i18n.ruleSaved) || 'Rule saved.');
+			var convertBtn = event.target.closest('.edminboost-anm-inbox-convert');
+			if (convertBtn) {
+				var inboxConverted = convertBtn.classList.contains('is-converted-to-rule');
+				var inboxPayload = {
+					inbox_action: inboxConverted ? 'unconvert' : 'convert',
+					id: convertBtn.dataset.id
+				};
+				apiPost('edminboost_anm_inbox_action', inboxPayload).then(function (result) {
+					if (!result.success) {
+						window.alert((result.data && result.data.message) || (data.i18n && data.i18n.actionError) || 'Action failed.');
+						return;
+					}
+					var row = convertBtn.closest('tr');
+					if (inboxConverted) {
+						unmarkInboxConverted(row);
+					} else {
+						markInboxConverted(row);
 					}
 				});
-			});
-		});
+				return;
+			}
 
-		var bulkApply = root.querySelector('.edminboost-anm-bulk-apply');
-		if (bulkApply) {
-			bulkApply.addEventListener('click', function () {
-				var action = document.getElementById('edminboost-anm-bulk-action').value;
+			var bulkApply = event.target.closest('.edminboost-anm-bulk-apply');
+			if (bulkApply) {
+				var actionEl = document.getElementById('edminboost-anm-bulk-action');
+				var action = actionEl ? actionEl.value : '';
 				if (!action) {
 					return;
 				}
@@ -280,8 +452,8 @@
 						window.location.reload();
 					}
 				});
-			});
-		}
+			}
+		});
 	}
 
 	function initDebugTools() {
@@ -396,6 +568,22 @@
 		}
 	}
 
+	function initNoticePanelSettings() {
+		var styleSelect = document.getElementById('edminboost-anm-notice-panel-style');
+		var badgeRow = document.querySelector('.edminboost-anm-notice-panel-badge-row');
+
+		if (!styleSelect || !badgeRow) {
+			return;
+		}
+
+		function syncBadgeRow() {
+			badgeRow.hidden = 'dropdown' !== styleSelect.value;
+		}
+
+		styleSelect.addEventListener('change', syncBadgeRow);
+		syncBadgeRow();
+	}
+
 	document.addEventListener('DOMContentLoaded', function () {
 		initWrap();
 		initQuickStatusToggle();
@@ -404,5 +592,6 @@
 		initInboxTable();
 		initDebugTools();
 		initSettingsImporter();
+		initNoticePanelSettings();
 	});
 }());

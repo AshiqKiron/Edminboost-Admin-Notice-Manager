@@ -41,6 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 - Enqueue assets with `EDMINBOOST_ANM_VERSION` as the version string.
 - Pass data to JS via `wp_localize_script()` — global `edminboostAnmData` from `EDMINBOOST_ANM_Admin::get_localized_data()`.
 - Page slugs: `EDMINBOOST_ANM_Admin::PAGE_SLUG` with `-inbox`, `-rules`, `-settings` suffixes.
+- Inbox list: sanitize GET/POST list args via `EDMINBOOST_ANM_Admin::parse_inbox_list_args()`; paginate with `get_inbox_list_slice()` (20 per page).
 
 ## Class Wiring
 
@@ -55,7 +56,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 array(
 	'enabled'           => false,
 	'hide_core_notices' => false,
-	'notice_panel'      => array( 'enabled' => true ),
+	'notice_panel'      => array(
+		'enabled'     => true,
+		'style'       => 'link',       // link | dropdown
+		'position'    => 'default',    // default | before_profile
+		'badge_style' => 'count',      // count | dot (dropdown)
+	),
 	'upsell_preset'     => array( 'enabled' => false, 'custom_phrases' => array() ),
 	'safety_guard'      => array( 'enabled' => true, 'mode' => 'strict' ),
 	'client_shield'     => array( 'enabled' => false, 'roles' => array( ... ) ),
@@ -71,9 +77,13 @@ Separate options: `RULES_OPTION` (rule list), `INBOX_OPTION` (captured notices),
 | Partial | Context |
 |---------|---------|
 | `edminboost-anm-dashboard-page.php` | Dashboard stats + quick actions |
-| `edminboost-anm-inbox-page.php` | Inbox list and bulk actions |
-| `edminboost-anm-rules-page.php` | Rule editor UI |
+| `edminboost-anm-inbox-page.php` | Inbox list table shell |
+| `edminboost-anm-inbox-table-rows.php` | Inbox `<tr>` fragment (page + AJAX) |
+| `edminboost-anm-rules-page.php` | Rules + WP preset conversion |
 | `edminboost-anm-settings-page.php` | Settings API form |
+| `edminboost-anm-notice-panel-dropdown.php` | Admin bar dropdown preview |
+
+`EDMINBOOST_ANM_Notices::DROPDOWN_PREVIEW_LIMIT` (8) caps dropdown preview items.
 
 - Document `@var` annotations at the top of partials.
 - Prefix partial-local variables with `$edminboost_anm_` to avoid collisions.
