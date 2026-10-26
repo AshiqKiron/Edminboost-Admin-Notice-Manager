@@ -1,0 +1,70 @@
+---
+description: Coding, i18n, accessibility, UX, performance, and release standards for ANM
+alwaysApply: true
+---
+
+# EdminBoost ANM Standards
+
+Cross-cutting quality standards. See also: `edminboost-anm-project.mdc`, `edminboost-anm-compliance.mdc`, `edminboost-anm-wordpress-php.mdc`, `edminboost-anm-admin-assets.mdc`.
+
+## Coding Standards
+
+- **PHP**: WordPress PHP Coding Standards — spacing, arrays, docblocks where useful, clear naming.
+- **JS**: IIFE with `'use strict'`; guard on DOM presence; no jQuery unless WordPress already loads it.
+- **CSS**: Prefix all selectors with `.edminboost-anm-` to avoid wp-admin conflicts.
+- **HTML**: Semantic markup, accessible labels, buttons, headings.
+- Never output inline CSS/JS unless there is a good reason (current exception: `hide_core_notices()` admin_head style tag).
+- Keep lines and functions readable rather than clever.
+
+## I18N
+
+- All user-facing strings must be translatable.
+- Use `EDMINBOOST_ANM_TEXT_DOMAIN` consistently; it must match `EDMINBOOST_ANM_PLUGIN_SLUG`.
+- Use `__()`, `_e()`, `esc_html__()`, `esc_attr__()`, etc. appropriately.
+- Text domain loads from `/languages` on `plugins_loaded` via `EDMINBOOST_ANM_Plugin::load_textdomain()`.
+
+## Accessibility
+
+- Every settings field must have a label (`<label for="...">` or `aria-label`).
+- Use `<button>` elements for actions, not clickable divs.
+- Respect keyboard navigation and focus states.
+- Use meaningful headings and notices.
+- Inbox and rules UI: preserve focus and confirm destructive actions (delete rule, bulk inbox actions).
+
+## Admin UX
+
+- Add notices sparingly and only when relevant.
+- Load plugin-screen assets only on this plugin's pages (`is_plugin_screen()`).
+- Notice CSS may load on all wp-admin when notice features are active and plugin is enabled.
+- Interceptor JS loads on all wp-admin when plugin is enabled — required for live notice capture.
+- Features must respect the global `enabled` kill switch via `EDMINBOOST_ANM_Settings::is_enabled()`.
+- Dashboard toggles and rules/inbox actions use AJAX with user feedback via localized `i18n` strings.
+
+## Performance
+
+- Load code only where needed.
+- Avoid expensive queries on every request.
+- Options (`edminboost_anm_settings`, `edminboost_anm_rules`, `edminboost_anm_inbox`, `edminboost_anm_stats`, `edminboost_anm_version`) are not autoloaded.
+- Cap inbox growth and batch operations where the codebase already defines limits.
+- Avoid front-end impact unless explicitly requested.
+
+## Privacy
+
+- No tracking, telemetry, or vendor data transmission.
+- Webhook and digest are explicit user-configured features; document data leaving the site in `readme.txt`.
+- Debug helpers (`EDMINBOOST_ANM_Debug`) load only when `WP_DEBUG` is true — must not ship verbose logging in production paths.
+
+## Uninstall & Lifecycle
+
+- **Activate**: seed defaults, stats, empty rules/inbox, version, digest schedule sync, optional redirect transient.
+- **Deactivate**: clear activation redirect transient; `EDMINBOOST_ANM_Digest::clear_schedule()`.
+- **Delete**: `uninstall.php` removes all `EDMINBOOST_ANM_Settings::*_OPTION` keys and clears digest cron.
+- State data retention clearly in `readme.txt`.
+- If adding new options or cron hooks, update activator/deactivator/uninstall accordingly.
+
+## Release
+
+- Include `readme.txt` structure suitable for WordPress.org if requested.
+- Include license headers (GPL-3.0-or-later).
+- Include versioning (`EDMINBOOST_ANM_VERSION` + plugin header).
+- Ensure the plugin is complete and stable enough for review.

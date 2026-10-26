@@ -1,0 +1,70 @@
+---
+description: Admin JS, CSS, and partial conventions for Edminboost Admin Notice Manager
+globs: "admin/**/*.{js,css,php}"
+alwaysApply: false
+---
+
+# Admin Assets (ANM)
+
+## JavaScript
+
+### `admin/js/edminboost-anm-admin.js`
+
+- Wrap in an IIFE with `'use strict'`.
+- Scope DOM queries to `.edminboost-anm-wrap` or plugin-specific selectors.
+- Use `fetch`/`admin-ajax.php` with `edminboostAnmData.ajaxUrl`, `nonce`, and localized `i18n` for errors/success.
+- No jQuery unless WordPress already loads it for the screen.
+- Use `DOMContentLoaded` for initialization.
+
+### `admin/js/edminboost-anm-interceptor.js`
+
+- Loaded on all wp-admin when plugin is enabled (`EDMINBOOST_ANM_Interceptor::enqueue_interceptor_script()`).
+- Observes/captures admin notices and POSTs to `edminboost_anm_capture_notice`.
+- Uses localized `edminboostAnmData` (same nonce action as admin UI).
+
+`edminboostAnmData` shape (plugin screens + interceptor):
+
+```javascript
+{
+	ajaxUrl: string,
+	nonce: string,
+	pageSlug: string,
+	i18n: {
+		saved, confirmDelete, ruleSaved, ruleDeleted,
+		importSuccess, importError, actionSuccess, actionError,
+		createRule, editRule, statusActive, statusInactive,
+		seedSuccess, seedError, triggerError, viewInbox
+	}
+}
+```
+
+## CSS (`admin/css/edminboost-anm-admin.css`)
+
+- Prefix all selectors with `.edminboost-anm-` to avoid admin conflicts.
+- Layout: `.edminboost-anm-wrap`, `.edminboost-anm-hero`, `.edminboost-anm-card`, `.edminboost-anm-status`.
+- Status modifiers: `.is-active`, `.is-inactive`, `.is-ready`.
+- Page modifiers: `.edminboost-anm-settings`, inbox/rules-specific blocks as defined in partials.
+
+## Partials (`admin/partials/`)
+
+| File | Purpose |
+|------|---------|
+| `edminboost-anm-dashboard-page.php` | Status, stats, importer shortcuts |
+| `edminboost-anm-inbox-page.php` | Intercepted notice inbox |
+| `edminboost-anm-rules-page.php` | Filter rules CRUD UI |
+| `edminboost-anm-settings-page.php` | Settings API form (general, display, digest, webhook, etc.) |
+
+- Use `fieldset` + `form-table` for grouped settings; label every input.
+- Settings checkboxes use nested keys under `EDMINBOOST_ANM_Settings::OPTION_NAME`.
+- Use `checked()` helper for checkbox state.
+
+## Enqueuing
+
+| Handle | File | When |
+|--------|------|------|
+| `edminboost-anm-admin` (style) | `admin/css/edminboost-anm-admin.css` | Plugin screens |
+| `edminboost-anm-admin` (script) | `admin/js/edminboost-anm-admin.js` | Plugin screens only |
+| `edminboost-anm-notices` (style) | same CSS file | All wp-admin when notice panel/features active |
+| `edminboost-anm-interceptor` (script) | `admin/js/edminboost-anm-interceptor.js` | All wp-admin when plugin enabled |
+
+Version: `EDMINBOOST_ANM_VERSION` for all handles.

@@ -4,7 +4,7 @@ Tags: admin, admin-notices, dashboard, admin-tools, notices
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -16,8 +16,13 @@ Edminboost Admin Notice Manager helps site administrators take control of WordPr
 
 = Features =
 
-* Central dashboard for admin notice management
-* Modular, extensible architecture with developer filters
+* Dashboard with intercept metrics, upsell preset, and live feed
+* Notice Inbox with search, filters, snooze, and bulk actions
+* Auto-Rules engine with keyword, regex, and CSS selector matching
+* Critical Safety Guard and Client Shield Mode for role-based filtering
+* Weekly email digest and opt-in webhook alerts (Slack/Discord)
+* JSON rules export/import and legacy competitor importer
+* Hybrid PHP + JS notice interception
 * Translation-ready with a dedicated text domain
 * Uninstall-safe — removes all plugin options on uninstall
 
@@ -31,7 +36,7 @@ Edminboost Admin Notice Manager helps site administrators take control of WordPr
 
 = What does this plugin do? =
 
-It provides tools to manage WordPress admin notices from a dedicated dashboard.
+It intercepts, organizes, and filters WordPress admin notices from a dedicated dashboard with inbox, auto-rules, and analytics.
 
 = Who can access the plugin settings? =
 
@@ -39,13 +44,28 @@ Only users with the `manage_options` capability (typically Administrators) can a
 
 = Does this plugin send data to external servers? =
 
-No. The plugin does not track users or send site data to external servers.
+Not by default. The plugin does not track users or send site data externally unless you explicitly enable the opt-in webhook integration and provide a webhook URL. Weekly email digests are sent only to addresses you configure using WordPress `wp_mail()`.
 
 = Is the plugin uninstall-safe? =
 
 Yes. When uninstalled, all plugin options are removed from the database.
 
 == Changelog ==
+
+= 1.1.1 =
+* Add custom upsell blacklist phrases in Settings (one per line), merged with the built-in preset list.
+* Add WP_DEBUG-only test notice generator on the Dashboard (seed inbox or trigger live interception).
+* Rename Dashboard live feed to “Live Blocked Feed” with “View more” linking to Notice Inbox; store up to 100 feed preview entries.
+
+= 1.1.0 =
+* Add Quick Status toggle on the Dashboard to enable or disable notice interception; inactive by default on new installs.
+* Add Dashboard wireframe with metrics, upsell preset toggle, bar chart, and live feed.
+* Add Notice Inbox with search, filter tabs, bulk actions, and row actions.
+* Add Auto-Rules page with CRUD modal and hit tracking.
+* Expand Settings with Safety Guard, Client Shield, digest email, webhook, and import/export tools.
+* Add hybrid PHP + JS notice interception engine.
+* Add AJAX handlers for toggles, inbox actions, and rule management.
+* Add weekly digest cron and opt-in webhook alerts.
 
 = 1.0.0 =
 * Initial release scaffold.

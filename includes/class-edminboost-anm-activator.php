@@ -23,6 +23,10 @@ class EDMINBOOST_ANM_Activator {
 	 */
 	public static function activate() {
 		require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-settings.php';
+		require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-stats.php';
+		require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-rules.php';
+		require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-inbox.php';
+		require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-digest.php';
 
 		$defaults = EDMINBOOST_ANM_Settings::get_defaults();
 
@@ -30,7 +34,23 @@ class EDMINBOOST_ANM_Activator {
 			add_option( EDMINBOOST_ANM_Settings::OPTION_NAME, $defaults, '', false );
 		}
 
+		if ( false === get_option( EDMINBOOST_ANM_Settings::RULES_OPTION, false ) ) {
+			add_option( EDMINBOOST_ANM_Settings::RULES_OPTION, array(), '', false );
+		}
+
+		if ( false === get_option( EDMINBOOST_ANM_Settings::INBOX_OPTION, false ) ) {
+			add_option( EDMINBOOST_ANM_Settings::INBOX_OPTION, array(), '', false );
+		}
+
+		if ( false === get_option( EDMINBOOST_ANM_Settings::STATS_OPTION, false ) ) {
+			$stats = EDMINBOOST_ANM_Stats::get_defaults();
+			$stats['preset_phrase_count'] = EDMINBOOST_ANM_Rules::get_preset_phrase_count();
+			add_option( EDMINBOOST_ANM_Settings::STATS_OPTION, $stats, '', false );
+		}
+
 		update_option( EDMINBOOST_ANM_Settings::VERSION_OPTION, EDMINBOOST_ANM_VERSION, false );
+
+		EDMINBOOST_ANM_Digest::sync_schedule( $defaults );
 
 		set_transient( 'edminboost_anm_activation_redirect', 1, 30 );
 	}

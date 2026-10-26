@@ -1,0 +1,105 @@
+---
+description: Core conventions for Edminboost Admin Notice Manager
+alwaysApply: true
+---
+
+# EdminBoost ANM Project Rules
+
+WordPress admin notice management plugin. PHP 7.4+, WordPress 6.0+, GPL-3.0. Current release: **1.1.0**.
+
+See `edminboost-anm-standards.mdc`, `edminboost-anm-compliance.mdc`, `edminboost-anm-wordpress-php.mdc`, `edminboost-anm-admin-assets.mdc`.
+
+## Directory Layout
+
+```
+edminboost-admin-notice-manager.php   # bootstrap + constants
+includes/
+  class-edminboost-anm-plugin.php     # hook orchestrator
+  class-edminboost-anm-admin.php      # menus, settings UI, assets
+  class-edminboost-anm-settings.php   # options, defaults, sanitize
+  class-edminboost-anm-notices.php    # notice panel + wp-admin styling
+  class-edminboost-anm-interceptor.php # capture notices (PHP buffer + JS)
+  class-edminboost-anm-inbox.php      # stored intercepted notices
+  class-edminboost-anm-rules.php      # filter rules + upsell preset
+  class-edminboost-anm-stats.php      # dashboard counters
+  class-edminboost-anm-ajax.php       # admin-ajax + export handler
+  class-edminboost-anm-importer.php   # third-party notice importer
+  class-edminboost-anm-digest.php     # weekly email digest (cron)
+  class-edminboost-anm-webhook.php    # opt-in outbound webhook alerts
+  class-edminboost-anm-debug.php      # WP_DEBUG-only dev helpers
+  class-edminboost-anm-{activator,deactivator}.php
+admin/
+  css/edminboost-anm-admin.css
+  js/edminboost-anm-admin.js
+  js/edminboost-anm-interceptor.js
+  partials/edminboost-anm-{dashboard,inbox,rules,settings}-page.php
+languages/  uninstall.php  readme.txt  composer.json
+AGENTS.md   .cursor/rules/
+```
+
+## Architecture
+
+- Bootstrap defines constants, requires core classes, registers activation/deactivation hooks, calls `edminboost_anm_run_plugin()`. Loads `EDMINBOOST_ANM_Debug` only when `WP_DEBUG` is true.
+- Bootstrap filename equals `EDMINBOOST_ANM_PLUGIN_SLUG . '.php'`.
+- `EDMINBOOST_ANM_Plugin::run()` wires i18n, admin menu/settings/assets, and on `init`: notices, interceptor, AJAX, digest (+ debug when loaded).
+- **Options API only** — no custom database tables.
+- **Stored options** (via `EDMINBOOST_ANM_Settings` constants): `edminboost_anm_settings`, `edminboost_anm_rules`, `edminboost_anm_inbox`, `edminboost_anm_stats`, `edminboost_anm_version`. All seeded on activation with `autoload => false`.
+- Global kill switch: `enabled` in settings. Most features also check `EDMINBOOST_ANM_Settings::is_enabled()`.
+- **AJAX**: `EDMINBOOST_ANM_Ajax` — privileged `wp_ajax_*` actions + `admin_post_edminboost_anm_export_rules`.
+- **Cron**: `EDMINBOOST_ANM_Digest` — weekly digest when enabled; schedule synced on settings save; cleared on deactivate/uninstall.
+- **External requests**: `EDMINBOOST_ANM_Webhook::maybe_send()` posts JSON to a user-configured URL only when webhook is enabled (opt-in). No telemetry or vendor tracking.
+- Admin UI: `EDMINBOOST_ANM_Admin` + partials. Plugins screen row meta includes Docs link (`EDMINBOOST_ANM_PLUGIN_DOCS_URL`).
+- Plugin-screen assets via `EDMINBOOST_ANM_Admin::is_plugin_screen()`. Notice CSS on all wp-admin when panel features active. Interceptor JS on all wp-admin when plugin enabled.
+
+## Admin Pages
+
+Use `EDMINBOOST_ANM_Admin::PAGE_SLUG` (equals `EDMINBOOST_ANM_PLUGIN_SLUG`).
+
+| Page | Slug | Renderer |
+|------|------|----------|
+| Dashboard | `PAGE_SLUG` | `render_dashboard_page()` |
+| Inbox | `PAGE_SLUG . '-inbox'` | `render_inbox_page()` |
+| Rules | `PAGE_SLUG . '-rules'` | `render_rules_page()` |
+| Settings | `PAGE_SLUG . '-settings'` | `render_settings_page()` |
+
+Capability: `EDMINBOOST_ANM_Settings::CAPABILITY` (`manage_options`).
+
+Settings constants: `OPTION_NAME`, `RULES_OPTION`, `INBOX_OPTION`, `STATS_OPTION`, `VERSION_OPTION`, `SETTINGS_GROUP`.
+
+## Naming
+
+Project prefix: `edminboost_anm` (use `edminboost-anm` in slugs/handles). Distinct from main EdminBoost plugin (`EDMINBOOST_*` without `_ANM`).
+
+| Kind | Pattern | Example |
+|------|---------|---------|
+| Constants | `EDMINBOOST_ANM_*` | `EDMINBOOST_ANM_VERSION` |
+| Plugin slug / text domain | `edminboost-admin-notice-manager` | `EDMINBOOST_ANM_PLUGIN_SLUG` |
+| Classes | `EDMINBOOST_ANM_{Name}` | `EDMINBOOST_ANM_Admin` |
+| Functions | `edminboost_anm_{action}` | `edminboost_anm_run_plugin()` |
+| Options | `edminboost_anm_{key}` | `edminboost_anm_inbox` |
+| CSS/JS handles | `edminboost-anm-{name}` | `edminboost-anm-interceptor` |
+| CSS classes | `edminboost-anm-*` | `edminboost-anm-wrap` |
+| JS global (localized) | `edminboostAnmData` | plugin screens + interceptor |
+| AJAX nonce action | `edminboost_anm_admin` | via `get_localized_data()` |
+
+`EDMINBOOST_ANM_TEXT_DOMAIN` must match `EDMINBOOST_ANM_PLUGIN_SLUG`.
+
+## Extension Hooks
+
+- `edminboost_anm_settings_defaults` — filter default settings
+- `edminboost_anm_settings` — filter merged settings on read
+- `edminboost_anm_sanitize_settings` — filter sanitized settings on save
+- `edminboost_anm_notices_loaded` — after notice manager hooks register
+- `edminboost_anm_upsell_preset_phrases` — filter built-in upsell phrase list
+
+## Scope & Change Discipline
+
+- Admin-only plugin — no front-end hooks unless explicitly requested.
+- Minimize diff scope; match existing file structure and coding style.
+- Add `index.php` silence files when creating new directories.
+- Update `readme.txt` changelog for user-facing changes.
+- Update `uninstall.php` when adding new stored options or cron hooks.
+
+## Constants (use, don't redefine)
+
+`EDMINBOOST_ANM_VERSION`, `EDMINBOOST_ANM_PLUGIN_FILE`, `EDMINBOOST_ANM_PLUGIN_DIR`, `EDMINBOOST_ANM_PLUGIN_URL`, `EDMINBOOST_ANM_PLUGIN_BASENAME`, `EDMINBOOST_ANM_PLUGIN_SLUG`, `EDMINBOOST_ANM_TEXT_DOMAIN`, `EDMINBOOST_ANM_PLUGIN_DOCS_URL`

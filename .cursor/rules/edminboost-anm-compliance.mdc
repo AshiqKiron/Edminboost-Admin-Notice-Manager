@@ -1,0 +1,58 @@
+---
+description: Security, WordPress.org directory, and pre-ship review checklist for ANM
+alwaysApply: true
+---
+
+# EdminBoost ANM Compliance
+
+Gate before presenting final code. If any checklist item is "no", fix it first.
+
+See `edminboost-anm-project.mdc`, `edminboost-anm-standards.mdc`, `edminboost-anm-wordpress-php.mdc`.
+
+## Security
+
+- Sanitize on input, escape on output, authorize before action, verify nonce before write.
+- Never trust browser or request input.
+- Use `EDMINBOOST_ANM_Settings::CAPABILITY` on admin pages and privileged handlers.
+- Settings API: `sanitize_callback` via `EDMINBOOST_ANM_Settings::sanitize()`, `show_in_rest => false`.
+- AJAX: `EDMINBOOST_ANM_Ajax::verify_request()` — `check_ajax_referer( 'edminboost_anm_admin', 'nonce' )` + capability check. Mirror pattern for new actions.
+- Rule export: `admin_post_edminboost_anm_export_rules` — nonce + capability before download.
+- SQL: `$wpdb->prepare()` only; prefer Options API (`edminboost_anm_*`) over custom tables.
+- Inbox notice HTML: treat as untrusted; use `wp_kses_post()` or equivalent on display; sanitize fields on capture.
+
+## Directory & Privacy
+
+- No obfuscated code, undisclosed telemetry, or hidden external requests.
+- No tracking or analytics to vendor servers. Docs link is user-initiated only.
+- **Webhook** (`settings.webhook`): disabled by default; user supplies URL; sends notice summary JSON via `wp_remote_post` only when enabled. Document in `readme.txt`.
+- **Digest**: uses `wp_mail()` to configured recipients — no third-party email API.
+- No spammy readme or deceptive behavior.
+- Any new remote integration must be documented, justified, and opt-in.
+
+## Code Quality
+
+- Prefer WordPress core APIs over custom hacks.
+- Keep code human-readable for directory review.
+- Follow WPCS across PHP, CSS, JS, and HTML.
+- Admin-only unless explicitly requested; enqueue plugin-screen assets via `is_plugin_screen()`.
+- Interceptor script loads on wp-admin when plugin is enabled — keep payload minimal; no external script URLs.
+- Use `edminboost_anm` / `EDMINBOOST_ANM_` prefix consistently.
+
+## Self-Review Checklist
+
+- [ ] No WordPress core modifications
+- [ ] GPL-compatible
+- [ ] Human-readable, reviewable code
+- [ ] User-facing strings translatable (`EDMINBOOST_ANM_TEXT_DOMAIN`)
+- [ ] Privileged actions: capability checks (+ nonces for AJAX/admin-post)
+- [ ] Input sanitized; output escaped
+- [ ] SQL prepared (if any)
+- [ ] Assets scoped; admin notices minimal and dismissible
+- [ ] Webhook/digest behavior documented; webhook off by default
+- [ ] Uninstall path removes plugin data and clears digest cron
+- [ ] Unique `EDMINBOOST_ANM_` / `edminboost_anm_` prefix; maintainable structure
+- [ ] Would survive WordPress.org review
+
+## Unsafe Requests
+
+If a feature conflicts with the Plugin Handbook, Coding Standards, security best practices, privacy expectations, or Directory Guidelines — refuse the unsafe approach and propose a compliant alternative.

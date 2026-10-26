@@ -31,11 +31,35 @@ class EDMINBOOST_ANM_Plugin {
 	protected $notices;
 
 	/**
+	 * Notice interceptor.
+	 *
+	 * @var EDMINBOOST_ANM_Interceptor
+	 */
+	protected $interceptor;
+
+	/**
+	 * AJAX handler.
+	 *
+	 * @var EDMINBOOST_ANM_Ajax
+	 */
+	protected $ajax;
+
+	/**
+	 * Digest handler.
+	 *
+	 * @var EDMINBOOST_ANM_Digest
+	 */
+	protected $digest;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->admin   = new EDMINBOOST_ANM_Admin();
-		$this->notices = new EDMINBOOST_ANM_Notices();
+		$this->admin       = new EDMINBOOST_ANM_Admin();
+		$this->notices     = new EDMINBOOST_ANM_Notices();
+		$this->interceptor = new EDMINBOOST_ANM_Interceptor();
+		$this->ajax        = new EDMINBOOST_ANM_Ajax();
+		$this->digest      = new EDMINBOOST_ANM_Digest();
 	}
 
 	/**
@@ -53,6 +77,13 @@ class EDMINBOOST_ANM_Plugin {
 		add_filter( 'plugin_action_links_' . EDMINBOOST_ANM_PLUGIN_BASENAME, array( $this->admin, 'add_settings_link' ) );
 		add_filter( 'plugin_row_meta', array( $this->admin, 'add_plugin_row_meta' ), 10, 2 );
 		add_action( 'init', array( $this->notices, 'register_hooks' ) );
+		add_action( 'init', array( $this->interceptor, 'register_hooks' ) );
+		add_action( 'init', array( $this->ajax, 'register_hooks' ) );
+		add_action( 'init', array( $this->digest, 'register_hooks' ) );
+
+		if ( class_exists( 'EDMINBOOST_ANM_Debug' ) ) {
+			add_action( 'init', array( 'EDMINBOOST_ANM_Debug', 'register_hooks' ) );
+		}
 	}
 
 	/**

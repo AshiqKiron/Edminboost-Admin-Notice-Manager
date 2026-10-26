@@ -2,7 +2,7 @@
 /**
  * Plugin deactivation handler.
  *
- * Purpose: Reserved for clearing scheduled hooks or transient cleanup on deactivate.
+ * Purpose: Clear scheduled hooks or transient cleanup on deactivate.
  *
  * @package EdminBoost\AdminNoticeManager
  */
@@ -23,5 +23,8 @@ class EDMINBOOST_ANM_Deactivator {
 	 */
 	public static function deactivate() {
 		delete_transient( 'edminboost_anm_activation_redirect' );
+
+		require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-digest.php';
+		EDMINBOOST_ANM_Digest::clear_schedule();
 	}
 }

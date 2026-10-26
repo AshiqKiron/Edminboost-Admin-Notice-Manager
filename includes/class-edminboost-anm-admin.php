@@ -50,6 +50,24 @@ class EDMINBOOST_ANM_Admin {
 
 		add_submenu_page(
 			self::PAGE_SLUG,
+			__( 'Notice Inbox', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			__( 'Notice Inbox', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			EDMINBOOST_ANM_Settings::CAPABILITY,
+			self::PAGE_SLUG . '-inbox',
+			array( $this, 'render_inbox_page' )
+		);
+
+		add_submenu_page(
+			self::PAGE_SLUG,
+			__( 'Auto-Rules', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			__( 'Auto-Rules', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			EDMINBOOST_ANM_Settings::CAPABILITY,
+			self::PAGE_SLUG . '-rules',
+			array( $this, 'render_rules_page' )
+		);
+
+		add_submenu_page(
+			self::PAGE_SLUG,
 			__( 'Settings', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			__( 'Settings', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			EDMINBOOST_ANM_Settings::CAPABILITY,
@@ -140,12 +158,40 @@ class EDMINBOOST_ANM_Admin {
 		wp_localize_script(
 			'edminboost-anm-admin',
 			'edminboostAnmData',
-			array(
-				'pageSlug' => self::PAGE_SLUG,
-				'i18n'     => array(
-					'saved' => __( 'Settings saved.', EDMINBOOST_ANM_TEXT_DOMAIN ),
-				),
-			)
+			self::get_localized_data()
+		);
+	}
+
+	/**
+	 * Localized script data for admin JS.
+	 *
+	 * @return array
+	 */
+	public static function get_localized_data() {
+		return array(
+			'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
+			'nonce'    => wp_create_nonce( 'edminboost_anm_admin' ),
+			'pageSlug' => self::PAGE_SLUG,
+			'i18n'     => array(
+				'saved'           => __( 'Settings saved.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'confirmDelete'   => __( 'Delete this rule?', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'ruleSaved'       => __( 'Rule saved.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'ruleDeleted'     => __( 'Rule deleted.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'importSuccess'   => __( 'Import completed.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'importError'     => __( 'Import failed.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'actionSuccess'   => __( 'Action completed.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'actionError'     => __( 'Action failed.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'createRule'      => __( 'Create New Filter Rule', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'editRule'        => __( 'Edit Filter Rule', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'statusActive'    => __( 'Active', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'statusInactive'  => __( 'Inactive', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'seedSuccess'     => __( 'Added %1$d test notices to the inbox (%2$d skipped as duplicates).', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'seedError'       => __( 'Could not seed test notices.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'triggerError'    => __( 'Could not trigger live test notices.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'viewInbox'       => __( 'View Inbox', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'convertedToRule' => __( 'Converted to rule', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'alreadyConverted' => __( 'Already converted to a rule.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			),
 		);
 	}
 
@@ -199,8 +245,76 @@ class EDMINBOOST_ANM_Admin {
 		}
 
 		$settings = EDMINBOOST_ANM_Settings::get();
+		$metrics  = EDMINBOOST_ANM_Stats::get_dashboard_metrics();
 
 		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-dashboard-page.php';
+	}
+
+	/**
+	 * Render the inbox page.
+	 *
+	 * @return void
+	 */
+	public function render_inbox_page() {
+		if ( ! current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
+		}
+
+		$settings = EDMINBOOST_ANM_Settings::get();
+		$filter   = sanitize_key( wp_unslash( $_GET['filter'] ?? 'all' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$search   = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$page     = max( 1, (int) ( $_GET['paged'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$orderby  = sanitize_key( wp_unslash( $_GET['orderby'] ?? 'date' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$order    = strtolower( sanitize_key( wp_unslash( $_GET['order'] ?? 'desc' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		if ( ! in_array( $orderby, array( 'source', 'message', 'type', 'status', 'date' ), true ) ) {
+			$orderby = 'date';
+		}
+		if ( ! in_array( $order, array( 'asc', 'desc' ), true ) ) {
+			$order = 'date' === $orderby ? 'desc' : 'asc';
+		}
+
+		$all_notices = EDMINBOOST_ANM_Inbox::query(
+			array(
+				'filter'   => $filter,
+				'search'   => $search,
+				'per_page' => 9999,
+				'orderby'  => $orderby,
+				'order'    => $order,
+			)
+		);
+
+		$per_page    = 20;
+		$total       = count( $all_notices );
+		$offset      = ( $page - 1 ) * $per_page;
+		$notices     = array_slice( $all_notices, $offset, $per_page );
+		$counts      = EDMINBOOST_ANM_Inbox::get_counts();
+
+		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-inbox-page.php';
+	}
+
+	/**
+	 * Render the auto-rules page.
+	 *
+	 * @return void
+	 */
+	public function render_rules_page() {
+		if ( ! current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
+		}
+
+		$settings   = EDMINBOOST_ANM_Settings::get();
+		$rules      = EDMINBOOST_ANM_Rules::get_all();
+		$wp_presets = EDMINBOOST_ANM_Rules::get_wp_presets_with_status();
+
+		usort(
+			$rules,
+			static function ( $a, $b ) {
+				return ( $b['hit_count'] ?? 0 ) <=> ( $a['hit_count'] ?? 0 );
+			}
+		);
+
+		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-rules-page.php';
 	}
 
 	/**
@@ -213,7 +327,12 @@ class EDMINBOOST_ANM_Admin {
 			wp_die( esc_html__( 'You do not have permission to access this page.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
 		}
 
-		$settings = EDMINBOOST_ANM_Settings::get();
+		$settings     = EDMINBOOST_ANM_Settings::get();
+		$legacy       = EDMINBOOST_ANM_Importer::detect_legacy();
+		$export_url   = wp_nonce_url(
+			admin_url( 'admin-post.php?action=edminboost_anm_export_rules' ),
+			'edminboost_anm_export_rules'
+		);
 
 		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-settings-page.php';
 	}

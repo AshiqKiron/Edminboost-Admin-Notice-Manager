@@ -1,0 +1,83 @@
+---
+description: WordPress PHP standards for Edminboost Admin Notice Manager
+globs: "**/*.php"
+alwaysApply: false
+---
+
+# WordPress PHP Conventions (ANM)
+
+See `edminboost-anm-compliance.mdc` for the security gate.
+
+## File Header
+
+Every PHP file must start with:
+
+```php
+<?php
+/**
+ * Brief description.
+ *
+ * @package EdminBoost\AdminNoticeManager
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+```
+
+`uninstall.php` uses `WP_UNINSTALL_PLUGIN` instead of `ABSPATH`.
+
+## Security
+
+- Check capabilities before rendering admin pages: `current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY )`.
+- Escape output: `esc_html()`, `esc_attr()`, `esc_url()`, `esc_html__()`, `esc_html_e()`.
+- Sanitize all settings via `EDMINBOOST_ANM_Settings::sanitize()` as `sanitize_callback` in `register_setting()`.
+- New AJAX handlers: register in `EDMINBOOST_ANM_Ajax::register_hooks()`, implement `handle_*`, call `verify_request()`.
+
+## WordPress APIs
+
+- Register hooks in `EDMINBOOST_ANM_Plugin::run()` or class `register_hooks()` — not in the bootstrap file (except activation/deactivation registration).
+- Use Settings API for the main settings option (`register_setting`, `settings_fields`, `submit_button`). Rules/inbox use dedicated classes + AJAX where appropriate.
+- Enqueue assets with `EDMINBOOST_ANM_VERSION` as the version string.
+- Pass data to JS via `wp_localize_script()` — global `edminboostAnmData` from `EDMINBOOST_ANM_Admin::get_localized_data()`.
+- Page slugs: `EDMINBOOST_ANM_Admin::PAGE_SLUG` with `-inbox`, `-rules`, `-settings` suffixes.
+
+## Class Wiring
+
+- Bootstrap requires core classes; instantiate only via `edminboost_anm_run_plugin()`.
+- `EDMINBOOST_ANM_Plugin` constructor: `Admin`, `Notices`, `Interceptor`, `Ajax`, `Digest`.
+- Domain helpers (static or instantiated as needed): `EDMINBOOST_ANM_Settings`, `EDMINBOOST_ANM_Rules`, `EDMINBOOST_ANM_Inbox`, `EDMINBOOST_ANM_Stats`, `EDMINBOOST_ANM_Importer`, `EDMINBOOST_ANM_Webhook`.
+- Activation seeds options via `EDMINBOOST_ANM_Activator`; deactivation clears digest schedule.
+
+## Settings Option Shape (top-level keys)
+
+```php
+array(
+	'enabled'           => false,
+	'hide_core_notices' => false,
+	'notice_panel'      => array( 'enabled' => true ),
+	'upsell_preset'     => array( 'enabled' => false, 'custom_phrases' => array() ),
+	'safety_guard'      => array( 'enabled' => true, 'mode' => 'strict' ),
+	'client_shield'     => array( 'enabled' => false, 'roles' => array( ... ) ),
+	'digest'            => array( 'enabled' => false, 'recipients' => 'admin@...' ),
+	'webhook'           => array( 'enabled' => false, 'url' => '' ),
+)
+```
+
+Separate options: `RULES_OPTION` (rule list), `INBOX_OPTION` (captured notices), `STATS_OPTION` (counters).
+
+## Partials
+
+| Partial | Context |
+|---------|---------|
+| `edminboost-anm-dashboard-page.php` | Dashboard stats + quick actions |
+| `edminboost-anm-inbox-page.php` | Inbox list and bulk actions |
+| `edminboost-anm-rules-page.php` | Rule editor UI |
+| `edminboost-anm-settings-page.php` | Settings API form |
+
+- Document `@var` annotations at the top of partials.
+- Prefix partial-local variables with `$edminboost_anm_` to avoid collisions.
+
+## Docblocks
+
+Document all public methods with `@param`, `@return`, and `@var` on class properties.

@@ -88,13 +88,23 @@ class EDMINBOOST_ANM_Notices {
 			return;
 		}
 
+		$counts = EDMINBOOST_ANM_Inbox::get_counts();
+		$title  = esc_html__( 'Notices', EDMINBOOST_ANM_TEXT_DOMAIN );
+
+		if ( ! empty( $counts['all'] ) ) {
+			$title .= sprintf(
+				' <span class="awaiting-mod count-%1$d"><span class="pending-count">%1$d</span></span>',
+				(int) $counts['all']
+			);
+		}
+
 		$admin_bar->add_node(
 			array(
 				'id'    => 'edminboost-anm-notices',
-				'title' => esc_html__( 'Notices', EDMINBOOST_ANM_TEXT_DOMAIN ),
-				'href'  => admin_url( 'admin.php?page=' . EDMINBOOST_ANM_Admin::PAGE_SLUG ),
+				'title' => $title,
+				'href'  => admin_url( 'admin.php?page=' . EDMINBOOST_ANM_Admin::PAGE_SLUG . '-inbox' ),
 				'meta'  => array(
-					'title' => esc_attr__( 'Open Admin Notice Manager', EDMINBOOST_ANM_TEXT_DOMAIN ),
+					'title' => esc_attr__( 'Open Notice Inbox', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				),
 			)
 		);
