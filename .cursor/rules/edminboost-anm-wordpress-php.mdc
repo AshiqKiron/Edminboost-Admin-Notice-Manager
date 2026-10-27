@@ -46,27 +46,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 ## Class Wiring
 
 - Bootstrap requires core classes; instantiate only via `edminboost_anm_run_plugin()`.
-- `EDMINBOOST_ANM_Plugin` constructor: `Admin`, `Notices`, `Interceptor`, `Ajax`, `Digest`.
-- Domain helpers (static or instantiated as needed): `EDMINBOOST_ANM_Settings`, `EDMINBOOST_ANM_Rules`, `EDMINBOOST_ANM_Inbox`, `EDMINBOOST_ANM_Stats`, `EDMINBOOST_ANM_Importer`, `EDMINBOOST_ANM_Webhook`.
+- `EDMINBOOST_ANM_Plugin` constructor: `Admin`, `Notices`, `Interceptor`, `Ajax`, `Digest`, `Ad_Redirects`.
+- Domain helpers (static or instantiated as needed): `EDMINBOOST_ANM_Settings`, `EDMINBOOST_ANM_Rules`, `EDMINBOOST_ANM_Inbox`, `EDMINBOOST_ANM_Stats`, `EDMINBOOST_ANM_Importer`, `EDMINBOOST_ANM_Webhook`, `EDMINBOOST_ANM_Ad_Redirects` (URL normalize/match helpers).
 - Activation seeds options via `EDMINBOOST_ANM_Activator`; deactivation clears digest schedule.
 
 ## Settings Option Shape (top-level keys)
 
 ```php
 array(
-	'enabled'           => false,
-	'hide_core_notices' => false,
-	'notice_panel'      => array(
+	'enabled'                              => false,
+	'hide_core_notices'                    => false,
+	'manage_notices_mode'                  => 'hide_selected', // show_all | hide_all | hide_selected | compact_panel
+	'disable_plugin_update_notifications'  => false,
+	'disable_core_update_notifications'    => false,
+	'show_hidden_notices_in_toolbar'       => false,
+	'standard_admin_notices'               => array( /* per-level handling */ ),
+	'non_standard_admin_notices'           => array(
+		'no_level'             => 'inbox',
+		'css_ignore_selectors' => '',
+	),
+	'hiding_notifications'                 => array( 'mode' => 'all', 'users' => array() ),
+	'acl'                                  => array( 'roles' => array() ),
+	'notice_panel'                         => array(
 		'enabled'     => true,
 		'style'       => 'link',       // link | dropdown
 		'position'    => 'default',    // default | before_profile
 		'badge_style' => 'count',      // count | dot (dropdown)
+		'colors'      => array( /* panel color keys */ ),
 	),
 	'upsell_preset'     => array( 'enabled' => false, 'custom_phrases' => array() ),
 	'safety_guard'      => array( 'enabled' => true, 'mode' => 'strict' ),
 	'client_shield'     => array( 'enabled' => false, 'roles' => array( ... ) ),
 	'digest'            => array( 'enabled' => false, 'recipients' => 'admin@...' ),
 	'webhook'           => array( 'enabled' => false, 'url' => '' ),
+	'word_filters'      => array( 'spam_words' => array(), 'whitelist_words' => array() ),
+	'block_ad_redirects'=> array( 'enabled' => false, 'urls' => array() ),
 )
 ```
 

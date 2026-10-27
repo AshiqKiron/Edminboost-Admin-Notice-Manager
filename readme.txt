@@ -53,8 +53,20 @@ Yes. When uninstalled, all plugin options are removed from the database.
 == Changelog ==
 
 = 1.1.1 =
+* Settings (General): ACL — per role, choose whether dashboard notifications are displayed or hidden.
+* Settings (General): Spam words and whitelist — comma-separated word lists to hide matching notices entirely or always show them on screen.
+* Settings (General): Block ad redirects — list admin URLs to block automatic post-install or promotional page loads (optional enable toggle).
+* Settings (General): manage admin notices mode (show all, hide all, hide selected, compact panel), disable plugin/core update notifications, show hidden notices in the admin toolbar, and reset hidden notice preferences per user or site-wide.
+* Visible admin notices: inline “Hide for me” and “Hide for all” actions (per-user or site-wide hash preferences; “Hide for all” can auto-create a rule).
+* Admin bar notification dropdown: full notice preview with “First logged”, “Display notice as normal”, “Hide for me”, and “Hide for all” actions.
+* Admin bar beside Howdy: Facebook-style bell icon with red count badge (replaces text “Admin notices” look); notification dropdown uses FB-like panel styling.
+* Settings (General): Hiding notifications visibility — hide from all users, only selected users, or all users except selected accounts (user search picker).
+* Settings (General): configure Standard admin notices (success, error, warning, information) and Non-Standard notices (no level + CSS ignore selectors).
+* Debug tools: choose notice levels (error, warning, success, info, upsell) before Add to Inbox or Trigger Live Notices.
+* Organize Settings into tabbed sections (General, Upsell Blacklist, Security, Notifications, Migration & Tools).
 * Add admin bar panel style and position options: notification dropdown (bell icon) and placement beside the Howdy profile menu.
 * Add red indicator option for the dropdown bell: number badge or dot-only.
+* Add customizable panel colors (dot/badge, badge text, accent, link hover, open bell highlight).
 * Add Default WordPress Notices section on Auto-Rules with one-click convert and a converted-state button tooltip.
 * Inbox and preset Convert to Rule buttons show a converted tooltip on hover; state persists after refresh and can be undone with another click.
 * Inbox column headers use WordPress list-table styles; sorting updates via AJAX without a full page reload.

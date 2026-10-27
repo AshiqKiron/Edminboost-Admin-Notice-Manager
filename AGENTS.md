@@ -1,6 +1,6 @@
 # Edminboost Admin Notice Manager — Agent Guide
 
-WordPress plugin that intercepts, filters, and organizes admin notices from a central dashboard. PHP 7.4+, WordPress 6.0+, GPL-3.0. Version **1.1.0**.
+WordPress plugin that intercepts, filters, and organizes admin notices from a central dashboard. PHP 7.4+, WordPress 6.0+, GPL-3.0. Version **1.1.0** (changelog includes **1.1.1** feature set).
 
 ## Quick Reference
 
@@ -23,7 +23,7 @@ includes/
   class-edminboost-anm-plugin.php     # hook orchestrator
   class-edminboost-anm-admin.php      # menus, inbox list helpers, assets
   class-edminboost-anm-settings.php   # defaults, get, sanitize
-  class-edminboost-anm-notices.php    # admin bar panel (link/dropdown)
+  class-edminboost-anm-notices.php    # admin bar panel (link/dropdown), inline hide assets
   class-edminboost-anm-interceptor.php
   class-edminboost-anm-inbox.php
   class-edminboost-anm-rules.php
@@ -32,6 +32,7 @@ includes/
   class-edminboost-anm-importer.php
   class-edminboost-anm-digest.php
   class-edminboost-anm-webhook.php
+  class-edminboost-anm-ad-redirects.php  # block unwanted admin redirects
   class-edminboost-anm-debug.php      # WP_DEBUG only
   class-edminboost-anm-{activator,deactivator}.php
 admin/
@@ -39,6 +40,7 @@ admin/
   js/edminboost-anm-admin.js
   js/edminboost-anm-interceptor.js
   js/edminboost-anm-notices.js
+  js/edminboost-anm-notice-inline.js
   partials/edminboost-anm-{dashboard,inbox,rules,settings}-page.php
   partials/edminboost-anm-inbox-table-rows.php
   partials/edminboost-anm-notice-panel-dropdown.php
@@ -46,10 +48,12 @@ languages/  uninstall.php  readme.txt  composer.json
 ```
 
 - Bootstrap defines constants and calls `edminboost_anm_run_plugin()`.
-- `EDMINBOOST_ANM_Plugin::run()` wires i18n, admin menu/settings/assets, and on `init`: notices, interceptor, AJAX, digest.
-- Settings: primary option via `EDMINBOOST_ANM_Settings` (Settings API group `edminboost_anm_settings_group`). Rules and inbox stored in separate options.
+- `EDMINBOOST_ANM_Plugin::run()` wires i18n, admin menu/settings/assets, and on `init`: notices, interceptor, AJAX, digest, ad redirects.
+- Settings: primary option via `EDMINBOOST_ANM_Settings` (Settings API group `edminboost_anm_settings_group`). Rules and inbox stored in separate options. Tabbed settings UI (General, Upsell Blacklist, Security, Notifications, Migration & Tools).
 - Options API only — no custom tables. No REST API.
-- AJAX for dashboard/rules/inbox (including `edminboost_anm_inbox_list` sort), importer, capture, WP preset conversion; weekly digest via WP-Cron; optional webhook (user URL, off by default).
+- AJAX for dashboard/rules/inbox (including `edminboost_anm_inbox_list` sort), importer, capture, WP preset conversion, user search, notice hide/reset hidden; weekly digest via WP-Cron; optional webhook (user URL, off by default).
+- **Ad redirects**: optional `block_ad_redirects` URL blocklist — admin-only redirect filtering via `EDMINBOOST_ANM_Ad_Redirects`.
+- **Inline notice controls**: `edminboost-anm-notice-inline.js` on non–plugin-screen wp-admin for “Hide for me” / “Hide for all”.
 
 ## Admin Pages
 
@@ -72,6 +76,9 @@ Registered in `EDMINBOOST_ANM_Ajax::register_hooks()` — all use `verify_reques
 | `edminboost_anm_inbox_action` | Row/bulk inbox mutations |
 | `edminboost_anm_convert_wp_preset` | Create/undo rule from WP preset |
 | `edminboost_anm_capture_notice` | Interceptor capture endpoint |
+| `edminboost_anm_search_users` | User picker for hiding-notifications settings |
+| `edminboost_anm_notice_hide` | Per-user or site-wide hide from inline UI or dropdown |
+| `edminboost_anm_reset_hidden_notices` | Reset hidden-notice preferences (user or site) |
 | `edminboost_anm_seed_test_notices` / `edminboost_anm_trigger_test_notices` | `verify_debug_request()` |
 
 ## Extension Hooks

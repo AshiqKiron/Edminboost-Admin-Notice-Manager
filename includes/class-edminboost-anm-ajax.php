@@ -34,6 +34,9 @@ class EDMINBOOST_ANM_Ajax {
 			'edminboost_anm_import_rules',
 			'edminboost_anm_seed_test_notices',
 			'edminboost_anm_trigger_test_notices',
+			'edminboost_anm_search_users',
+			'edminboost_anm_reset_hidden_notices',
+			'edminboost_anm_notice_hide',
 		);
 
 		foreach ( $actions as $action ) {
@@ -275,6 +278,22 @@ class EDMINBOOST_ANM_Ajax {
 				}
 				wp_send_json_success( array( 'converted' => false ) );
 				return;
+			case 'display_normal':
+			case 'hide_for_me':
+			case 'hide_for_all':
+			case 'hide_forever':
+			case 'panel_dismiss':
+				$result = EDMINBOOST_ANM_Inbox::apply_panel_display_choice( $id, $action );
+				if ( is_wp_error( $result ) ) {
+					wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+				}
+				wp_send_json_success(
+					array(
+						'counts'  => EDMINBOOST_ANM_Inbox::get_counts(),
+						'reload'  => 'display_normal' === $action,
+					)
+				);
+				return;
 			case 'bulk':
 				$bulk = sanitize_key( wp_unslash( $_POST['bulk_action'] ?? '' ) );
 				$count = EDMINBOOST_ANM_Inbox::bulk_action( $ids, $bulk );
@@ -285,6 +304,117 @@ class EDMINBOOST_ANM_Ajax {
 		}
 
 		wp_send_json_success();
+	}
+
+	/**
+	 * Search users for hiding-notifications settings pickers.
+	 *
+	 * @return void
+	 */
+	public function handle_search_users() {
+		$this->verify_request();
+
+		$term = sanitize_text_field( wp_unslash( $_POST['term'] ?? '' ) );
+		$term = trim( $term );
+
+		if ( strlen( $term ) < 2 ) {
+			wp_send_json_success( array( 'users' => array() ) );
+		}
+
+		$query = new WP_User_Query(
+			array(
+				'number'         => 20,
+				'search'         => '*' . $term . '*',
+				'search_columns' => array( 'user_login', 'user_nicename', 'display_name', 'user_email' ),
+				'orderby'        => 'display_name',
+				'order'          => 'ASC',
+				'fields'         => array( 'ID', 'display_name', 'user_login' ),
+			)
+		);
+
+		$results = array();
+
+		foreach ( $query->get_results() as $user ) {
+			if ( empty( $user->ID ) ) {
+				continue;
+			}
+
+			$results[] = array(
+				'id'    => (int) $user->ID,
+				'label' => sprintf(
+					/* translators: 1: display name, 2: login */
+					__( '%1$s (%2$s)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+					$user->display_name,
+					$user->user_login
+				),
+			);
+		}
+
+		wp_send_json_success( array( 'users' => $results ) );
+	}
+
+	/**
+	 * Reset per-user hidden notice preferences (hash prefs).
+	 *
+	 * @return void
+	 */
+	public function handle_reset_hidden_notices() {
+		$this->verify_request();
+
+		$scope = sanitize_key( wp_unslash( $_POST['scope'] ?? 'current_user' ) );
+		if ( ! in_array( $scope, array( 'current_user', 'all_users' ), true ) ) {
+			$scope = 'current_user';
+		}
+
+		if ( 'all_users' === $scope && ! current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to reset hidden notices for all users.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				)
+			);
+		}
+
+		EDMINBOOST_ANM_Inbox::reset_hash_preferences( $scope );
+
+		wp_send_json_success(
+			array(
+				'message' => 'all_users' === $scope
+					? __( 'Hidden notice preferences were reset for all users.', EDMINBOOST_ANM_TEXT_DOMAIN )
+					: __( 'Hidden notice preferences were reset for your account.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			)
+		);
+	}
+
+	/**
+	 * Hide a visible dashboard notice (inline Hide for me / Hide for all).
+	 *
+	 * @return void
+	 */
+	public function handle_notice_hide() {
+		$this->verify_request();
+
+		if ( ! EDMINBOOST_ANM_Settings::is_enabled() ) {
+			wp_send_json_error( array( 'message' => __( 'Plugin disabled.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
+		}
+
+		$scope = sanitize_key( wp_unslash( $_POST['scope'] ?? '' ) );
+		if ( ! in_array( $scope, array( 'hide_for_me', 'hide_for_all' ), true ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid action.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
+		}
+
+		$html = wp_unslash( $_POST['html'] ?? '' );
+		$html = wp_kses_post( $html );
+
+		$result = EDMINBOOST_ANM_Inbox::apply_inline_hide( $html, $scope );
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+		}
+
+		wp_send_json_success(
+			array(
+				'counts' => EDMINBOOST_ANM_Inbox::get_counts(),
+			)
+		);
 	}
 
 	/**
@@ -362,7 +492,13 @@ class EDMINBOOST_ANM_Ajax {
 	public function handle_seed_test_notices() {
 		$this->verify_debug_request();
 
-		$result = EDMINBOOST_ANM_Debug::seed_inbox();
+		$types = $this->get_debug_notice_types_from_request();
+
+		if ( is_wp_error( $types ) ) {
+			wp_send_json_error( array( 'message' => $types->get_error_message() ) );
+		}
+
+		$result = EDMINBOOST_ANM_Debug::seed_inbox( $types );
 
 		wp_send_json_success(
 			array(
@@ -389,6 +525,12 @@ class EDMINBOOST_ANM_Ajax {
 			);
 		}
 
+		$types = $this->get_debug_notice_types_from_request();
+
+		if ( is_wp_error( $types ) ) {
+			wp_send_json_error( array( 'message' => $types->get_error_message() ) );
+		}
+
 		$rule = EDMINBOOST_ANM_Debug::ensure_test_rule();
 
 		if ( is_wp_error( $rule ) ) {
@@ -397,9 +539,50 @@ class EDMINBOOST_ANM_Ajax {
 
 		wp_send_json_success(
 			array(
-				'redirect' => EDMINBOOST_ANM_Debug::queue_live_notices(),
+				'redirect' => EDMINBOOST_ANM_Debug::queue_live_notices( $types ),
 			)
 		);
+	}
+
+	/**
+	 * Parse and validate notice type slugs from a debug AJAX request.
+	 *
+	 * @return string[]|WP_Error
+	 */
+	private function get_debug_notice_types_from_request() {
+		$types = array();
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in verify_debug_request().
+		if ( isset( $_POST['notice_types'] ) ) {
+			$types = EDMINBOOST_ANM_Debug::sanitize_notice_types( wp_unslash( $_POST['notice_types'] ) );
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in verify_debug_request().
+		if ( empty( $types ) && isset( $_POST['edminboost_anm_debug_notice_types'] ) ) {
+			$types = EDMINBOOST_ANM_Debug::sanitize_notice_types( wp_unslash( $_POST['edminboost_anm_debug_notice_types'] ) );
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in verify_debug_request().
+		if ( empty( $types ) && ! empty( $_POST['notice_types_csv'] ) ) {
+			$types = EDMINBOOST_ANM_Debug::sanitize_notice_types( wp_unslash( $_POST['notice_types_csv'] ) );
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in verify_debug_request().
+		if ( empty( $types ) && ! empty( $_POST['notice_types_json'] ) ) {
+			$decoded = json_decode( wp_unslash( $_POST['notice_types_json'] ), true );
+			if ( is_array( $decoded ) ) {
+				$types = EDMINBOOST_ANM_Debug::sanitize_notice_types( $decoded );
+			}
+		}
+
+		if ( empty( $types ) ) {
+			return new WP_Error(
+				'edminboost_anm_no_notice_types',
+				__( 'Select at least one notice level (error, warning, success, and others).', EDMINBOOST_ANM_TEXT_DOMAIN )
+			);
+		}
+
+		return $types;
 	}
 
 	/**

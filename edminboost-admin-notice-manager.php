@@ -45,6 +45,7 @@ require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-digest.p
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-importer.php';
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-ajax.php';
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-notices.php';
+require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-ad-redirects.php';
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-admin.php';
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-plugin.php';
 

@@ -13,14 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<div class="edminboost-anm-notices-panel" id="edminboost-anm-notices-panel" role="region" aria-label="<?php esc_attr_e( 'Notice inbox preview', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" hidden>
+<div class="edminboost-anm-notices-panel edminboost-anm-notices-panel--detailed" id="edminboost-anm-notices-panel" role="region" aria-label="<?php esc_attr_e( 'Admin notice inbox', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" hidden>
 	<div class="edminboost-anm-notices-panel__header">
-		<strong><?php esc_html_e( 'Notices', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></strong>
-		<?php if ( $edminboost_anm_total > 0 ) : ?>
-			<span class="edminboost-anm-notices-panel__count"><?php echo esc_html( (string) $edminboost_anm_total ); ?></span>
-		<?php endif; ?>
+		<strong><?php esc_html_e( 'Admin notices', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></strong>
+		<button type="button" class="edminboost-anm-notices-panel__close" aria-label="<?php esc_attr_e( 'Close panel', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">&times;</button>
 	</div>
-	<ul class="edminboost-anm-notices-panel__list">
+	<ul class="edminboost-anm-notices-panel__list" data-empty-label="<?php echo esc_attr__( 'No intercepted notices yet. Browse wp-admin to capture nags here.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">
 		<?php if ( empty( $edminboost_anm_notices ) ) : ?>
 			<li class="edminboost-anm-notices-panel__empty">
 				<?php esc_html_e( 'No intercepted notices yet. Browse wp-admin to capture nags here.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
@@ -28,32 +26,59 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php else : ?>
 			<?php foreach ( $edminboost_anm_notices as $edminboost_anm_notice ) : ?>
 				<?php
-				$edminboost_anm_type   = sanitize_key( $edminboost_anm_notice['type'] ?? 'info' );
-				$edminboost_anm_source = $edminboost_anm_notice['source_plugin'] ?? '';
-				$edminboost_anm_msg    = wp_trim_words( wp_strip_all_tags( $edminboost_anm_notice['message'] ?? '' ), 18, '…' );
-				$edminboost_anm_when   = (int) ( $edminboost_anm_notice['intercepted_at'] ?? 0 );
-				$edminboost_anm_time   = $edminboost_anm_when > 0
-					? sprintf(
-						/* translators: %s: human-readable time difference */
-						__( '%s ago', EDMINBOOST_ANM_TEXT_DOMAIN ),
-						human_time_diff( $edminboost_anm_when, time() )
-					)
-					: '';
+				$edminboost_anm_id      = $edminboost_anm_notice['id'] ?? '';
+				$edminboost_anm_type    = sanitize_key( $edminboost_anm_notice['type'] ?? 'info' );
+				$edminboost_anm_when    = (int) ( $edminboost_anm_notice['intercepted_at'] ?? 0 );
+				$edminboost_anm_logged  = EDMINBOOST_ANM_Inbox::format_first_logged( $edminboost_anm_when );
+				$edminboost_anm_html    = $edminboost_anm_notice['html'] ?? '';
+				$edminboost_anm_message = $edminboost_anm_notice['message'] ?? '';
+
+				if ( '' === trim( $edminboost_anm_html ) ) {
+					$edminboost_anm_html = sprintf(
+						'<div class="%1$s"><p>%2$s</p></div>',
+						esc_attr( EDMINBOOST_ANM_Inbox::get_panel_notice_class( $edminboost_anm_type ) ),
+						esc_html( $edminboost_anm_message )
+					);
+				}
 				?>
-				<li class="edminboost-anm-notices-panel__item is-type-<?php echo esc_attr( $edminboost_anm_type ); ?>">
-					<span class="edminboost-anm-notices-panel__type"><?php echo esc_html( ucfirst( $edminboost_anm_type ) ); ?></span>
-					<span class="edminboost-anm-notices-panel__message"><?php echo esc_html( $edminboost_anm_msg ); ?></span>
-					<span class="edminboost-anm-notices-panel__meta">
-						<?php echo esc_html( $edminboost_anm_source ); ?>
-						<?php if ( $edminboost_anm_time ) : ?>
-							<span class="edminboost-anm-notices-panel__time"><?php echo esc_html( $edminboost_anm_time ); ?></span>
+				<li class="edminboost-anm-notices-panel__card" data-notice-id="<?php echo esc_attr( $edminboost_anm_id ); ?>">
+					<div class="edminboost-anm-notices-panel__notice-wrap">
+						<button type="button" class="edminboost-anm-notices-panel__dismiss" data-action="panel_dismiss" data-id="<?php echo esc_attr( $edminboost_anm_id ); ?>" aria-label="<?php esc_attr_e( 'Dismiss from panel', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">&times;</button>
+						<div class="edminboost-anm-notices-panel__notice-body">
+							<?php echo wp_kses_post( $edminboost_anm_html ); ?>
+						</div>
+					</div>
+					<div class="edminboost-anm-notices-panel__options">
+						<?php if ( $edminboost_anm_logged ) : ?>
+							<span class="edminboost-anm-notices-panel__logged">
+								<?php
+								printf(
+									/* translators: %s: formatted date/time */
+									esc_html__( 'First logged: %s', EDMINBOOST_ANM_TEXT_DOMAIN ),
+									esc_html( $edminboost_anm_logged )
+								);
+								?>
+							</span>
 						<?php endif; ?>
-					</span>
+						<span class="edminboost-anm-notices-panel__actions">
+							<button type="button" class="edminboost-anm-notices-panel__action" data-action="display_normal" data-id="<?php echo esc_attr( $edminboost_anm_id ); ?>">
+								<?php esc_html_e( 'Display notice as normal', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+							</button>
+							<button type="button" class="edminboost-anm-notices-panel__action edminboost-anm-notices-panel__action--hide" data-action="hide_for_me" data-id="<?php echo esc_attr( $edminboost_anm_id ); ?>">
+								<span class="dashicons dashicons-hidden" aria-hidden="true"></span>
+								<?php esc_html_e( 'Hide for me', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+							</button>
+							<button type="button" class="edminboost-anm-notices-panel__action edminboost-anm-notices-panel__action--hide" data-action="hide_for_all" data-id="<?php echo esc_attr( $edminboost_anm_id ); ?>">
+								<span class="dashicons dashicons-hidden" aria-hidden="true"></span>
+								<?php esc_html_e( 'Hide for all', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+							</button>
+						</span>
+					</div>
 				</li>
 			<?php endforeach; ?>
 		<?php endif; ?>
 	</ul>
 	<div class="edminboost-anm-notices-panel__footer">
-		<a href="<?php echo esc_url( $edminboost_anm_inbox_url ); ?>"><?php esc_html_e( 'See all in Notice Inbox', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></a>
+		<a href="<?php echo esc_url( $edminboost_anm_inbox_url ); ?>"><?php esc_html_e( 'See all notifications', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></a>
 	</div>
 </div>

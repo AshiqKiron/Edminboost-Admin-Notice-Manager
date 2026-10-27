@@ -18,6 +18,7 @@ delete_option( EDMINBOOST_ANM_Settings::OPTION_NAME );
 delete_option( EDMINBOOST_ANM_Settings::RULES_OPTION );
 delete_option( EDMINBOOST_ANM_Settings::INBOX_OPTION );
 delete_option( EDMINBOOST_ANM_Settings::STATS_OPTION );
+delete_option( EDMINBOOST_ANM_Settings::HASH_PREFS_OPTION );
 delete_option( EDMINBOOST_ANM_Settings::VERSION_OPTION );
 
 EDMINBOOST_ANM_Digest::clear_schedule();

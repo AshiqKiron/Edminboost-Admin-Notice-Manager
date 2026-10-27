@@ -194,10 +194,17 @@ class EDMINBOOST_ANM_Admin {
 				'seedSuccess'     => __( 'Added %1$d test notices to the inbox (%2$d skipped as duplicates).', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'seedError'       => __( 'Could not seed test notices.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'triggerError'    => __( 'Could not trigger live test notices.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'selectNoticeLevels' => __( 'Select at least one notice level.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'viewInbox'       => __( 'View Inbox', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'convertedToRule'  => __( 'Converted to rule', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'undoConversion'   => __( 'Converted to rule. Click again to undo.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'alreadyConverted' => __( 'Already converted to a rule.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'userSearchShort'  => __( 'Type at least 2 characters to search users.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'userSearchEmpty'  => __( 'No users found.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'removeUser'       => __( 'Remove user', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'resetHiddenSuccess' => __( 'Hidden notices were reset.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'resetHiddenError'   => __( 'Could not reset hidden notices.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'resetHiddenConfirmAll' => __( 'Reset hidden notice preferences for every user on this site?', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			),
 		);
 	}

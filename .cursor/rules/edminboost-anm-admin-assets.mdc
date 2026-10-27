@@ -28,7 +28,13 @@ alwaysApply: false
 
 - Loaded when `notice_panel.enabled` and `notice_panel.style` is `dropdown` (`EDMINBOOST_ANM_Notices::enqueue_assets()`).
 - Targets `#wp-admin-bar-edminboost-anm-notices` — toggles `#edminboost-anm-notices-panel` with `aria-expanded`, click-outside close, Escape key.
-- No localization object; markup comes from `edminboost-anm-notice-panel-dropdown.php` via admin bar `meta.html`.
+- Panel row actions (hide for me/all, display as normal) use localized `edminboostAnmNotices` (`ajaxUrl`, `nonce`, `i18n`). Markup from `edminboost-anm-notice-panel-dropdown.php` via admin bar `meta.html`.
+
+### `admin/js/edminboost-anm-notice-inline.js`
+
+- Loaded on wp-admin when plugin enabled and user has `EDMINBOOST_ANM_Settings::CAPABILITY`, **except** on plugin screens (`! EDMINBOOST_ANM_Admin::is_plugin_screen()`).
+- Injects `.edminboost-anm-notice-inline-actions` on eligible `.notice` / `.update-nag` nodes; respects `edminboostAnmNoticeInline.cssIgnoreSelectors` from settings.
+- POSTs to `edminboost_anm_notice_hide` via localized `edminboostAnmNotices` (same nonce action as admin UI).
 
 `edminboostAnmData` shape (plugin screens + interceptor):
 
@@ -63,7 +69,7 @@ alwaysApply: false
 | `edminboost-anm-inbox-page.php` | Inbox list table shell (filters, bulk actions) |
 | `edminboost-anm-inbox-table-rows.php` | `<tr>` rows only — included from page render and AJAX `rows` HTML |
 | `edminboost-anm-rules-page.php` | Filter rules CRUD + WP preset conversion UI |
-| `edminboost-anm-settings-page.php` | Settings API form (general, notice panel, digest, webhook, etc.) |
+| `edminboost-anm-settings-page.php` | Tabbed Settings API form (General, Upsell Blacklist, Security, Notifications, Migration & Tools) |
 | `edminboost-anm-notice-panel-dropdown.php` | Admin bar dropdown preview list (max 8 notices) |
 
 - Reusable row/panel partials: set `$edminboost_anm_*` variables before `include`; document `@var` at top.
@@ -81,6 +87,7 @@ alwaysApply: false
 | `list-tables` (style) | WordPress core | Inbox plugin screen |
 | `edminboost-anm-notices` (style) | same CSS file | All wp-admin when plugin enabled |
 | `edminboost-anm-notices` (script) | `admin/js/edminboost-anm-notices.js` | wp-admin when notice panel dropdown style |
+| `edminboost-anm-notice-inline` (script) | `admin/js/edminboost-anm-notice-inline.js` | wp-admin (non–plugin screens) when plugin enabled + capability |
 | `edminboost-anm-interceptor` (script) | `admin/js/edminboost-anm-interceptor.js` | All wp-admin when plugin enabled |
 
 Version: `EDMINBOOST_ANM_VERSION` for plugin handles.

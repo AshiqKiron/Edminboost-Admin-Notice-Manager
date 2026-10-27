@@ -63,6 +63,320 @@
 	width: 220px;
 }
 
+.edminboost-anm-help-tip {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	margin-left: 6px;
+	padding: 0;
+	border: 0;
+	border-radius: 2px;
+	background: #00a32a;
+	color: #fff;
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1;
+	vertical-align: middle;
+	cursor: help;
+}
+
+.edminboost-anm-segmented {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.edminboost-anm-segmented input[type="radio"] {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.edminboost-anm-segmented label {
+	display: inline-block;
+	margin: 0;
+	padding: 6px 12px;
+	border: 1px solid #c3c4c7;
+	background: #f6f7f7;
+	color: #1d2327;
+	font-size: 13px;
+	line-height: 1.4;
+	cursor: pointer;
+}
+
+.edminboost-anm-segmented label + input + label {
+	border-left: 0;
+}
+
+.edminboost-anm-segmented label:first-of-type {
+	border-radius: 3px 0 0 3px;
+}
+
+.edminboost-anm-segmented label:last-of-type {
+	border-radius: 0 3px 3px 0;
+}
+
+.edminboost-anm-segmented input:checked + label {
+	background: #fff;
+	border-color: #2271b1;
+	box-shadow: inset 0 0 0 1px #2271b1;
+	position: relative;
+	z-index: 1;
+}
+
+.edminboost-anm-inline-notice {
+	max-width: 640px;
+	margin: 10px 0 0;
+	padding: 8px 12px;
+	border-left: 4px solid #dba617;
+	background: #fcf9e8;
+	color: #1d2327;
+}
+
+.edminboost-anm-switch {
+	display: inline-flex;
+	border: 1px solid #c3c4c7;
+	border-radius: 3px;
+	overflow: hidden;
+	background: #f6f7f7;
+}
+
+.edminboost-anm-switch__input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.edminboost-anm-switch__option {
+	margin: 0;
+	padding: 6px 14px;
+	border: 0;
+	border-right: 1px solid #c3c4c7;
+	background: transparent;
+	color: #50575e;
+	font-size: 13px;
+	line-height: 1.4;
+	cursor: pointer;
+}
+
+.edminboost-anm-switch__option:last-child {
+	border-right: 0;
+}
+
+.edminboost-anm-switch__option.is-active {
+	background: #fff;
+	color: #1d2327;
+	font-weight: 600;
+	box-shadow: inset 0 0 0 1px #2271b1;
+}
+
+.edminboost-anm-reset-hidden__scope {
+	display: inline-block;
+	margin: 0 16px 8px 0;
+}
+
+.edminboost-anm-reset-hidden__button {
+	margin-top: 4px;
+}
+
+.edminboost-anm-reset-hidden__feedback.is-success {
+	color: #008a20;
+}
+
+.edminboost-anm-reset-hidden__feedback.is-error {
+	color: #b32d2e;
+}
+
+.edminboost-anm-notice-policy-table th {
+	vertical-align: top;
+	padding-top: 16px;
+}
+
+.edminboost-anm-acl-table th {
+	width: 220px;
+	font-weight: 400;
+}
+
+.edminboost-anm-acl-table select {
+	min-width: 240px;
+	max-width: 100%;
+}
+
+.edminboost-anm-notice-policy-options {
+	margin: 0;
+	border: 0;
+	padding: 0;
+}
+
+.edminboost-anm-notice-policy-options label {
+	display: block;
+	margin: 0 0 10px;
+	max-width: 640px;
+	line-height: 1.5;
+}
+
+.edminboost-anm-notice-policy-options label:last-child {
+	margin-bottom: 0;
+}
+
+.edminboost-anm-notice-policy-options input[type="radio"] {
+	margin: 0 6px 0 0;
+	vertical-align: top;
+	margin-top: 3px;
+}
+
+.edminboost-anm-hiding-visibility-options {
+	margin: 0;
+	border: 0;
+	padding: 0;
+}
+
+.edminboost-anm-hiding-visibility-options__mode {
+	display: block;
+	margin: 0 0 8px;
+	max-width: 640px;
+	line-height: 1.5;
+}
+
+.edminboost-anm-hiding-visibility-options__mode input[type="radio"] {
+	margin: 0 6px 0 0;
+	vertical-align: top;
+	margin-top: 3px;
+}
+
+.edminboost-anm-user-picker {
+	position: relative;
+	max-width: 420px;
+	margin: 0 0 16px 22px;
+	padding: 6px 8px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+	min-height: 36px;
+	box-sizing: border-box;
+}
+
+.edminboost-anm-user-picker__selected {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 4px;
+}
+
+.edminboost-anm-user-picker__selected:empty {
+	margin-bottom: 0;
+}
+
+.edminboost-anm-user-picker__chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 3px;
+	background: #f0f0f1;
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+.edminboost-anm-user-picker__remove {
+	border: 0;
+	background: transparent;
+	color: #50575e;
+	cursor: pointer;
+	font-size: 16px;
+	line-height: 1;
+	padding: 0 2px;
+}
+
+.edminboost-anm-user-picker__search {
+	width: 100%;
+	border: 0;
+	box-shadow: none;
+	padding: 2px 0;
+	margin: 0;
+	background: transparent;
+}
+
+.edminboost-anm-user-picker__search:focus {
+	outline: none;
+	box-shadow: none;
+}
+
+.edminboost-anm-user-picker__results {
+	position: absolute;
+	left: -1px;
+	right: -1px;
+	top: 100%;
+	z-index: 20;
+	margin: 4px 0 0;
+	padding: 0;
+	list-style: none;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+	max-height: 220px;
+	overflow-y: auto;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.edminboost-anm-user-picker__results li {
+	margin: 0;
+}
+
+.edminboost-anm-user-picker__results button {
+	display: block;
+	width: 100%;
+	border: 0;
+	background: transparent;
+	text-align: left;
+	padding: 8px 12px;
+	cursor: pointer;
+}
+
+.edminboost-anm-user-picker__results button:hover,
+.edminboost-anm-user-picker__results button:focus {
+	background: #f0f6fc;
+}
+
+.edminboost-anm-settings-tabs {
+	margin-bottom: 0;
+}
+
+.edminboost-anm-settings-panels .edminboost-anm-tab-panel > .edminboost-anm-card {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+	margin-top: 0;
+}
+
+.edminboost-anm-settings-form .submit {
+	margin-top: 0;
+	padding-top: 0;
+}
+
+.edminboost-anm-settings-form.is-tab-tools .submit {
+	display: none;
+}
+
+button.edminboost-anm-tabs__tab {
+	appearance: none;
+	background: transparent;
+	border: 1px solid transparent;
+	border-bottom: none;
+	font-family: inherit;
+	cursor: pointer;
+	margin: 0;
+}
+
+button.edminboost-anm-tabs__tab:focus-visible {
+	outline: 2px solid #2271b1;
+	outline-offset: -2px;
+}
+
 .edminboost-anm-status {
 	display: inline-block;
 	padding: 2px 8px;
@@ -231,6 +545,32 @@
 	font-weight: 600;
 	background: #f0f0f1;
 	color: #646970;
+}
+
+.edminboost-anm-debug-card__levels {
+	margin: 12px 0 0;
+	padding: 0;
+	border: 0;
+}
+
+.edminboost-anm-debug-card__levels legend {
+	font-weight: 600;
+	margin-bottom: 8px;
+	padding: 0;
+}
+
+.edminboost-anm-debug-card__levels-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px 16px;
+}
+
+.edminboost-anm-debug-card__level {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0;
+	font-weight: 400;
 }
 
 .edminboost-anm-debug-card__actions {
@@ -566,9 +906,20 @@
 	cursor: pointer;
 }
 
-.edminboost-anm-wp-presets .inside {
+.edminboost-anm-wp-presets__heading {
+	padding: 16px 20px;
+	margin-bottom: 0;
+	border-bottom: 1px solid #dcdcde;
+}
+
+.edminboost-anm-wp-presets__heading h2 {
 	margin: 0;
-	padding: 0;
+	font-size: 16px;
+	line-height: 1.4;
+}
+
+.edminboost-anm-wp-presets__heading .description {
+	margin: 6px 0 0;
 }
 
 .edminboost-anm-wp-presets-table {
@@ -709,6 +1060,15 @@
 	font-size: 14px;
 }
 
+.edminboost-anm-redirect-block-table {
+	margin-top: 0;
+}
+
+.edminboost-anm-redirect-block-table__action {
+	width: 120px;
+	vertical-align: middle;
+}
+
 .edminboost-anm-feature-block__header .dashicons {
 	color: #2271b1;
 }
@@ -730,23 +1090,109 @@
 	display: none !important;
 }
 
-/* Admin bar notice panel (dropdown style) */
-#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--dropdown {
+.edminboost-anm-notice--managed {
+	position: relative;
+	padding-bottom: 44px !important;
+}
+
+.edminboost-anm-notice-inline-actions {
+	position: absolute;
+	right: 12px;
+	bottom: 10px;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 8px;
+	z-index: 2;
+}
+
+.edminboost-anm-notice-inline-actions__btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	margin: 0;
+	padding: 4px 10px;
+	border: 1px solid #d63638;
+	border-radius: 4px;
+	background: transparent;
+	color: #d63638;
+	font-size: 12px;
+	line-height: 1.4;
+	cursor: pointer;
+}
+
+.edminboost-anm-notice-inline-actions__btn .dashicons {
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+}
+
+.edminboost-anm-notice-inline-actions__btn:hover,
+.edminboost-anm-notice-inline-actions__btn:focus {
+	background: #fcf0f1;
+	color: #b32d2e;
+	border-color: #b32d2e;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__action--hide {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	border: 1px solid #d63638;
+	border-radius: 4px;
+	padding: 2px 8px;
+	color: #d63638;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__action--hide .dashicons {
+	width: 14px;
+	height: 14px;
+	font-size: 14px;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__action--hide:hover,
+#wpadminbar .edminboost-anm-notices-panel__action--hide:focus {
+	color: #b32d2e;
+	border-color: #b32d2e;
+	background: #fcf0f1;
+}
+
+/* Admin bar notice panel — Facebook-style bell (dropdown + beside Howdy link) */
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--dropdown,
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook {
 	position: relative;
 }
 
-#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--dropdown > .ab-item {
-	padding: 0 8px;
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--dropdown > .ab-item,
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook > .ab-item {
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 32px;
+	min-width: 40px;
+	padding: 0 10px;
+	overflow: visible;
 }
 
-#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--dropdown .ab-icon {
-	margin-right: 0;
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--dropdown .ab-icon,
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook .ab-icon {
+	float: none;
+	display: block;
+	width: 20px;
+	height: 20px;
+	margin: 0;
+	padding: 0;
+	line-height: 1;
+	font-size: 20px;
 }
 
-#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--dropdown .ab-icon:before {
-	content: "\f16d";
-	content: "\f16d" / '';
-	top: 3px;
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--dropdown .ab-icon:before,
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook .edminboost-anm-fb-bell:before,
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook .ab-icon:before {
+	content: "\f478";
+	content: "\f478" / '';
+	top: 0;
 }
 
 #wpadminbar #wp-admin-bar-edminboost-anm-notices .edminboost-anm-notices-badge {
@@ -757,12 +1203,27 @@
 	height: 16px;
 	padding: 0 4px;
 	border-radius: 8px;
-	background: #d63638;
-	color: #fff;
+	background: var(--edminboost-anm-notice-badge-bg, #d63638);
+	color: var(--edminboost-anm-notice-badge-text, #fff);
 	font-size: 10px;
 	font-weight: 600;
 	line-height: 16px;
 	text-align: center;
+}
+
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook .edminboost-anm-notices-badge {
+	top: 2px;
+	right: 4px;
+	min-width: 18px;
+	height: 18px;
+	padding: 0 5px;
+	border-radius: 10px;
+	line-height: 14px;
+	font-size: 11px;
+	font-weight: 700;
+	background: var(--edminboost-anm-notice-badge-bg, #e41e3f);
+	border: 2px solid #1d2327;
+	box-sizing: border-box;
 }
 
 #wpadminbar #wp-admin-bar-edminboost-anm-notices .edminboost-anm-notices-badge--dot {
@@ -777,13 +1238,33 @@
 	line-height: 0;
 }
 
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook .edminboost-anm-notices-badge--dot {
+	width: 10px;
+	height: 10px;
+	top: 4px;
+	right: 6px;
+	border: 2px solid #1d2327;
+}
+
 #wpadminbar #wp-admin-bar-edminboost-anm-notices > .ab-item {
 	position: relative;
 }
 
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook > .ab-item:hover,
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook.edminboost-anm-notices--open > .ab-item {
+	background: rgba(255, 255, 255, 0.08);
+	border-radius: 8px;
+	color: #f0f0f1;
+}
+
 #wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--open > .ab-item {
 	background: #32373c;
-	color: #72aee6;
+	color: var(--edminboost-anm-notice-bell-active, #72aee6);
+}
+
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook.edminboost-anm-notices--open > .ab-item {
+	background: rgba(255, 255, 255, 0.12);
+	color: #fff;
 }
 
 #wpadminbar .edminboost-anm-notices-panel {
@@ -798,21 +1279,71 @@
 	border-radius: 0 0 4px 4px;
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 	color: #1d2327;
-	z-index: 99999;
+	z-index: 100001;
 	text-align: left;
+}
+
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook .edminboost-anm-notices-panel {
+	margin-top: 6px;
+	border: none;
+	border-radius: 8px;
+	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.08);
+	overflow: hidden;
+}
+
+@media screen and (max-width: 782px) {
+	#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--dropdown > .ab-item,
+	#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook > .ab-item {
+		height: 46px;
+		min-width: 52px;
+		padding: 0;
+	}
+
+	#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--dropdown .ab-icon,
+	#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook .ab-icon {
+		width: 52px;
+		height: 46px;
+		line-height: 46px;
+		text-align: center;
+	}
+
+	#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook .edminboost-anm-notices-badge {
+		top: 8px;
+		right: 10px;
+	}
 }
 
 #wpadminbar .edminboost-anm-notices-panel[hidden] {
 	display: none !important;
 }
 
+#wpadminbar .edminboost-anm-notices-panel--detailed {
+	width: 480px;
+}
+
 #wpadminbar .edminboost-anm-notices-panel__header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 12px 14px;
-	border-bottom: 1px solid #dcdcde;
-	font-size: 13px;
+	padding: 14px 16px;
+	border-bottom: 1px solid #e4e6eb;
+	font-size: 15px;
+	font-weight: 700;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__close {
+	border: 0;
+	background: transparent;
+	color: #2271b1;
+	font-size: 22px;
+	line-height: 1;
+	cursor: pointer;
+	padding: 0 4px;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__close:hover,
+#wpadminbar .edminboost-anm-notices-panel__close:focus {
+	color: #135e96;
 }
 
 #wpadminbar .edminboost-anm-notices-panel__count {
@@ -823,7 +1354,7 @@
 	height: 22px;
 	padding: 0 6px;
 	border-radius: 11px;
-	background: #2271b1;
+	background: var(--edminboost-anm-notice-accent, #1877f2);
 	color: #fff;
 	font-size: 11px;
 	font-weight: 600;
@@ -833,16 +1364,97 @@
 	margin: 0;
 	padding: 0;
 	list-style: none;
-	max-height: 320px;
+	max-height: 420px;
 	overflow-y: auto;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__card {
+	padding: 0;
+	border-bottom: 1px solid #dcdcde;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__card:last-child {
+	border-bottom: none;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__notice-wrap {
+	position: relative;
+	padding: 12px 16px 8px;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__dismiss {
+	position: absolute;
+	top: 8px;
+	right: 12px;
+	z-index: 2;
+	border: 0;
+	background: transparent;
+	color: #787c82;
+	font-size: 18px;
+	line-height: 1;
+	cursor: pointer;
+	padding: 4px;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__notice-body .notice,
+#wpadminbar .edminboost-anm-notices-panel__notice-body .update-nag,
+#wpadminbar .edminboost-anm-notices-panel__notice-body div.error,
+#wpadminbar .edminboost-anm-notices-panel__notice-body div.updated {
+	margin: 0;
+	box-shadow: none;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__options {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px 12px;
+	padding: 10px 16px 12px;
+	border-top: 1px solid #f0f0f1;
+	font-size: 12px;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__logged {
+	color: #646970;
+	font-style: italic;
+	flex: 1 1 160px;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 4px 12px;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__action {
+	border: 0;
+	background: transparent;
+	color: var(--edminboost-anm-notice-accent, #2271b1);
+	cursor: pointer;
+	padding: 0;
+	font-size: 12px;
+	text-decoration: underline;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__action:hover,
+#wpadminbar .edminboost-anm-notices-panel__action:focus {
+	color: var(--edminboost-anm-notice-accent-hover, #135e96);
 }
 
 #wpadminbar .edminboost-anm-notices-panel__item,
 #wpadminbar .edminboost-anm-notices-panel__empty {
-	padding: 10px 14px;
-	border-bottom: 1px solid #f0f0f1;
-	font-size: 12px;
+	padding: 12px 16px;
+	border-bottom: none;
+	font-size: 13px;
 	line-height: 1.45;
+	transition: background-color 0.15s ease;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__item:hover {
+	background: #f2f3f5;
+	cursor: pointer;
 }
 
 #wpadminbar .edminboost-anm-notices-panel__empty {
@@ -889,26 +1501,23 @@
 }
 
 #wpadminbar .edminboost-anm-notices-panel__footer {
-	padding: 10px 14px;
-	background: #f6f7f7;
+	padding: 12px 16px;
+	background: #fff;
 	text-align: center;
+	border-top: 1px solid #e4e6eb;
 }
 
 #wpadminbar .edminboost-anm-notices-panel__footer a {
-	color: #2271b1;
-	font-size: 12px;
+	color: var(--edminboost-anm-notice-accent, #1877f2);
+	font-size: 13px;
 	font-weight: 600;
 	text-decoration: none;
 }
 
 #wpadminbar .edminboost-anm-notices-panel__footer a:hover,
 #wpadminbar .edminboost-anm-notices-panel__footer a:focus {
-	color: #135e96;
+	color: var(--edminboost-anm-notice-accent-hover, #135e96);
 	text-decoration: underline;
-}
-
-#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--before-profile {
-	float: none;
 }
 
 #wpadminbar #wp-admin-bar-my-account > .ab-item .edminboost-anm-howdy-dot {
@@ -917,10 +1526,33 @@
 	height: 8px;
 	margin-right: 6px;
 	border-radius: 50%;
-	background: #d63638;
+	background: var(--edminboost-anm-notice-badge-bg, #d63638);
 	vertical-align: middle;
 	position: relative;
 	top: -1px;
+}
+
+.edminboost-anm-notice-panel-colors__row {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin: 0 0 10px;
+}
+
+.edminboost-anm-notice-panel-colors__row label {
+	min-width: 11em;
+	font-weight: 600;
+}
+
+.edminboost-anm-notice-panel-colors input[type="color"] {
+	width: 48px;
+	height: 32px;
+	padding: 2px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	background: #fff;
+	cursor: pointer;
 }
 
 #wpadminbar #wp-admin-bar-my-account.with-avatar > .ab-item .edminboost-anm-howdy-dot {

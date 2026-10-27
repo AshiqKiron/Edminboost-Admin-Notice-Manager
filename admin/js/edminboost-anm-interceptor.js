@@ -8,6 +8,29 @@
 
 	var config = window.edminboostAnmInterceptor || {};
 	var processed = {};
+	var ignoreSelectors = Array.isArray(config.cssIgnoreSelectors) ? config.cssIgnoreSelectors : [];
+
+	function matchesIgnoreSelector(node) {
+		if (!node || !node.matches || !ignoreSelectors.length) {
+			return false;
+		}
+
+		for (var i = 0; i < ignoreSelectors.length; i++) {
+			var selector = (ignoreSelectors[i] || '').trim();
+			if (!selector) {
+				continue;
+			}
+			try {
+				if (node.matches(selector)) {
+					return true;
+				}
+			} catch (e) {
+				// Unsupported selector syntax — skip.
+			}
+		}
+
+		return false;
+	}
 
 	function hashNotice(message, classes) {
 		var str = (message || '').toLowerCase().trim() + '|' + (classes || '');
@@ -20,7 +43,7 @@
 	}
 
 	function captureNotice(node) {
-		if (!node || node.classList.contains('edminboost-anm-notice-hidden')) {
+		if (!node || node.classList.contains('edminboost-anm-notice-hidden') || matchesIgnoreSelector(node)) {
 			return;
 		}
 

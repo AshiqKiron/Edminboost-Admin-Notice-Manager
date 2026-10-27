@@ -29,6 +29,15 @@ class EDMINBOOST_ANM_Debug {
 	const TEST_KEYWORD = 'ANM_TEST';
 
 	/**
+	 * Inbox notice types available for debug seed / live trigger.
+	 *
+	 * @return string[]
+	 */
+	public static function get_notice_type_slugs() {
+		return array( 'critical', 'warning', 'success', 'info', 'upsell' );
+	}
+
+	/**
 	 * Whether debug tooling is available in this environment.
 	 *
 	 * @return bool
@@ -48,6 +57,62 @@ class EDMINBOOST_ANM_Debug {
 		}
 
 		add_action( 'admin_notices', array( __CLASS__, 'render_live_test_notices' ) );
+	}
+
+	/**
+	 * Sanitize notice type slugs from a request or stored value.
+	 *
+	 * @param mixed $types Raw type list.
+	 * @return string[]
+	 */
+	public static function sanitize_notice_types( $types ) {
+		if ( is_string( $types ) ) {
+			$types = '' === trim( $types ) ? array() : preg_split( '/\s*,\s*/', $types );
+		} elseif ( ! is_array( $types ) ) {
+			$types = array();
+		}
+
+		$flat = array();
+		foreach ( $types as $type ) {
+			if ( is_array( $type ) ) {
+				foreach ( $type as $inner ) {
+					if ( is_string( $inner ) && '' !== $inner ) {
+						$flat[] = $inner;
+					}
+				}
+			} elseif ( is_string( $type ) && '' !== $type ) {
+				$flat[] = $type;
+			}
+		}
+
+		$allowed = self::get_notice_type_slugs();
+		$flat    = array_map( 'sanitize_key', $flat );
+
+		return array_values( array_intersect( $flat, $allowed ) );
+	}
+
+	/**
+	 * Keep sample notices whose inbox type is in the given list.
+	 *
+	 * @param array    $notices Sample notices from get_test_notices().
+	 * @param string[] $types   Allowed type slugs.
+	 * @return array
+	 */
+	public static function filter_test_notices_by_types( array $notices, array $types ) {
+		$types = self::sanitize_notice_types( $types );
+
+		if ( empty( $types ) ) {
+			return array();
+		}
+
+		return array_values(
+			array_filter(
+				$notices,
+				function ( $sample ) use ( $types ) {
+					return in_array( $sample['type'] ?? '', $types, true );
+				}
+			)
+		);
 	}
 
 	/**
@@ -129,9 +194,10 @@ class EDMINBOOST_ANM_Debug {
 	/**
 	 * Seed the inbox with sample notices and record stats.
 	 *
+	 * @param string[] $types Inbox type slugs to include (critical, warning, success, etc.).
 	 * @return array{added:int,skipped:int}
 	 */
-	public static function seed_inbox() {
+	public static function seed_inbox( $types = array() ) {
 		$suffix = sprintf(
 			/* translators: %s: short random token */
 			__( '(run %s)', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -141,7 +207,9 @@ class EDMINBOOST_ANM_Debug {
 		$added   = 0;
 		$skipped = 0;
 
-		foreach ( self::get_test_notices( $suffix ) as $sample ) {
+		$samples = self::filter_test_notices_by_types( self::get_test_notices( $suffix ), $types );
+
+		foreach ( $samples as $sample ) {
 			$notice = EDMINBOOST_ANM_Inbox::add(
 				array(
 					'message'       => $sample['message'],
@@ -167,11 +235,13 @@ class EDMINBOOST_ANM_Debug {
 	/**
 	 * Queue live admin notices for the current user on the next admin screen load.
 	 *
+	 * @param string[] $types Inbox type slugs to output on the next load.
 	 * @return string Redirect URL.
 	 */
-	public static function queue_live_notices() {
+	public static function queue_live_notices( $types = array() ) {
 		$user_id = get_current_user_id();
-		set_transient( self::TRANSIENT_PREFIX . $user_id, 1, MINUTE_IN_SECONDS );
+		$types   = self::sanitize_notice_types( $types );
+		set_transient( self::TRANSIENT_PREFIX . $user_id, $types, MINUTE_IN_SECONDS );
 
 		return admin_url( 'index.php' );
 	}
@@ -193,11 +263,24 @@ class EDMINBOOST_ANM_Debug {
 		$user_id = get_current_user_id();
 		$key     = self::TRANSIENT_PREFIX . $user_id;
 
-		if ( ! get_transient( $key ) ) {
+		$queued_types = get_transient( $key );
+
+		if ( false === $queued_types ) {
 			return;
 		}
 
 		delete_transient( $key );
+
+		if ( is_array( $queued_types ) ) {
+			$types = self::sanitize_notice_types( $queued_types );
+		} else {
+			// Legacy transient stored as 1 — show all sample types.
+			$types = self::get_notice_type_slugs();
+		}
+
+		if ( empty( $types ) ) {
+			return;
+		}
 
 		$suffix = sprintf(
 			/* translators: %s: short random token */
@@ -205,7 +288,9 @@ class EDMINBOOST_ANM_Debug {
 			wp_generate_password( 4, false )
 		);
 
-		foreach ( self::get_test_notices( $suffix ) as $sample ) {
+		$samples = self::filter_test_notices_by_types( self::get_test_notices( $suffix ), $types );
+
+		foreach ( $samples as $sample ) {
 			printf(
 				'<div class="%1$s"><p><strong>%2$s</strong> %3$s</p></div>',
 				esc_attr( $sample['class'] ),

@@ -118,6 +118,33 @@ foreach ( $edminboost_anm_top_plugins as $plugin ) {
 				<span class="edminboost-anm-debug-card__badge"><?php esc_html_e( 'WP_DEBUG', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></span>
 			</div>
 			<p><?php esc_html_e( 'Create sample notices for each inbox type (critical, warning, success, info, upsell). This panel is hidden when WP_DEBUG is off.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+			<?php
+			$edminboost_anm_debug_notice_levels = array(
+				'critical' => __( 'Error', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'warning'  => __( 'Warning', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'success'  => __( 'Success', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'info'     => __( 'Info', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'upsell'   => __( 'Upsell', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			);
+			?>
+			<fieldset class="edminboost-anm-debug-card__levels">
+				<legend><?php esc_html_e( 'Notice levels', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></legend>
+				<div class="edminboost-anm-debug-card__levels-grid">
+					<?php foreach ( $edminboost_anm_debug_notice_levels as $edminboost_anm_level_slug => $edminboost_anm_level_label ) : ?>
+						<label class="edminboost-anm-debug-card__level">
+							<input
+								type="checkbox"
+								class="edminboost-anm-debug-notice-type"
+								name="edminboost_anm_debug_notice_types[]"
+								value="<?php echo esc_attr( $edminboost_anm_level_slug ); ?>"
+								data-notice-type="<?php echo esc_attr( $edminboost_anm_level_slug ); ?>"
+								checked="checked"
+							/>
+							<?php echo esc_html( $edminboost_anm_level_label ); ?>
+						</label>
+					<?php endforeach; ?>
+				</div>
+			</fieldset>
 			<div class="edminboost-anm-debug-card__actions">
 				<button type="button" class="button button-secondary edminboost-anm-seed-test-notices">
 					<?php esc_html_e( 'Add to Inbox', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>

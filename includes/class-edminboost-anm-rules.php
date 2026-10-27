@@ -362,6 +362,162 @@ class EDMINBOOST_ANM_Rules {
 	}
 
 	/**
+	 * Detect WordPress standard notice severity from markup.
+	 *
+	 * @param string $html Notice HTML.
+	 * @return string|null Level slug (success, error, warning, info) or null if not standard.
+	 */
+	public static function detect_standard_notice_level( $html ) {
+		if ( ! self::is_admin_notice_markup( $html ) ) {
+			return null;
+		}
+
+		if ( preg_match( '/class=["\'][^"\']*\b(notice-success|updated)\b/i', $html ) ) {
+			return 'success';
+		}
+
+		if ( preg_match( '/class=["\'][^"\']*\b(notice-error|error)\b/i', $html ) ) {
+			return 'error';
+		}
+
+		if ( preg_match( '/class=["\'][^"\']*\bnotice-warning\b/i', $html ) ) {
+			return 'warning';
+		}
+
+		if ( preg_match( '/class=["\'][^"\']*\bnotice-info\b/i', $html ) ) {
+			return 'info';
+		}
+
+		return null;
+	}
+
+	/**
+	 * Whether HTML looks like a WordPress admin notice container.
+	 *
+	 * @param string $html Notice HTML.
+	 * @return bool
+	 */
+	public static function is_admin_notice_markup( $html ) {
+		return (bool) preg_match( '/class=["\'][^"\']*\b(notice|update-nag)\b/i', $html )
+			|| (bool) preg_match( '/<div[^>]+class=["\'][^"\']*\b(error|updated)\b/i', $html );
+	}
+
+	/**
+	 * Map a standard notice level to an inbox type slug.
+	 *
+	 * @param string $level Standard level slug.
+	 * @return string
+	 */
+	public static function inbox_type_for_level( $level ) {
+		if ( 'error' === $level ) {
+			return 'critical';
+		}
+
+		if ( in_array( $level, array( 'success', 'warning', 'info' ), true ) ) {
+			return $level;
+		}
+
+		return 'info';
+	}
+
+	/**
+	 * Whether notice HTML matches any configured CSS ignore selector.
+	 *
+	 * @param string $html Notice HTML.
+	 * @return bool
+	 */
+	public static function matches_css_ignore_selectors( $html ) {
+		$selectors = EDMINBOOST_ANM_Settings::get_css_ignore_selectors();
+
+		if ( empty( $selectors ) ) {
+			return false;
+		}
+
+		foreach ( $selectors as $selector ) {
+			if ( self::html_matches_css_selector( $html, $selector ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Basic CSS selector match against notice HTML (class, id, and tag.class).
+	 *
+	 * @param string $html     Notice HTML.
+	 * @param string $selector CSS selector fragment.
+	 * @return bool
+	 */
+	public static function html_matches_css_selector( $html, $selector ) {
+		$selector = trim( $selector );
+
+		if ( '' === $selector ) {
+			return false;
+		}
+
+		if ( preg_match( '/^\.([a-zA-Z0-9_-]+)$/', $selector, $matches ) ) {
+			return (bool) preg_match(
+				'/class=["\'][^"\']*\b' . preg_quote( $matches[1], '/' ) . '\b/i',
+				$html
+			);
+		}
+
+		if ( preg_match( '/^#([a-zA-Z0-9_-]+)$/', $selector, $matches ) ) {
+			return (bool) preg_match(
+				'/id=["\']' . preg_quote( $matches[1], '/' ) . '["\']/i',
+				$html
+			);
+		}
+
+		if ( preg_match( '/^([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_-]+)$/', $selector, $matches ) ) {
+			return (bool) preg_match(
+				'/' . preg_quote( $matches[1], '/' ) . '[^>]*class=["\'][^"\']*\b' . preg_quote( $matches[2], '/' ) . '\b/i',
+				$html
+			);
+		}
+
+		return false;
+	}
+
+	/**
+	 * Resolve handling mode for an unmatched notice from plugin settings.
+	 *
+	 * @param string $html Notice HTML.
+	 * @return array{mode: string, type: string, source: string}
+	 */
+	public static function resolve_notice_policy( $html ) {
+		$settings = EDMINBOOST_ANM_Settings::get();
+		$level    = self::detect_standard_notice_level( $html );
+
+		if ( $level ) {
+			$modes = $settings['standard_admin_notices'] ?? EDMINBOOST_ANM_Settings::get_standard_admin_notice_defaults();
+
+			return array(
+				'mode'   => $modes[ $level ] ?? 'default',
+				'type'   => self::inbox_type_for_level( $level ),
+				'source' => 'standard_level',
+			);
+		}
+
+		if ( self::is_admin_notice_markup( $html ) ) {
+			$non_standard = $settings['non_standard_admin_notices'] ?? array();
+
+			return array(
+				'mode'   => $non_standard['no_level'] ?? 'default',
+				'type'   => 'info',
+				'source' => 'non_standard',
+			);
+		}
+
+		return array(
+			'mode'   => 'default',
+			'type'   => 'info',
+			'source' => 'none',
+		);
+	}
+
+	/**
 	 * Classify notice type from message content.
 	 *
 	 * @param string $message Notice text.

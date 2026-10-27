@@ -76,11 +76,13 @@ $edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
 		<?php endif; ?>
 	</div>
 
-	<div class="postbox edminboost-anm-wp-presets">
-		<div class="postbox-header">
-			<h2 class="hndle"><?php esc_html_e( 'Default WordPress Notices', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+	<div class="edminboost-anm-card edminboost-anm-card--flush edminboost-anm-wp-presets">
+		<div class="edminboost-anm-card__heading edminboost-anm-wp-presets__heading">
+			<div>
+				<h2><?php esc_html_e( 'Default WordPress Notices', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+				<p class="description"><?php esc_html_e( 'Common core admin notices you can convert into filter rules with one click.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+			</div>
 		</div>
-		<div class="inside">
 		<?php if ( ! empty( $wp_presets ) ) : ?>
 			<table class="wp-list-table widefat fixed striped edminboost-anm-table edminboost-anm-wp-presets-table">
 				<thead>
@@ -118,7 +120,6 @@ $edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
 				</tfoot>
 			</table>
 		<?php endif; ?>
-		</div>
 	</div>
 
 	<div class="edminboost-anm-modal" id="edminboost-anm-rule-modal" aria-hidden="true" role="dialog" aria-labelledby="edminboost-anm-rule-modal-title">
