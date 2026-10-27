@@ -1637,9 +1637,12 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	border-radius: 4px;
 	padding: 2px 8px;
 	color: #d63638;
+	text-decoration: none;
+	white-space: nowrap;
 }
 
 #wpadminbar .edminboost-anm-notices-panel__action--hide .dashicons {
+	flex-shrink: 0;
 	width: 14px;
 	height: 14px;
 	font-size: 14px;
@@ -1701,16 +1704,32 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	position: absolute;
 	top: 8px;
 	right: 2px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	min-width: 16px;
 	height: 16px;
 	padding: 0 4px;
 	border-radius: 8px;
+	box-sizing: border-box;
 	background: var(--edminboost-anm-notice-badge-bg, #d63638);
 	color: var(--edminboost-anm-notice-badge-text, #fff);
 	font-size: 10px;
 	font-weight: 600;
-	line-height: 16px;
+	line-height: 1;
 	text-align: center;
+	overflow: hidden;
+}
+
+/* Undo `#wpadminbar *` line-height / box model on nested badge labels. */
+#wpadminbar #wp-admin-bar-edminboost-anm-notices .edminboost-anm-notices-badge * {
+	line-height: 1;
+	box-sizing: border-box;
+}
+
+#wpadminbar #wp-admin-bar-edminboost-anm-notices .edminboost-anm-notices-badge [aria-hidden="true"] {
+	font-size: inherit;
+	font-weight: inherit;
 }
 
 #wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook .edminboost-anm-notices-badge {
@@ -1720,7 +1739,7 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	height: 18px;
 	padding: 0 5px;
 	border-radius: 10px;
-	line-height: 14px;
+	line-height: 1;
 	font-size: 11px;
 	font-weight: 700;
 	background: var(--edminboost-anm-notice-badge-bg, #e41e3f);
@@ -1800,6 +1819,41 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	color: #1d2327;
 	z-index: 100001;
 	text-align: left;
+	line-height: 1.45;
+}
+
+/* Undo wp-admin bar global `#wpadminbar *` resets inside the dropdown panel. */
+#wpadminbar .edminboost-anm-notices-panel,
+#wpadminbar .edminboost-anm-notices-panel * {
+	box-sizing: border-box;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__header,
+#wpadminbar .edminboost-anm-notices-panel__header strong,
+#wpadminbar .edminboost-anm-notices-panel__logged,
+#wpadminbar .edminboost-anm-notices-panel__action,
+#wpadminbar .edminboost-anm-notices-panel__footer a,
+#wpadminbar .edminboost-anm-notices-panel__empty,
+#wpadminbar .edminboost-anm-notices-panel__item,
+#wpadminbar .edminboost-anm-notices-panel__close,
+#wpadminbar .edminboost-anm-notices-panel__dismiss {
+	line-height: 1.4;
+}
+
+#wpadminbar .edminboost-anm-notices-panel .dashicons {
+	font-family: dashicons;
+	display: inline-block;
+	line-height: 1;
+	vertical-align: middle;
+	text-decoration: none;
+}
+
+#wpadminbar .edminboost-anm-notices-panel .dashicons:before {
+	font-family: dashicons;
+	line-height: 1;
+	position: static;
+	float: none;
+	color: inherit;
 }
 
 #wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook .edminboost-anm-notices-panel {
@@ -1949,8 +2003,9 @@ button.edminboost-anm-tabs__tab:focus-visible {
 #wpadminbar .edminboost-anm-notices-panel__actions {
 	display: flex;
 	flex-wrap: wrap;
+	align-items: center;
 	justify-content: flex-end;
-	gap: 4px 12px;
+	gap: 6px 10px;
 }
 
 #wpadminbar .edminboost-anm-notices-panel__action {
@@ -2213,16 +2268,31 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	position: absolute;
 	top: 8px;
 	right: 2px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	min-width: 16px;
 	height: 16px;
 	padding: 0 4px;
 	border-radius: 8px;
+	box-sizing: border-box;
 	background: var(--edminboost-anm-notice-badge-bg, #d63638);
 	color: var(--edminboost-anm-notice-badge-text, #fff);
 	font-size: 10px;
 	font-weight: 600;
-	line-height: 16px;
+	line-height: 1;
 	text-align: center;
+	overflow: hidden;
+}
+
+.edminboost-anm-notice-panel-preview__trigger .edminboost-anm-notices-badge * {
+	line-height: 1;
+	box-sizing: border-box;
+}
+
+.edminboost-anm-notice-panel-preview__trigger .edminboost-anm-notices-badge [aria-hidden="true"] {
+	font-size: inherit;
+	font-weight: inherit;
 }
 
 .edminboost-anm-notice-panel-preview__trigger .edminboost-anm-notices-badge--dot {
@@ -2366,8 +2436,9 @@ button.edminboost-anm-tabs__tab:focus-visible {
 .edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__actions {
 	display: flex;
 	flex-wrap: wrap;
+	align-items: center;
 	justify-content: flex-end;
-	gap: 4px 12px;
+	gap: 6px 10px;
 }
 
 #edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__action:not(.edminboost-anm-notices-panel__action--hide) {
@@ -2386,15 +2457,24 @@ button.edminboost-anm-tabs__tab:focus-visible {
 }
 
 .edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__action--hide {
-	color: #2271b1;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	border: 1px solid #d63638;
+	border-radius: 4px;
+	padding: 2px 8px;
+	color: #d63638;
+	text-decoration: none;
+	white-space: nowrap;
 }
 
 .edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__action .dashicons {
+	flex-shrink: 0;
 	width: 14px;
 	height: 14px;
 	font-size: 14px;
 	line-height: 1;
-	vertical-align: text-bottom;
+	vertical-align: middle;
 }
 
 .edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__item {

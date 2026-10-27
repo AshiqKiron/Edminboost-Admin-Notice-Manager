@@ -81,6 +81,7 @@ alwaysApply: false
 - Notifications previews: `.edminboost-anm-digest-preview*`, `.edminboost-anm-digest-layout__preview`, `.edminboost-anm-webhook-preview*` (notice-type modifiers `.is-info`, `.is-success`, `.is-warning`, `.is-error`).
 - Admin bar (live + settings mock): `.edminboost-anm-notices--dropdown`, `.edminboost-anm-notices--bell`, `.edminboost-anm-notices--facebook`, `.edminboost-anm-notices-badge--pulse`, `.edminboost-anm-notices-panel--compact`, `.edminboost-anm-notice-panel-layout__preview`, `.edminboost-anm-notice-panel-preview*` (preview colors via CSS vars scoped under `#edminboost-anm-notice-panel-preview`; bell icon uses dashicons).
 - Admin bar: `.edminboost-anm-notices--open`, `.edminboost-anm-notices-badge`, `.edminboost-anm-howdy-dot`.
+- Live admin bar dropdown lives under `#wpadminbar` — WordPress `#wpadminbar *` resets affect badges, panel copy, and dashicons. Use scoped `#wpadminbar .edminboost-anm-notices-panel` / `#wp-admin-bar-edminboost-anm-notices .edminboost-anm-notices-badge` overrides (`box-sizing`, `line-height: 1`, flex badge layout, dashicons `:before` reset). Keep settings mock (`.edminboost-anm-notice-panel-preview*`) visually aligned with the same badge, `__actions`, and `__action--hide` (outlined red pill + dashicon) rules where applicable.
 
 ## Partials (`admin/partials/`)
 
