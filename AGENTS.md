@@ -55,8 +55,9 @@ languages/  uninstall.php  readme.txt  composer.json
 - **Ad redirects**: optional `block_ad_redirects` URL blocklist — admin-only redirect filtering via `EDMINBOOST_ANM_Ad_Redirects`.
 - **Inline notice controls**: `edminboost-anm-notice-inline.js` on non–plugin-screen wp-admin for “Hide for me” / “Hide for all”.
 - **Notifications previews**: Settings Notifications tab — two-column digest form + sticky structured email preview; live webhook text/JSON preview (no send on preview).
-- **Admin bar panel**: Styles `link`, `bell_link`, `dropdown`, `dropdown_compact`; six position slots; badge caps and dot/pulse/none; compact vs detailed dropdown markup. Settings Admin bar tab includes live mock preview (`initNoticePanelPreview`, `noticePanelPositionLayouts`).
-- **Settings UX**: `EDMINBOOST_ANM_Admin::help_tip()` on most fields; segmented notice-display control (General); redirect blocklist as list table (Security). Enqueues `list-tables` on inbox and settings screens.
+- **Admin bar panel**: Styles `link`, `bell_link`, `dropdown`, `dropdown_compact`; six position slots; badge caps and dot/pulse/none; compact vs detailed dropdown markup. Assets on wp-admin and front-end admin bar when panel active (`EDMINBOOST_ANM_Notices`, `dashicons` for bell). Settings Admin bar tab: unified `initNoticePanelPreview()` (bell row sync, CSS var colors, realistic sample notices). Dropdown JS via `enqueue_admin_bar_dropdown_script()`.
+- **Settings UX**: `EDMINBOOST_ANM_Admin::help_tip()` on most fields; segmented notice-display control (General); hiding visibility fieldset with inline user pickers per mode (`initHidingNotificationsSettings`); redirect blocklist as list table (Security). Enqueues `list-tables` and `dashicons` on inbox and settings screens.
+- **Dashboard**: Quick Status enable toggle reloads the page after successful AJAX save.
 
 ## Admin Pages
 
@@ -111,7 +112,7 @@ Persistent AI guidance lives in `.cursor/rules/`:
 
 ## Change Discipline
 
-- Admin-only plugin — no front-end hooks unless explicitly requested.
+- Admin-only plugin — limited front-end hooks for admin bar notice panel when the toolbar is visible.
 - Minimize diff scope; match existing file structure and style.
 - Add `index.php` silence files when creating new directories.
 - Update `readme.txt` changelog for user-facing changes.

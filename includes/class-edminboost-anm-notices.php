@@ -29,25 +29,23 @@ class EDMINBOOST_ANM_Notices {
 	 * @return void
 	 */
 	public function register_hooks() {
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+
+		$settings  = EDMINBOOST_ANM_Settings::get();
+		$panel     = wp_parse_args(
+			$settings['notice_panel'] ?? array(),
+			EDMINBOOST_ANM_Settings::get_defaults()['notice_panel']
+		);
+		$placement = EDMINBOOST_ANM_Settings::get_notice_panel_admin_bar_placement( $panel['position'] ?? 'default' );
+		add_action( 'admin_bar_menu', array( $this, 'register_admin_bar_node' ), $placement['hook_priority'] );
+
 		if ( ! EDMINBOOST_ANM_Settings::is_enabled() ) {
 			return;
 		}
 
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-
 		if ( EDMINBOOST_ANM_Settings::should_hide_dashboard_notices() ) {
 			add_action( 'admin_head', array( $this, 'hide_core_notices' ), 1 );
-		}
-
-		if ( EDMINBOOST_ANM_Settings::should_show_admin_bar_notice_panel() ) {
-			$settings = EDMINBOOST_ANM_Settings::get();
-			$panel    = wp_parse_args(
-				$settings['notice_panel'] ?? array(),
-				EDMINBOOST_ANM_Settings::get_defaults()['notice_panel']
-			);
-			$placement = EDMINBOOST_ANM_Settings::get_notice_panel_admin_bar_placement( $panel['position'] ?? 'default' );
-
-			add_action( 'admin_bar_menu', array( $this, 'register_admin_bar_node' ), $placement['hook_priority'] );
 		}
 
 		/**
@@ -64,14 +62,27 @@ class EDMINBOOST_ANM_Notices {
 	 * @return void
 	 */
 	public function enqueue_assets() {
-		if ( ! is_admin() ) {
+		if ( ! EDMINBOOST_ANM_Settings::is_enabled() ) {
 			return;
+		}
+
+		$can_manage      = current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY );
+		$show_admin_bar  = EDMINBOOST_ANM_Settings::should_show_admin_bar_notice_panel();
+		$needs_admin_bar = $can_manage && $show_admin_bar && ( is_admin() || is_admin_bar_showing() );
+
+		if ( ! is_admin() && ! $needs_admin_bar ) {
+			return;
+		}
+
+		$style_deps = array();
+		if ( $needs_admin_bar ) {
+			$style_deps[] = 'dashicons';
 		}
 
 		wp_enqueue_style(
 			'edminboost-anm-notices',
 			EDMINBOOST_ANM_PLUGIN_URL . 'admin/css/edminboost-anm-admin.css',
-			array(),
+			$style_deps,
 			EDMINBOOST_ANM_VERSION
 		);
 
@@ -81,14 +92,21 @@ class EDMINBOOST_ANM_Notices {
 			EDMINBOOST_ANM_Settings::get_defaults()['notice_panel']
 		);
 
-		if ( ! empty( $panel['enabled'] ) && current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
+		if ( $needs_admin_bar ) {
 			$color_css = self::build_panel_color_css( $panel );
 			if ( '' !== $color_css ) {
 				wp_add_inline_style( 'edminboost-anm-notices', $color_css );
 			}
 		}
 
-		if ( ! current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
+		if ( ! $can_manage ) {
+			return;
+		}
+
+		if ( ! is_admin() ) {
+			if ( $needs_admin_bar && EDMINBOOST_ANM_Settings::notice_panel_style_is_dropdown( $panel['style'] ?? 'link' ) ) {
+				$this->enqueue_admin_bar_dropdown_script( $panel );
+			}
 			return;
 		}
 
@@ -122,8 +140,32 @@ class EDMINBOOST_ANM_Notices {
 			);
 		}
 
-		if ( empty( $panel['enabled'] ) || ! EDMINBOOST_ANM_Settings::notice_panel_style_is_dropdown( $panel['style'] ?? 'link' ) ) {
+		if ( ! $show_admin_bar || ! EDMINBOOST_ANM_Settings::notice_panel_style_is_dropdown( $panel['style'] ?? 'link' ) ) {
 			return;
+		}
+
+		$this->enqueue_admin_bar_dropdown_script( $panel, $localized );
+	}
+
+	/**
+	 * Enqueue dropdown panel behavior for the admin bar node.
+	 *
+	 * @param array $panel     Notice panel settings.
+	 * @param array $localized Optional pre-built script data.
+	 * @return void
+	 */
+	private function enqueue_admin_bar_dropdown_script( $panel, $localized = null ) {
+		if ( null === $localized ) {
+			$localized = array(
+				'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+				'nonce'      => wp_create_nonce( 'edminboost_anm_admin' ),
+				'badgeStyle' => sanitize_key( $panel['badge_style'] ?? 'count' ),
+				'i18n'       => array(
+					'actionError' => __( 'Could not update this notice. Please try again.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+					'hideForMe'   => __( 'Hide for me', EDMINBOOST_ANM_TEXT_DOMAIN ),
+					'hideForAll'  => __( 'Hide for all', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				),
+			);
 		}
 
 		wp_enqueue_script(
@@ -161,7 +203,15 @@ class EDMINBOOST_ANM_Notices {
 	 * @return void
 	 */
 	public function register_admin_bar_node( $admin_bar ) {
+		if ( ! EDMINBOOST_ANM_Settings::is_enabled() ) {
+			return;
+		}
+
 		if ( ! current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
+			return;
+		}
+
+		if ( ! EDMINBOOST_ANM_Settings::should_show_admin_bar_notice_panel() ) {
 			return;
 		}
 

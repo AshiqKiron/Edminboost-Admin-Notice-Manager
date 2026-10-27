@@ -349,48 +349,50 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 								$edminboost_anm_picker_active   = in_array( $edminboost_anm_hiding_slug, array( 'only', 'except' ), true );
 								$edminboost_anm_picker_enabled   = $edminboost_anm_hiding_mode === $edminboost_anm_hiding_slug;
 								?>
-								<label class="edminboost-anm-hiding-visibility-options__mode" for="<?php echo esc_attr( $edminboost_anm_hiding_field_id ); ?>">
-									<input
-										type="radio"
-										id="<?php echo esc_attr( $edminboost_anm_hiding_field_id ); ?>"
-										name="<?php echo esc_attr( $edminboost_anm_option_name . '[hiding_notifications][mode]' ); ?>"
-										value="<?php echo esc_attr( $edminboost_anm_hiding_slug ); ?>"
-										<?php checked( $edminboost_anm_hiding_mode, $edminboost_anm_hiding_slug ); ?>
-									/>
-									<?php echo esc_html( $edminboost_anm_hiding_label ); ?>
-								</label>
-								<?php if ( $edminboost_anm_picker_active ) : ?>
-									<div
-										class="edminboost-anm-user-picker"
-										data-edminboost-anm-user-picker
-										data-picker-mode="<?php echo esc_attr( $edminboost_anm_hiding_slug ); ?>"
-										<?php echo $edminboost_anm_picker_enabled ? '' : ' hidden'; ?>
-									>
-										<div class="edminboost-anm-user-picker__selected" data-edminboost-anm-user-selected>
-											<?php foreach ( $edminboost_anm_hiding_users as $edminboost_anm_hiding_user ) : ?>
-												<span class="edminboost-anm-user-picker__chip" data-user-id="<?php echo esc_attr( (string) $edminboost_anm_hiding_user['id'] ); ?>">
-													<span class="edminboost-anm-user-picker__chip-text"><?php echo esc_html( $edminboost_anm_hiding_user['label'] ); ?></span>
-													<button type="button" class="edminboost-anm-user-picker__remove" aria-label="<?php esc_attr_e( 'Remove user', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">&times;</button>
-													<input
-														type="hidden"
-														name="<?php echo esc_attr( $edminboost_anm_option_name . '[hiding_notifications][users][]' ); ?>"
-														value="<?php echo esc_attr( (string) $edminboost_anm_hiding_user['id'] ); ?>"
-														<?php disabled( ! $edminboost_anm_picker_enabled ); ?>
-													/>
-												</span>
-											<?php endforeach; ?>
-										</div>
+								<div class="edminboost-anm-hiding-visibility-options__option">
+									<label class="edminboost-anm-hiding-visibility-options__mode" for="<?php echo esc_attr( $edminboost_anm_hiding_field_id ); ?>">
 										<input
-											type="search"
-											class="edminboost-anm-user-picker__search regular-text"
-											placeholder="<?php esc_attr_e( 'select user(s)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"
-											autocomplete="off"
-											aria-label="<?php esc_attr_e( 'Search users', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"
-											<?php disabled( ! $edminboost_anm_picker_enabled ); ?>
+											type="radio"
+											id="<?php echo esc_attr( $edminboost_anm_hiding_field_id ); ?>"
+											name="<?php echo esc_attr( $edminboost_anm_option_name . '[hiding_notifications][mode]' ); ?>"
+											value="<?php echo esc_attr( $edminboost_anm_hiding_slug ); ?>"
+											<?php checked( $edminboost_anm_hiding_mode, $edminboost_anm_hiding_slug ); ?>
 										/>
-										<ul class="edminboost-anm-user-picker__results" data-edminboost-anm-user-results hidden role="listbox"></ul>
-									</div>
-								<?php endif; ?>
+										<span class="edminboost-anm-hiding-visibility-options__label"><?php echo esc_html( $edminboost_anm_hiding_label ); ?></span>
+									</label>
+									<?php if ( $edminboost_anm_picker_active ) : ?>
+										<div
+											class="edminboost-anm-user-picker"
+											data-edminboost-anm-user-picker
+											data-picker-mode="<?php echo esc_attr( $edminboost_anm_hiding_slug ); ?>"
+											<?php echo $edminboost_anm_picker_enabled ? '' : ' hidden'; ?>
+										>
+											<div class="edminboost-anm-user-picker__selected" data-edminboost-anm-user-selected>
+												<?php foreach ( $edminboost_anm_hiding_users as $edminboost_anm_hiding_user ) : ?>
+													<span class="edminboost-anm-user-picker__chip" data-user-id="<?php echo esc_attr( (string) $edminboost_anm_hiding_user['id'] ); ?>">
+														<span class="edminboost-anm-user-picker__chip-text"><?php echo esc_html( $edminboost_anm_hiding_user['label'] ); ?></span>
+														<button type="button" class="edminboost-anm-user-picker__remove" aria-label="<?php esc_attr_e( 'Remove user', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">&times;</button>
+														<input
+															type="hidden"
+															name="<?php echo esc_attr( $edminboost_anm_option_name . '[hiding_notifications][users][]' ); ?>"
+															value="<?php echo esc_attr( (string) $edminboost_anm_hiding_user['id'] ); ?>"
+															<?php disabled( ! $edminboost_anm_picker_enabled ); ?>
+														/>
+													</span>
+												<?php endforeach; ?>
+											</div>
+											<input
+												type="search"
+												class="edminboost-anm-user-picker__search regular-text"
+												placeholder="<?php esc_attr_e( 'select user(s)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"
+												autocomplete="off"
+												aria-label="<?php esc_attr_e( 'Search users', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"
+												<?php disabled( ! $edminboost_anm_picker_enabled ); ?>
+											/>
+											<ul class="edminboost-anm-user-picker__results" data-edminboost-anm-user-results hidden role="listbox"></ul>
+										</div>
+									<?php endif; ?>
+								</div>
 							<?php endforeach; ?>
 						</fieldset>
 					</td>

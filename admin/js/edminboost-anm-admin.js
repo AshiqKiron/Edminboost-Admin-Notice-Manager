@@ -55,15 +55,7 @@
 						toggle.checked = !toggle.checked;
 						return;
 					}
-					var status = document.querySelector('[data-edminboost-anm-enabled-status]');
-					if (status) {
-						var i18n = data.i18n || {};
-						status.textContent = toggle.checked
-							? (i18n.statusActive || 'Active')
-							: (i18n.statusInactive || 'Inactive');
-						status.classList.toggle('is-active', toggle.checked);
-						status.classList.toggle('is-inactive', !toggle.checked);
-					}
+					window.location.reload();
 				});
 		});
 	}
@@ -1510,47 +1502,19 @@
 		}
 	}
 
-	function initNoticePanelSettings() {
+	function initNoticePanelPreview() {
 		var styleSelect = document.getElementById('edminboost-anm-notice-panel-style');
-		var positionSelect = document.getElementById('edminboost-anm-notice-panel-position');
-		var bellRows = document.querySelectorAll('.edminboost-anm-notice-panel-bell-row');
-
 		if (!styleSelect) {
 			return;
 		}
 
-		function styleUsesBell(style, position) {
-			if (style === 'bell_link' || style === 'dropdown' || style === 'dropdown_compact') {
-				return true;
-			}
-			return style === 'link' && position === 'before_profile';
-		}
-
-		function syncBellRows() {
-			var position = positionSelect ? positionSelect.value : 'default';
-			var show = styleUsesBell(styleSelect.value, position);
-			bellRows.forEach(function (row) {
-				row.hidden = !show;
-			});
-		}
-
-		styleSelect.addEventListener('change', syncBellRows);
-		if (positionSelect) {
-			positionSelect.addEventListener('change', syncBellRows);
-		}
-		syncBellRows();
-	}
-
-	function initNoticePanelPreview() {
 		var previewRoot = document.getElementById('edminboost-anm-notice-panel-preview');
 		var stage = previewRoot ? previewRoot.querySelector('[data-edminboost-anm-notice-panel-preview-stage]') : null;
-		if (!previewRoot || !stage) {
-			return;
-		}
+		var bellRows = document.querySelectorAll('.edminboost-anm-notice-panel-bell-row');
+		var settingsRoot = document.querySelector('[data-edminboost-anm-settings]');
 
 		var i18n = data.i18n || {};
 		var enabledCheckbox = document.getElementById('edminboost-anm-notice-panel');
-		var styleSelect = document.getElementById('edminboost-anm-notice-panel-style');
 		var badgeSelect = document.getElementById('edminboost-anm-notice-panel-badge');
 		var positionSelect = document.getElementById('edminboost-anm-notice-panel-position');
 		var colorFields = {
@@ -1596,6 +1560,17 @@
 			};
 		}
 
+		function applyPreviewColorVars(colors) {
+			if (!previewRoot) {
+				return;
+			}
+			previewRoot.style.setProperty('--edminboost-anm-notice-badge-bg', colors.badge);
+			previewRoot.style.setProperty('--edminboost-anm-notice-badge-text', colors.badge_text);
+			previewRoot.style.setProperty('--edminboost-anm-notice-accent', colors.accent);
+			previewRoot.style.setProperty('--edminboost-anm-notice-accent-hover', colors.accent_hover);
+			previewRoot.style.setProperty('--edminboost-anm-notice-bell-active', colors.bell_active);
+		}
+
 		function formatBadgeDisplayCount(count, badgeStyle) {
 			if (badgeStyle === 'count_9plus' && count > 9) {
 				return '9+';
@@ -1621,12 +1596,27 @@
 			return '<span class="edminboost-anm-notices-badge"><span class="screen-reader-text">' + escapeHtml(String(count)) + '</span><span aria-hidden="true">' + escapeHtml(display) + '</span></span>';
 		}
 
-		function buildBellTrigger(badgeStyle, facebook) {
-			var count = 3;
-			return '<span class="edminboost-anm-notice-panel-preview__trigger edminboost-anm-notice-panel-preview__trigger--bell' + (facebook ? ' is-facebook' : '') + '">'
-				+ '<span class="ab-icon edminboost-anm-fb-bell" aria-hidden="true"></span>'
-				+ buildBadgeHtml(badgeStyle, count, null, facebook)
+		function buildBellTrigger(style, badgeStyle, facebook) {
+			var triggerClass = 'edminboost-anm-notice-panel-preview__trigger edminboost-anm-notice-panel-preview__trigger--bell';
+			if (facebook) {
+				triggerClass += ' is-facebook';
+			}
+			if (style === 'bell_link') {
+				triggerClass += ' is-style-bell-link';
+			} else if (isDropdownStyle(style)) {
+				triggerClass += ' is-style-dropdown';
+			}
+			return '<span class="' + triggerClass + '">'
+				+ '<span class="ab-icon edminboost-anm-notice-panel-preview__bell-icon" aria-hidden="true"></span>'
+				+ buildBadgeHtml(badgeStyle, 3, null, facebook)
 				+ '</span>';
+		}
+
+		function buildTriggerHtml(style, badgeStyle, position, facebook) {
+			if (styleUsesBell(style, position)) {
+				return buildBellTrigger(style, badgeStyle, facebook);
+			}
+			return buildLinkTrigger();
 		}
 
 		function buildLinkTrigger() {
@@ -1648,6 +1638,25 @@
 			return '<div class="edminboost-anm-notices-panel__footer"><a href="#" tabindex="-1" onclick="return false;">'
 				+ escapeHtml(i18n.noticePanelPreviewSeeAll || 'See all notifications')
 				+ '</a></div>';
+		}
+
+		function compactItemTypeClass(type) {
+			if (type === 'error' || type === 'critical') {
+				return 'is-type-critical';
+			}
+			return 'is-type-' + type;
+		}
+
+		function panelNoticeClass(type) {
+			var map = {
+				success: 'notice notice-success',
+				critical: 'notice notice-error',
+				warning: 'notice notice-warning',
+				upsell: 'notice notice-info',
+				info: 'notice notice-info',
+				error: 'notice notice-error'
+			};
+			return map[type] || 'notice notice-info';
 		}
 
 		function buildDetailedCardHtml(noticeClass, message) {
@@ -1672,15 +1681,27 @@
 
 		function buildCompactPanel() {
 			var samples = [
-				{ type: 'warning', message: i18n.noticePanelSample1 || 'A plugin update is available.', source: i18n.noticePanelSampleSource || 'Sample Plugin' },
-				{ type: 'upsell', message: i18n.noticePanelSample2 || 'Please review our product.', source: i18n.noticePanelSampleSource || 'Sample Plugin' },
-				{ type: 'success', message: i18n.noticePanelSample3 || 'Site health check found improvements.', source: 'WordPress' }
+				{
+					type: 'info',
+					message: i18n.noticePanelSample1 || 'There is a new version of Akismet Anti-spam available. View version 5.3.3 details or update now.',
+					source: i18n.noticePanelSample1Source || 'Akismet Anti-spam'
+				},
+				{
+					type: 'upsell',
+					message: i18n.noticePanelSample2 || 'Enjoying WPForms? Please leave us a review on WordPress.org — it only takes a minute.',
+					source: i18n.noticePanelSample2Source || 'WPForms'
+				},
+				{
+					type: 'warning',
+					message: i18n.noticePanelSample3 || 'Your license key expires in 14 days. Renew now to keep receiving updates and support.',
+					source: i18n.noticePanelSample3Source || 'Advanced Custom Fields'
+				}
 			];
 			var html = '<div class="edminboost-anm-notices-panel edminboost-anm-notices-panel--compact edminboost-anm-notice-panel-preview__panel">';
 			html += buildPanelHeaderHtml();
 			html += '<ul class="edminboost-anm-notices-panel__list">';
 			samples.forEach(function (item) {
-				var typeClass = item.type === 'success' ? 'is-type-success' : (item.type === 'warning' ? 'is-type-warning' : 'is-type-info');
+				var typeClass = compactItemTypeClass(item.type);
 				html += '<li class="edminboost-anm-notices-panel__item ' + typeClass + '">';
 				html += '<span class="edminboost-anm-notices-panel__type">' + escapeHtml(item.type) + '</span>';
 				html += '<span class="edminboost-anm-notices-panel__message">' + escapeHtml(item.message) + '</span>';
@@ -1694,18 +1715,34 @@
 		}
 
 		function buildDetailedPanel() {
+			var detailedWarning = i18n.noticePanelSampleDetailed1 || i18n.noticePanelSample3 || 'Your license will expire in 3 days. Renew now to keep receiving updates and support.';
+			var detailedUpsell = i18n.noticePanelSampleDetailed2 || i18n.noticePanelSample2 || 'Thanks for using Yoast SEO! Could you take a moment to leave a five-star review on WordPress.org?';
 			var html = '<div class="edminboost-anm-notices-panel edminboost-anm-notices-panel--detailed edminboost-anm-notice-panel-preview__panel">';
 			html += buildPanelHeaderHtml();
 			html += '<ul class="edminboost-anm-notices-panel__list">';
-			html += buildDetailedCardHtml('notice-warning', i18n.noticePanelSample1 || 'A plugin update is available.');
-			html += buildDetailedCardHtml('notice-info', i18n.noticePanelSample2 || 'Please review our product on WordPress.org.');
+			html += buildDetailedCardHtml(panelNoticeClass('warning'), detailedWarning);
+			html += buildDetailedCardHtml(panelNoticeClass('upsell'), detailedUpsell);
 			html += '</ul>';
 			html += buildPanelFooterHtml();
 			html += '</div>';
 			return html;
 		}
 
+		function syncBellRows() {
+			var position = positionSelect ? positionSelect.value : 'default';
+			var show = styleUsesBell(styleSelect.value, position);
+			bellRows.forEach(function (row) {
+				row.hidden = !show;
+			});
+		}
+
 		function renderPreview() {
+			if (!stage) {
+				return;
+			}
+
+			applyPreviewColorVars(readColors());
+
 			if (enabledCheckbox && !enabledCheckbox.checked) {
 				stage.innerHTML = '<p class="edminboost-anm-notice-panel-preview__disabled">' + escapeHtml(i18n.noticePanelPreviewDisabled || 'Enable the admin bar panel to preview.') + '</p>';
 				return;
@@ -1714,17 +1751,10 @@
 			var style = styleSelect ? styleSelect.value : 'link';
 			var badgeStyle = badgeSelect ? badgeSelect.value : 'count';
 			var position = positionSelect ? positionSelect.value : 'default';
-			var colors = readColors();
-			var usesBell = styleUsesBell(style, position);
 			var previewLayout = getPositionPreviewLayout(position);
 			var facebook = previewLayout === 'profile_before';
-			var cssVars = '--edminboost-anm-notice-badge-bg:' + colors.badge + ';'
-				+ '--edminboost-anm-notice-badge-text:' + colors.badge_text + ';'
-				+ '--edminboost-anm-notice-accent:' + colors.accent + ';'
-				+ '--edminboost-anm-notice-accent-hover:' + colors.accent_hover + ';'
-				+ '--edminboost-anm-notice-bell-active:' + colors.bell_active + ';';
 
-			var triggerHtml = usesBell ? buildBellTrigger(badgeStyle, facebook) : buildLinkTrigger();
+			var triggerHtml = buildTriggerHtml(style, badgeStyle, position, facebook);
 			var panelHtml = '';
 			if (isDropdownStyle(style)) {
 				panelHtml = style === 'dropdown_compact' ? buildCompactPanel() : buildDetailedPanel();
@@ -1750,8 +1780,11 @@
 			} else if (previewLayout === 'profile_before' || previewLayout === 'profile_after') {
 				mockBarClass += ' is-profile-slot';
 			}
+			if (panelHtml) {
+				mockBarClass += ' is-dropdown-open';
+			}
 
-			stage.innerHTML = '<div class="' + mockBarClass + '" style="' + cssVars + '">'
+			stage.innerHTML = '<div class="' + mockBarClass + '">'
 				+ '<div class="edminboost-anm-notice-panel-preview__bar-inner">'
 				+ barInnerHtml
 				+ '</div>'
@@ -1767,22 +1800,37 @@
 			field.addEventListener('change', renderPreview);
 		}
 
-		if (enabledCheckbox) {
-			enabledCheckbox.addEventListener('change', renderPreview);
+		function onPanelLayoutChange() {
+			syncBellRows();
+			renderPreview();
 		}
-		if (styleSelect) {
-			styleSelect.addEventListener('change', renderPreview);
+
+		function bindPanelField(field) {
+			if (!field) {
+				return;
+			}
+			field.addEventListener('change', onPanelLayoutChange);
+			field.addEventListener('input', onPanelLayoutChange);
 		}
-		if (badgeSelect) {
-			badgeSelect.addEventListener('change', renderPreview);
-		}
-		if (positionSelect) {
-			positionSelect.addEventListener('change', renderPreview);
-		}
+
+		bindPanelField(enabledCheckbox);
+		bindPanelField(styleSelect);
+		bindPanelField(badgeSelect);
+		bindPanelField(positionSelect);
 		Object.keys(colorFields).forEach(function (key) {
 			bindColorField(colorFields[key]);
 		});
 
+		if (settingsRoot) {
+			settingsRoot.addEventListener('edminboost-anm-settings-tab', function (event) {
+				if (event.detail && event.detail.tab === 'admin_bar') {
+					syncBellRows();
+					renderPreview();
+				}
+			});
+		}
+
+		syncBellRows();
 		renderPreview();
 	}
 
@@ -1800,7 +1848,6 @@
 		initSettingsHelpTips();
 		initManageNoticesMode();
 		initResetHiddenNotices();
-		initNoticePanelSettings();
 		initNoticePanelPreview();
 		initDigestPreview();
 		initWebhookPreview();

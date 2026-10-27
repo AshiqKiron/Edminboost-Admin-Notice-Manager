@@ -135,6 +135,9 @@ class EDMINBOOST_ANM_Admin {
 			$style_deps[] = 'list-tables';
 		}
 
+		wp_enqueue_style( 'dashicons' );
+		$style_deps[] = 'dashicons';
+
 		wp_enqueue_style(
 			'edminboost-anm-admin',
 			EDMINBOOST_ANM_PLUGIN_URL . 'admin/css/edminboost-anm-admin.css',
@@ -229,10 +232,15 @@ class EDMINBOOST_ANM_Admin {
 				'noticePanelPreviewSeeAll'   => __( 'See all notifications', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'noticePanelPreviewHowdy'    => __( 'Howdy, Admin', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'noticePanelPreviewSiteName' => __( 'My Site', EDMINBOOST_ANM_TEXT_DOMAIN ),
-				'noticePanelSample1'         => __( 'A plugin update is available.', EDMINBOOST_ANM_TEXT_DOMAIN ),
-				'noticePanelSample2'         => __( 'Please review our product on WordPress.org.', EDMINBOOST_ANM_TEXT_DOMAIN ),
-				'noticePanelSample3'         => __( 'Your site health check found improvements.', EDMINBOOST_ANM_TEXT_DOMAIN ),
-				'noticePanelSampleSource'    => __( 'Sample Plugin', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelSample1'         => __( 'There is a new version of Akismet Anti-spam available. View version 5.3.3 details or update now.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelSample1Source'   => __( 'Akismet Anti-spam', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelSample2'         => __( 'Enjoying WPForms? Please leave us a review on WordPress.org — it only takes a minute.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelSample2Source'   => __( 'WPForms', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelSample3'         => __( 'Your license key expires in 14 days. Renew now to keep receiving updates and support.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelSample3Source'   => __( 'Advanced Custom Fields', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelSampleDetailed1' => __( 'Your license will expire in 3 days. Renew now to keep receiving updates and support.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelSampleDetailed2' => __( 'Thanks for using Yoast SEO! Could you take a moment to leave a five-star review on WordPress.org?', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelSampleDetailed2Source' => __( 'Yoast SEO', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'noticePanelPreviewClose'    => __( 'Close panel', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'noticePanelPreviewDismiss'  => __( 'Dismiss from panel', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'noticePanelSampleFirstLogged' => sprintf(

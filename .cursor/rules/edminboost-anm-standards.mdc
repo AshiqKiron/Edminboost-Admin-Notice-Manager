@@ -41,10 +41,10 @@ Cross-cutting quality standards. See also: `edminboost-anm-project.mdc`, `edminb
 
 - Add notices sparingly and only when relevant.
 - Load plugin-screen assets only on this plugin's pages (`is_plugin_screen()`).
-- Notice CSS may load on all wp-admin when notice features are active and plugin is enabled.
+- Notice CSS may load on wp-admin when the plugin is enabled, and on the front-end admin bar when the notice panel is active for capable users.
 - Interceptor JS loads on all wp-admin when plugin is enabled — required for live notice capture.
 - Features must respect the global `enabled` kill switch via `EDMINBOOST_ANM_Settings::is_enabled()`.
-- Dashboard toggles and rules/inbox actions use AJAX with user feedback via localized `i18n` strings.
+- Dashboard Quick Status uses AJAX then full page reload on success; other dashboard/rules/inbox actions use AJAX with localized `i18n` feedback.
 
 ## Performance
 
@@ -52,7 +52,7 @@ Cross-cutting quality standards. See also: `edminboost-anm-project.mdc`, `edminb
 - Avoid expensive queries on every request.
 - Options (`edminboost_anm_settings`, `edminboost_anm_rules`, `edminboost_anm_inbox`, `edminboost_anm_stats`, `edminboost_anm_version`) are not autoloaded.
 - Cap inbox growth and batch operations where the codebase already defines limits.
-- Avoid front-end impact unless explicitly requested.
+- Avoid front-end impact beyond admin bar notice panel styling/behavior for capable users when the panel is enabled.
 
 ## Privacy
 

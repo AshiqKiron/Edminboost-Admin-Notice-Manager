@@ -18,8 +18,9 @@ alwaysApply: false
 - Settings: tabbed UI via `initSettingsTabs()` on `[data-edminboost-anm-settings]` — `?tab=` query sync, `history.replaceState`, keyboard (Arrow/Home/End), `edminboost-anm-settings-tab` custom event; legacy `?tab=upsell` maps to `filtering`. Tools tab adds `.is-tab-tools` on the form (hides main Save button where appropriate). Preserve active tab in `_wp_http_referer` on submit.
 - Settings: digest live preview via `initDigestPreview()` — POST `edminboost_anm_digest_preview` with unsaved `digest[...]` fields; renders structured `content` into `[data-edminboost-anm-digest-preview-content]` with `escapeHtml()` (plain-text email still sent via `body`); debounced refresh when preview panel is open; auto-load on Notifications tab.
 - Settings: webhook live preview via `initWebhookPreview()` — POST `edminboost_anm_webhook_preview` with unsaved `webhook[message]`; shows sample line, alert `text`, and formatted JSON payload; debounced refresh; auto-load on Notifications tab.
-- Settings (Admin bar tab): `initNoticePanelSettings()` toggles `.edminboost-anm-notice-panel-bell-row` when style/position uses bell; `initNoticePanelPreview()` renders mock admin bar + sample panel into `#edminboost-anm-notice-panel-preview` using `noticePanelPositionLayouts` and panel color inputs (escape all dynamic strings).
-- Settings: admin bar panel preview via `initNoticePanelPreview()` + `initNoticePanelSettings()` — mock admin bar on the Admin bar tab (`edminboost-anm-notice-panel-layout__preview`); styles `link`|`bell_link`|`dropdown`|`dropdown_compact`.
+- Settings (Notices tab): `initHidingNotificationsSettings()` on `[data-edminboost-anm-hiding-visibility]` — radio modes with nested `.edminboost-anm-hiding-visibility-options__option` user pickers (`only` / `except`); syncs chips/hidden inputs via `edminboost_anm_search_users`.
+- Settings (Admin bar tab): `initNoticePanelPreview()` — toggles `.edminboost-anm-notice-panel-bell-row` (`syncBellRows`), applies panel color CSS vars on `#edminboost-anm-notice-panel-preview`, renders mock admin bar + open dropdown into `[data-edminboost-anm-notice-panel-preview-stage]` using `noticePanelPositionLayouts`, realistic localized sample notices (per-notice `noticePanelSample*Source` keys), and color inputs; refreshes on tab switch (`edminboost-anm-settings-tab` → `admin_bar`); escape all dynamic strings.
+- Dashboard: Quick Status enable toggle reloads the page after successful AJAX save (reflects global kill switch across admin).
 - Settings: field help via `initSettingsHelpTips()` — `.edminboost-anm-help-tip[data-tip]` with optional `data-tip-placement` (`below` default, `left`); hover/focus popup; `click`/`mousedown` use `stopPropagation` so tips do not toggle segmented controls.
 - Settings: notice display mode — `initManageNoticesMode()` on `[data-edminboost-anm-manage-mode]` (`.edminboost-anm-segmented` radios); shows `[data-edminboost-anm-compact-panel-tip]` when `compact_panel` is selected.
 - Settings: ad redirect URL list — `initBlockAdRedirectsSettings()` on `[data-edminboost-anm-redirect-block]`; clones hidden template row `.edminboost-anm-redirect-block-row-template` into `[data-edminboost-anm-redirect-block-rows]`; `block_ad_redirects[urls][]` inputs.
@@ -34,7 +35,7 @@ alwaysApply: false
 
 ### `admin/js/edminboost-anm-notices.js`
 
-- Loaded when panel enabled and `EDMINBOOST_ANM_Settings::notice_panel_style_is_dropdown( style )` (`dropdown`, `dropdown_compact`).
+- Loaded when admin bar panel is shown, style is dropdown (`dropdown`, `dropdown_compact`), and user has capability — in wp-admin or on the front end when `is_admin_bar_showing()` (via `EDMINBOOST_ANM_Notices::enqueue_admin_bar_dropdown_script()`).
 - Targets `#wp-admin-bar-edminboost-anm-notices` — toggles `#edminboost-anm-notices-panel` with `aria-expanded`, click-outside close, Escape key.
 - Panel row actions (hide for me/all, display as normal) use localized `edminboostAnmNotices` (`ajaxUrl`, `nonce`, `badgeStyle`, `i18n`). Markup from `edminboost-anm-notice-panel-dropdown.php` via admin bar `meta.html` (`$edminboost_anm_panel_layout` `detailed`|`compact`).
 - After hide actions, `updateBadgeCount()` respects `badgeStyle` (dot/none/capped counts via `formatBadgeDisplayCount`).
@@ -65,7 +66,7 @@ alwaysApply: false
 		digestPreviewBlocked, digestPreviewRules,
 		webhookPreviewLoading, webhookPreviewError,
 		webhookPreviewSample, webhookPreviewInbox,
-		noticePanelPreview* // mock bar/panel strings (Disabled, sample notices, actions, etc.)
+		noticePanelPreview*, noticePanelSample* // mock bar/panel strings; sample notices include per-row source keys
 	}
 }
 ```
@@ -75,10 +76,10 @@ alwaysApply: false
 - Prefix all selectors with `.edminboost-anm-` to avoid admin conflicts.
 - Layout: `.edminboost-anm-wrap`, `.edminboost-anm-hero`, `.edminboost-anm-card`, `.edminboost-anm-status`.
 - Status modifiers: `.is-active`, `.is-inactive`, `.is-ready`.
-- Page modifiers: `.edminboost-anm-settings`, `.edminboost-anm-settings-tabs`, `.edminboost-anm-tab-panel`, `.edminboost-anm-settings-form.is-tab-tools`, `.edminboost-anm-segmented`, `.edminboost-anm-notice-handling-table`, `.edminboost-anm-digest-layout__columns`, `.edminboost-anm-redirect-block-*`, inbox list table, rules presets.
+- Page modifiers: `.edminboost-anm-settings`, `.edminboost-anm-settings-tabs`, `.edminboost-anm-tab-panel`, `.edminboost-anm-settings-form.is-tab-tools`, `.edminboost-anm-segmented`, `.edminboost-anm-hiding-visibility-options*`, `.edminboost-anm-notice-handling-table`, `.edminboost-anm-digest-layout__columns`, `.edminboost-anm-redirect-block-*`, inbox list table, rules presets.
 - Help tips: `.edminboost-anm-help-tip`, `.edminboost-anm-help-tip-popup`.
 - Notifications previews: `.edminboost-anm-digest-preview*`, `.edminboost-anm-digest-layout__preview`, `.edminboost-anm-webhook-preview*` (notice-type modifiers `.is-info`, `.is-success`, `.is-warning`, `.is-error`).
-- Admin bar (live + settings mock): `.edminboost-anm-notices--dropdown`, `.edminboost-anm-notices--bell`, `.edminboost-anm-notices--facebook`, `.edminboost-anm-notices-badge--pulse`, `.edminboost-anm-notices-panel--compact`, `.edminboost-anm-notice-panel-layout__preview`, `.edminboost-anm-notice-panel-preview*`.
+- Admin bar (live + settings mock): `.edminboost-anm-notices--dropdown`, `.edminboost-anm-notices--bell`, `.edminboost-anm-notices--facebook`, `.edminboost-anm-notices-badge--pulse`, `.edminboost-anm-notices-panel--compact`, `.edminboost-anm-notice-panel-layout__preview`, `.edminboost-anm-notice-panel-preview*` (preview colors via CSS vars scoped under `#edminboost-anm-notice-panel-preview`; bell icon uses dashicons).
 - Admin bar: `.edminboost-anm-notices--open`, `.edminboost-anm-notices-badge`, `.edminboost-anm-howdy-dot`.
 
 ## Partials (`admin/partials/`)
@@ -102,11 +103,12 @@ alwaysApply: false
 
 | Handle | File | When |
 |--------|------|------|
-| `edminboost-anm-admin` (style) | `admin/css/edminboost-anm-admin.css` | Plugin screens |
+| `edminboost-anm-admin` (style) | `admin/css/edminboost-anm-admin.css` | Plugin screens (deps: `list-tables` on inbox/settings, `dashicons`) |
 | `edminboost-anm-admin` (script) | `admin/js/edminboost-anm-admin.js` | Plugin screens only |
 | `list-tables` (style) | WordPress core | Inbox and Settings plugin screens |
-| `edminboost-anm-notices` (style) | same CSS file | All wp-admin when plugin enabled |
-| `edminboost-anm-notices` (script) | `admin/js/edminboost-anm-notices.js` | wp-admin when notice panel dropdown or dropdown_compact |
+| `dashicons` (style) | WordPress core | Plugin screens; admin bar notice panel (live) |
+| `edminboost-anm-notices` (style) | same CSS file | wp-admin when enabled; front end when admin bar panel active for capable user (deps include `dashicons` when panel shown) |
+| `edminboost-anm-notices` (script) | `admin/js/edminboost-anm-notices.js` | Dropdown styles in wp-admin or front-end admin bar |
 | `edminboost-anm-notice-inline` (script) | `admin/js/edminboost-anm-notice-inline.js` | wp-admin (non–plugin screens) when plugin enabled + capability |
 | `edminboost-anm-interceptor` (script) | `admin/js/edminboost-anm-interceptor.js` | All wp-admin when plugin enabled |
 
