@@ -129,7 +129,8 @@ class EDMINBOOST_ANM_Admin {
 		}
 
 		$style_deps = array();
-		if ( false !== strpos( (string) $hook_suffix, self::PAGE_SLUG . '-inbox' ) ) {
+		if ( false !== strpos( (string) $hook_suffix, self::PAGE_SLUG . '-inbox' )
+			|| false !== strpos( (string) $hook_suffix, self::PAGE_SLUG . '-settings' ) ) {
 			wp_enqueue_style( 'list-tables' );
 			$style_deps[] = 'list-tables';
 		}
@@ -174,10 +175,16 @@ class EDMINBOOST_ANM_Admin {
 	 * @return array
 	 */
 	public static function get_localized_data() {
+		$notice_panel_position_layouts = array();
+		foreach ( EDMINBOOST_ANM_Settings::get_notice_panel_position_slugs() as $position_slug ) {
+			$notice_panel_position_layouts[ $position_slug ] = EDMINBOOST_ANM_Settings::get_notice_panel_preview_layout( $position_slug );
+		}
+
 		return array(
 			'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( 'edminboost_anm_admin' ),
 			'pageSlug' => self::PAGE_SLUG,
+			'noticePanelPositionLayouts' => $notice_panel_position_layouts,
 			'i18n'     => array(
 				'saved'           => __( 'Settings saved.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'confirmDelete'   => __( 'Delete this rule?', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -212,6 +219,30 @@ class EDMINBOOST_ANM_Admin {
 				'digestPreviewNoNotices'=> __( 'No intercepted notices in the inbox yet.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'digestPreviewBlocked'  => __( 'Blocked this month', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'digestPreviewRules'    => __( 'Active auto-rules', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'webhookPreviewLoading' => __( 'Loading preview…', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'webhookPreviewError'   => __( 'Could not load webhook preview.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'webhookPreviewSample'  => __( 'Sample notice', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'webhookPreviewInbox'   => __( 'Based on your latest inbox notice', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelPreviewDisabled' => __( 'Enable the admin bar panel to preview.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelPreviewNotices'  => __( 'Notices', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelPreviewAdminNotices' => __( 'Admin notices', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelPreviewSeeAll'   => __( 'See all notifications', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelPreviewHowdy'    => __( 'Howdy, Admin', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelPreviewSiteName' => __( 'My Site', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelSample1'         => __( 'A plugin update is available.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelSample2'         => __( 'Please review our product on WordPress.org.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelSample3'         => __( 'Your site health check found improvements.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelSampleSource'    => __( 'Sample Plugin', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelPreviewClose'    => __( 'Close panel', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelPreviewDismiss'  => __( 'Dismiss from panel', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelSampleFirstLogged' => sprintf(
+					/* translators: %s: sample date/time for panel preview only */
+					__( 'First logged: %s', EDMINBOOST_ANM_TEXT_DOMAIN ),
+					__( 'Mar 15, 2024 10:30 am', EDMINBOOST_ANM_TEXT_DOMAIN )
+				),
+				'noticePanelPreviewDisplayNormal' => __( 'Display notice as normal', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelPreviewHideForMe'     => __( 'Hide for me', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'noticePanelPreviewHideForAll'    => __( 'Hide for all', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			),
 		);
 	}
@@ -419,17 +450,20 @@ class EDMINBOOST_ANM_Admin {
 	/**
 	 * Render a settings help tip (WordPress dashicons + hover tooltip).
 	 *
-	 * @param string $message Help text.
+	 * @param string $message   Help text.
+	 * @param string $placement Popup placement: `below` (default) or `left`.
 	 * @return string Safe HTML.
 	 */
-	public static function help_tip( $message ) {
-		$message = (string) $message;
-		$label   = wp_strip_all_tags( $message );
+	public static function help_tip( $message, $placement = 'below' ) {
+		$message   = (string) $message;
+		$label     = wp_strip_all_tags( $message );
+		$placement = 'left' === $placement ? 'left' : 'below';
 
 		return sprintf(
-			'<span class="dashicons dashicons-info-outline edminboost-anm-help-tip" tabindex="0" role="button" aria-label="%1$s" data-tip="%2$s"></span>',
+			'<span class="dashicons dashicons-info-outline edminboost-anm-help-tip" tabindex="0" role="button" aria-label="%1$s" data-tip="%2$s" data-tip-placement="%3$s"></span>',
 			esc_attr( $label ),
-			esc_attr( $message )
+			esc_attr( $message ),
+			esc_attr( $placement )
 		);
 	}
 

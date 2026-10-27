@@ -363,19 +363,19 @@ class EDMINBOOST_ANM_Settings {
 			? $input['notice_panel']
 			: array();
 
-		$allowed_styles = array( 'link', 'dropdown' );
+		$allowed_styles = self::get_notice_panel_style_slugs();
 		$panel_style      = sanitize_key( $panel_input['style'] ?? 'link' );
 		if ( ! in_array( $panel_style, $allowed_styles, true ) ) {
 			$panel_style = 'link';
 		}
 
-		$allowed_positions = array( 'default', 'before_profile' );
+		$allowed_positions = self::get_notice_panel_position_slugs();
 		$panel_position    = sanitize_key( $panel_input['position'] ?? 'default' );
 		if ( ! in_array( $panel_position, $allowed_positions, true ) ) {
 			$panel_position = 'default';
 		}
 
-		$allowed_badge_styles = array( 'count', 'dot' );
+		$allowed_badge_styles = self::get_notice_panel_badge_style_slugs();
 		$panel_badge_style    = sanitize_key( $panel_input['badge_style'] ?? 'count' );
 		if ( ! in_array( $panel_badge_style, $allowed_badge_styles, true ) ) {
 			$panel_badge_style = 'count';
@@ -918,6 +918,224 @@ class EDMINBOOST_ANM_Settings {
 			'accent_hover' => '#135e96',
 			'bell_active'  => '#72aee6',
 		);
+	}
+
+	/**
+	 * Admin bar panel style choices (slug => label).
+	 *
+	 * @return array<string, string>
+	 */
+	public static function get_notice_panel_styles() {
+		return array(
+			'link'              => __( 'Text link with count', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'bell_link'         => __( 'Bell icon (opens inbox)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'dropdown'          => __( 'Notification dropdown — detailed cards', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'dropdown_compact'  => __( 'Notification dropdown — compact list', EDMINBOOST_ANM_TEXT_DOMAIN ),
+		);
+	}
+
+	/**
+	 * Allowed notice panel style slugs.
+	 *
+	 * @return string[]
+	 */
+	public static function get_notice_panel_style_slugs() {
+		return array_keys( self::get_notice_panel_styles() );
+	}
+
+	/**
+	 * Admin bar panel position choices (slug => label).
+	 *
+	 * @return array<string, string>
+	 */
+	public static function get_notice_panel_positions() {
+		return array(
+			'default'             => __( 'Default admin bar slot', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'after_site_name'     => __( 'Left bar, after site name', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'after_updates'       => __( 'Left bar, after updates', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'top_secondary_start' => __( 'Top-right area, first item', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'before_profile'      => __( 'Top right, before “Howdy” profile menu', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'after_profile'       => __( 'Top right, after “Howdy” profile menu', EDMINBOOST_ANM_TEXT_DOMAIN ),
+		);
+	}
+
+	/**
+	 * Allowed notice panel position slugs.
+	 *
+	 * @return string[]
+	 */
+	public static function get_notice_panel_position_slugs() {
+		return array_keys( self::get_notice_panel_positions() );
+	}
+
+	/**
+	 * Admin bar hook priority and parent group for a panel position.
+	 *
+	 * @param string $position Panel position slug.
+	 * @return array{hook_priority: int, parent: string}
+	 */
+	public static function get_notice_panel_admin_bar_placement( $position ) {
+		$position   = sanitize_key( $position );
+		$placements = array(
+			'default'             => array(
+				'hook_priority' => 100,
+				'parent'        => '',
+			),
+			'after_site_name'     => array(
+				'hook_priority' => 31,
+				'parent'        => '',
+			),
+			'after_updates'       => array(
+				'hook_priority' => 51,
+				'parent'        => '',
+			),
+			'top_secondary_start' => array(
+				'hook_priority' => 201,
+				'parent'        => 'top-secondary',
+			),
+			'before_profile'      => array(
+				'hook_priority' => 9990,
+				'parent'        => 'top-secondary',
+			),
+			'after_profile'       => array(
+				'hook_priority' => 9993,
+				'parent'        => 'top-secondary',
+			),
+		);
+
+		if ( isset( $placements[ $position ] ) ) {
+			return $placements[ $position ];
+		}
+
+		return $placements['default'];
+	}
+
+	/**
+	 * Preview mock bar layout key for settings UI (matches admin JS).
+	 *
+	 * @param string $position Panel position slug.
+	 * @return string
+	 */
+	public static function get_notice_panel_preview_layout( $position ) {
+		$position = sanitize_key( $position );
+		$layouts  = array(
+			'default'             => 'right',
+			'after_site_name'     => 'left',
+			'after_updates'       => 'left',
+			'top_secondary_start' => 'right',
+			'before_profile'      => 'profile_before',
+			'after_profile'       => 'profile_after',
+		);
+
+		return $layouts[ $position ] ?? 'right';
+	}
+
+	/**
+	 * Whether the position uses Facebook-style bell styling beside Howdy.
+	 *
+	 * @param string $position Panel position slug.
+	 * @return bool
+	 */
+	public static function notice_panel_position_uses_facebook_slot( $position ) {
+		return 'before_profile' === sanitize_key( $position );
+	}
+
+	/**
+	 * Bell unread indicator choices (slug => label).
+	 *
+	 * @return array<string, string>
+	 */
+	public static function get_notice_panel_badge_styles() {
+		return array(
+			'count'        => __( 'Number badge', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'count_9plus'  => __( 'Number badge (9+ cap)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'count_99plus' => __( 'Number badge (99+ cap)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'dot'          => __( 'Dot only (no count)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'dot_pulse'    => __( 'Pulsing dot (no count)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'none'         => __( 'Hidden (no visual indicator)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+		);
+	}
+
+	/**
+	 * Allowed notice panel badge style slugs.
+	 *
+	 * @return string[]
+	 */
+	public static function get_notice_panel_badge_style_slugs() {
+		return array_keys( self::get_notice_panel_badge_styles() );
+	}
+
+	/**
+	 * Visible numeric text for the bell badge (respects cap styles).
+	 *
+	 * @param int    $count       Active notice count.
+	 * @param string $badge_style Badge style slug.
+	 * @return string
+	 */
+	public static function format_notice_panel_badge_display_count( $count, $badge_style ) {
+		$count = max( 0, (int) $count );
+		if ( $count <= 0 ) {
+			return '0';
+		}
+
+		$badge_style = sanitize_key( $badge_style );
+
+		if ( 'count_9plus' === $badge_style && $count > 9 ) {
+			return '9+';
+		}
+
+		if ( 'count_99plus' === $badge_style && $count > 99 ) {
+			return '99+';
+		}
+
+		return (string) $count;
+	}
+
+	/**
+	 * Whether a badge style uses a dot instead of a numeric pill.
+	 *
+	 * @param string $badge_style Badge style slug.
+	 * @return bool
+	 */
+	public static function notice_panel_badge_style_uses_dot( $badge_style ) {
+		return in_array( sanitize_key( $badge_style ), array( 'dot', 'dot_pulse' ), true );
+	}
+
+	/**
+	 * Whether a badge style shows no visual indicator on the bell.
+	 *
+	 * @param string $badge_style Badge style slug.
+	 * @return bool
+	 */
+	public static function notice_panel_badge_style_is_hidden( $badge_style ) {
+		return 'none' === sanitize_key( $badge_style );
+	}
+
+	/**
+	 * Whether a panel style opens an in-bar dropdown panel.
+	 *
+	 * @param string $style Panel style slug.
+	 * @return bool
+	 */
+	public static function notice_panel_style_is_dropdown( $style ) {
+		return in_array( sanitize_key( $style ), array( 'dropdown', 'dropdown_compact' ), true );
+	}
+
+	/**
+	 * Whether a panel style uses the bell trigger (badge colors apply).
+	 *
+	 * @param string $style    Panel style slug.
+	 * @param string $position Panel position slug.
+	 * @return bool
+	 */
+	public static function notice_panel_style_uses_bell( $style, $position = 'default' ) {
+		$style = sanitize_key( $style );
+
+		if ( in_array( $style, array( 'bell_link', 'dropdown', 'dropdown_compact' ), true ) ) {
+			return true;
+		}
+
+		return 'link' === $style && self::notice_panel_position_uses_facebook_slot( $position );
 	}
 
 	/**

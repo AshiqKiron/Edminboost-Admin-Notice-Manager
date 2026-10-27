@@ -53,8 +53,11 @@ Yes. When uninstalled, all plugin options are removed from the database.
 == Changelog ==
 
 = 1.1.1 =
+* Settings (Admin bar): Additional panel positions — left bar (after site name or updates), top-right first slot, and before or after the Howdy profile menu.
+* Settings (Admin bar): Live panel preview on the right — updates as you change style, position, badge, and colors.
+* Settings (Admin bar): Additional panel styles — bell icon link to inbox, detailed dropdown, and compact list dropdown.
 * Settings (Notifications): Weekly Notice Diet digest — customize subject, opening/closing text, stats and inbox sections, and preview the email before saving.
-* Settings (Notifications): Webhook alerts — customize the alert message text with placeholders for source, notice body, type, and site.
+* Settings (Notifications): Webhook alerts — customize the alert message text with placeholders for source, notice body, type, and site; live preview of alert text and JSON payload below the message field.
 * Settings (Notices & access): ACL and per-user visibility — role-based display/hide plus hide from all, only selected users, or all except selected (user search picker).
 * Settings (General): Spam words and whitelist — comma-separated word lists to hide matching notices entirely or always show them on screen.
 * Settings (General): Block ad redirects — list admin URLs to block automatic post-install or promotional page loads (optional enable toggle).
@@ -66,7 +69,7 @@ Yes. When uninstalled, all plugin options are removed from the database.
 * Debug tools: choose notice levels (error, warning, success, info, upsell) before Add to Inbox or Trigger Live Notices.
 * Organize Settings into tabbed sections (General, Notices & access, Admin bar, Filtering, Security, Notifications, Migration & Tools).
 * Add admin bar panel style and position options: notification dropdown (bell icon) and placement beside the Howdy profile menu.
-* Add red indicator option for the dropdown bell: number badge or dot-only.
+* Add unread indicator options for the bell: number badge, 9+ / 99+ caps, dot, pulsing dot, or hidden (count still available to screen readers).
 * Add customizable panel colors (dot/badge, badge text, accent, link hover, open bell highlight).
 * Add Default WordPress Notices section on Auto-Rules with one-click convert and a converted-state button tooltip.
 * Inbox and preset Convert to Rule buttons show a converted tooltip on hover; state persists after refresh and can be undone with another click.

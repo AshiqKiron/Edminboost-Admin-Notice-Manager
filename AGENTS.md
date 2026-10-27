@@ -54,6 +54,9 @@ languages/  uninstall.php  readme.txt  composer.json
 - AJAX for dashboard/rules/inbox (including `edminboost_anm_inbox_list` sort), importer, capture, WP preset conversion, user search, notice hide/reset hidden; weekly digest via WP-Cron; optional webhook (user URL, off by default).
 - **Ad redirects**: optional `block_ad_redirects` URL blocklist — admin-only redirect filtering via `EDMINBOOST_ANM_Ad_Redirects`.
 - **Inline notice controls**: `edminboost-anm-notice-inline.js` on non–plugin-screen wp-admin for “Hide for me” / “Hide for all”.
+- **Notifications previews**: Settings Notifications tab — two-column digest form + sticky structured email preview; live webhook text/JSON preview (no send on preview).
+- **Admin bar panel**: Styles `link`, `bell_link`, `dropdown`, `dropdown_compact`; six position slots; badge caps and dot/pulse/none; compact vs detailed dropdown markup. Settings Admin bar tab includes live mock preview (`initNoticePanelPreview`, `noticePanelPositionLayouts`).
+- **Settings UX**: `EDMINBOOST_ANM_Admin::help_tip()` on most fields; segmented notice-display control (General); redirect blocklist as list table (Security). Enqueues `list-tables` on inbox and settings screens.
 
 ## Admin Pages
 
@@ -79,7 +82,8 @@ Registered in `EDMINBOOST_ANM_Ajax::register_hooks()` — all use `verify_reques
 | `edminboost_anm_search_users` | User picker for hiding-notifications settings |
 | `edminboost_anm_notice_hide` | Per-user or site-wide hide from inline UI or dropdown |
 | `edminboost_anm_reset_hidden_notices` | Reset hidden-notice preferences (user or site) |
-| `edminboost_anm_digest_preview` | Plain-text weekly digest preview (unsaved `digest` fields sanitized server-side) |
+| `edminboost_anm_digest_preview` | Digest preview: to/from/subject, plain `body`, and structured `content` for the settings UI (unsaved `digest` fields sanitized server-side) |
+| `edminboost_anm_webhook_preview` | Webhook alert text and JSON payload preview using latest inbox notice or sample data (unsaved `webhook[message]` sanitized server-side) |
 | `edminboost_anm_seed_test_notices` / `edminboost_anm_trigger_test_notices` | `verify_debug_request()` |
 
 ## Extension Hooks

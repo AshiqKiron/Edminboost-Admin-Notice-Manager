@@ -59,16 +59,34 @@
 			}
 		}
 
-		function updateBadgeCount(count) {
-			var badge = root.querySelector('.edminboost-anm-notices-badge [aria-hidden="true"]');
-			if (badge) {
-				badge.textContent = String(count);
+		function formatBadgeDisplayCount(count, badgeStyle) {
+			if (badgeStyle === 'count_9plus' && count > 9) {
+				return '9+';
 			}
-			if (count <= 0) {
-				var badgeWrap = root.querySelector('.edminboost-anm-notices-badge');
+			if (badgeStyle === 'count_99plus' && count > 99) {
+				return '99+';
+			}
+			return String(count);
+		}
+
+		function updateBadgeCount(count) {
+			var badgeStyle = config.badgeStyle || 'count';
+			var badgeWrap = root.querySelector('.edminboost-anm-notices-badge');
+
+			if (count <= 0 || badgeStyle === 'none') {
 				if (badgeWrap) {
 					badgeWrap.remove();
 				}
+				return;
+			}
+
+			if (badgeStyle === 'dot' || badgeStyle === 'dot_pulse') {
+				return;
+			}
+
+			var badge = root.querySelector('.edminboost-anm-notices-badge [aria-hidden="true"]');
+			if (badge) {
+				badge.textContent = formatBadgeDisplayCount(count, badgeStyle);
 			}
 		}
 

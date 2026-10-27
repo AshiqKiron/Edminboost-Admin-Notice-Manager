@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 - Check capabilities before rendering admin pages: `current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY )`.
 - Escape output: `esc_html()`, `esc_attr()`, `esc_url()`, `esc_html__()`, `esc_html_e()`.
 - Sanitize all settings via `EDMINBOOST_ANM_Settings::sanitize()` as `sanitize_callback` in `register_setting()`.
-- New AJAX handlers: register in `EDMINBOOST_ANM_Ajax::register_hooks()`, implement `handle_*`, call `verify_request()` (digest preview: sanitize nested input with dedicated helpers when accepting unsaved form fields).
+- New AJAX handlers: register in `EDMINBOOST_ANM_Ajax::register_hooks()`, implement `handle_*`, call `verify_request()` (digest/webhook preview: sanitize nested input with dedicated helpers when accepting unsaved form fields).
 
 ## WordPress APIs
 
@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 - Enqueue assets with `EDMINBOOST_ANM_VERSION` as the version string.
 - Pass data to JS via `wp_localize_script()` — global `edminboostAnmData` from `EDMINBOOST_ANM_Admin::get_localized_data()`.
 - Page slugs: `EDMINBOOST_ANM_Admin::PAGE_SLUG` with `-inbox`, `-rules`, `-settings` suffixes.
-- Inbox list: sanitize GET/POST list args via `EDMINBOOST_ANM_Admin::parse_inbox_list_args()`; paginate with `get_inbox_list_slice()` (20 per page).
+- Inbox list: sanitize GET/POST list args via `EDMINBOOST_ANM_Admin::parse_inbox_list_args()`; paginate with `get_inbox_list_slice()` (20 per page). `EDMINBOOST_ANM_Inbox::query()` honors `page` / `per_page` after filtering.
 
 ## Class Wiring
 
@@ -69,10 +69,10 @@ array(
 	'acl'                                  => array( 'roles' => array() ),
 	'notice_panel'                         => array(
 		'enabled'     => true,
-		'style'       => 'link',       // link | dropdown
-		'position'    => 'default',    // default | before_profile
-		'badge_style' => 'count',      // count | dot (dropdown)
-		'colors'      => array( /* panel color keys */ ),
+		'style'       => 'link',       // link | bell_link | dropdown | dropdown_compact
+		'position'    => 'default',    // see get_notice_panel_position_slugs()
+		'badge_style' => 'count',      // count | count_9plus | count_99plus | dot | dot_pulse | none
+		'colors'      => array( /* badge, badge_text, accent, accent_hover, bell_active */ ),
 	),
 	'upsell_preset'     => array( 'enabled' => false, 'custom_phrases' => array() ),
 	'safety_guard'      => array( 'enabled' => true, 'mode' => 'strict' ),
@@ -112,10 +112,11 @@ Separate options: `RULES_OPTION` (rule list), `INBOX_OPTION` (captured notices),
 
 `EDMINBOOST_ANM_Notices::DROPDOWN_PREVIEW_LIMIT` (8) caps dropdown preview items.
 
-- Settings help tips: `EDMINBOOST_ANM_Admin::help_tip( $message )` — escaped dashicons + `data-tip` for JS popup.
-- Digest: `EDMINBOOST_ANM_Digest::build_email()`, `get_preview()`, `get_recipients()`, `SITE_NAME_TOKEN`; filter `edminboost_anm_digest_email`.
-- Webhook: `EDMINBOOST_ANM_Webhook::build_payload()`, `build_message_text()`; filter `edminboost_anm_webhook_payload`.
-- Sanitize helpers: `EDMINBOOST_ANM_Settings::sanitize_digest_settings()`, `sanitize_webhook_settings()` (shared by Settings API and digest preview AJAX).
+- Settings help tips: `EDMINBOOST_ANM_Admin::help_tip( $message, $placement = 'below' )` — escaped dashicons + `data-tip` + `data-tip-placement` (`below`|`left`) for JS popup; output is safe HTML (escape in helper, document phpcs ignore when echoing in partials).
+- Notice panel: `EDMINBOOST_ANM_Settings::get_notice_panel_*()` registries; `get_notice_panel_admin_bar_placement()`, `get_notice_panel_preview_layout()`, `notice_panel_style_is_dropdown()`, `notice_panel_style_uses_bell()`, `format_notice_panel_badge_display_count()`, etc. `EDMINBOOST_ANM_Notices::build_notice_badge_markup()` mirrors badge rules for live admin bar.
+- Digest: `EDMINBOOST_ANM_Digest::build_email_content()`, `format_email_body_plain()`, `build_email()`, `get_preview()` (includes structured `content` + plain `body`), `get_recipients()`, `SITE_NAME_TOKEN`; filter `edminboost_anm_digest_email`.
+- Webhook: `EDMINBOOST_ANM_Webhook::build_payload()`, `build_message_text()`, `get_preview()`, `get_preview_notice()`, `get_sample_notice()`; filter `edminboost_anm_webhook_payload`.
+- Sanitize helpers: `EDMINBOOST_ANM_Settings::sanitize_digest_settings()`, `sanitize_webhook_settings()` (Settings API save; digest preview uses full digest sanitizer; webhook preview AJAX sanitizes `message` only).
 
 - Document `@var` annotations at the top of partials.
 - Prefix partial-local variables with `$edminboost_anm_` to avoid collisions.

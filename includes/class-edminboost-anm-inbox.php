@@ -226,7 +226,12 @@ class EDMINBOOST_ANM_Inbox {
 			}
 		);
 
-		return array_values( $notices );
+		$notices  = array_values( $notices );
+		$page     = max( 1, (int) $args['page'] );
+		$per_page = max( 1, (int) $args['per_page'] );
+		$offset   = ( $page - 1 ) * $per_page;
+
+		return array_slice( $notices, $offset, $per_page );
 	}
 
 	/**

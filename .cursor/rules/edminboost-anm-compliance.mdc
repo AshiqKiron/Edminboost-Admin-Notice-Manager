@@ -23,7 +23,8 @@ See `edminboost-anm-project.mdc`, `edminboost-anm-standards.mdc`, `edminboost-an
 - Inbox notice HTML: treat as untrusted; use `wp_kses_post()` or equivalent on display; sanitize fields on capture.
 - Notice hide AJAX (`edminboost_anm_notice_hide`, `edminboost_anm_reset_hidden_notices`): same `verify_request()` + capability; sanitize scope/hash inputs; persist preferences in options/user meta only.
 - Digest preview AJAX (`edminboost_anm_digest_preview`): `verify_request()`; sanitize posted `digest` via `EDMINBOOST_ANM_Settings::sanitize_digest_settings()`; return preview only — no `wp_mail()` on preview.
-- Digest/webhook settings: `sanitize_digest_settings()` and `sanitize_webhook_settings()` from Settings API save (and digest preview input).
+- Webhook preview AJAX (`edminboost_anm_webhook_preview`): `verify_request()`; sanitize posted `webhook[message]`; return preview only — no `wp_remote_post()` on preview.
+- Digest/webhook settings: `sanitize_digest_settings()` and `sanitize_webhook_settings()` on Settings API save; digest preview uses `sanitize_digest_settings()`; webhook preview sanitizes `webhook[message]` with `sanitize_textarea_field()` only.
 - Block ad redirects: sanitize URL list in `EDMINBOOST_ANM_Settings::sanitize_block_ad_redirect_urls()`; admin-only `wp_safe_redirect` — no outbound requests.
 
 ## Directory & Privacy

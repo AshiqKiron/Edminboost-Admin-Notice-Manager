@@ -31,7 +31,10 @@ Cross-cutting quality standards. See also: `edminboost-anm-project.mdc`, `edminb
 - Use meaningful headings and notices.
 - Inbox and rules UI: preserve focus and confirm destructive actions (delete rule, bulk inbox actions).
 - Settings tabs: `role="tablist"` / `role="tab"` / `role="tabpanel"` with `aria-selected`, `aria-controls`, and arrow-key navigation; panels use `hidden` when inactive.
-- Settings help tips: `role="button"`, `aria-label`, and `role="tooltip"` on the floating popup; support keyboard focus.
+- Settings help tips: `role="button"`, `aria-label`, and `role="tooltip"` on the floating popup; support keyboard focus; optional `data-tip-placement` for viewport-aware positioning (`below` or `left`).
+- Settings copy: use `help_tip()` for long field explanations; keep token/placeholder lists and counts in visible `.description` where users need them while editing.
+- Digest/webhook previews: `aria-live="polite"` on preview containers; digest body built client-side must escape all dynamic strings (`escapeHtml` in admin JS).
+- Admin bar settings preview: non-functional mock (tabindex `-1` on controls); sample notices only — must not imply live inbox data.
 - Admin bar dropdown: use `aria-haspopup`, `aria-expanded`, `aria-controls`, and screen-reader text for counts; panel `#edminboost-anm-notices-panel` uses `hidden` when closed.
 
 ## Admin UX

@@ -45,10 +45,9 @@ class EDMINBOOST_ANM_Notices {
 				$settings['notice_panel'] ?? array(),
 				EDMINBOOST_ANM_Settings::get_defaults()['notice_panel']
 			);
-			// Register before wp_admin_bar_my_account_item (9991) so the bell sits left of Howdy.
-			$priority = ( ! empty( $panel['position'] ) && 'before_profile' === $panel['position'] ) ? 9990 : 100;
+			$placement = EDMINBOOST_ANM_Settings::get_notice_panel_admin_bar_placement( $panel['position'] ?? 'default' );
 
-			add_action( 'admin_bar_menu', array( $this, 'register_admin_bar_node' ), $priority );
+			add_action( 'admin_bar_menu', array( $this, 'register_admin_bar_node' ), $placement['hook_priority'] );
 		}
 
 		/**
@@ -94,9 +93,10 @@ class EDMINBOOST_ANM_Notices {
 		}
 
 		$localized = array(
-			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-			'nonce'   => wp_create_nonce( 'edminboost_anm_admin' ),
-			'i18n'    => array(
+			'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
+			'nonce'       => wp_create_nonce( 'edminboost_anm_admin' ),
+			'badgeStyle'  => sanitize_key( $panel['badge_style'] ?? 'count' ),
+			'i18n'        => array(
 				'actionError' => __( 'Could not update this notice. Please try again.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'hideForMe'   => __( 'Hide for me', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'hideForAll'  => __( 'Hide for all', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -122,7 +122,7 @@ class EDMINBOOST_ANM_Notices {
 			);
 		}
 
-		if ( empty( $panel['enabled'] ) || 'dropdown' !== ( $panel['style'] ?? 'link' ) ) {
+		if ( empty( $panel['enabled'] ) || ! EDMINBOOST_ANM_Settings::notice_panel_style_is_dropdown( $panel['style'] ?? 'link' ) ) {
 			return;
 		}
 
@@ -177,11 +177,16 @@ class EDMINBOOST_ANM_Notices {
 		$count_all  = (int) ( $counts['all'] ?? 0 );
 		$meta_class = 'edminboost-anm-notices-trigger';
 
-		if ( 'dropdown' === $style ) {
+		if ( EDMINBOOST_ANM_Settings::notice_panel_style_is_dropdown( $style ) ) {
 			$meta_class .= ' edminboost-anm-notices--dropdown';
 		}
 
-		if ( 'before_profile' === $position ) {
+		if ( EDMINBOOST_ANM_Settings::notice_panel_style_uses_bell( $style, $position )
+			&& ! EDMINBOOST_ANM_Settings::notice_panel_position_uses_facebook_slot( $position ) ) {
+			$meta_class .= ' edminboost-anm-notices--bell';
+		}
+
+		if ( EDMINBOOST_ANM_Settings::notice_panel_position_uses_facebook_slot( $position ) ) {
 			$meta_class .= ' edminboost-anm-notices--before-profile edminboost-anm-notices--facebook';
 		}
 
@@ -193,14 +198,15 @@ class EDMINBOOST_ANM_Notices {
 			),
 		);
 
-		if ( 'before_profile' === $position ) {
-			$node['parent'] = 'top-secondary';
+		$placement = EDMINBOOST_ANM_Settings::get_notice_panel_admin_bar_placement( $position );
+		if ( ! empty( $placement['parent'] ) ) {
+			$node['parent'] = $placement['parent'];
 		}
 
-		if ( 'dropdown' === $style ) {
+		if ( EDMINBOOST_ANM_Settings::notice_panel_style_is_dropdown( $style ) ) {
 			$node['href'] = '#';
 			ob_start();
-			$this->render_dropdown_panel( $count_all, $inbox_url );
+			$this->render_dropdown_panel( $count_all, $inbox_url, $style );
 			$node['meta']['html'] = ob_get_clean();
 		} else {
 			$node['href'] = $inbox_url;
@@ -220,7 +226,7 @@ class EDMINBOOST_ANM_Notices {
 		$style    = $panel['style'] ?? 'link';
 		$position = $panel['position'] ?? 'default';
 
-		if ( 'dropdown' === $style || ( 'link' === $style && 'before_profile' === $position ) ) {
+		if ( EDMINBOOST_ANM_Settings::notice_panel_style_uses_bell( $style, $position ) ) {
 			return $this->build_facebook_bell_title( $panel, $count_all );
 		}
 
@@ -248,36 +254,76 @@ class EDMINBOOST_ANM_Notices {
 		$badge_style = $panel['badge_style'] ?? 'count';
 		$title       = '<span class="ab-icon edminboost-anm-fb-bell" aria-hidden="true"></span>';
 
-		if ( $count_all > 0 ) {
-			$count_label = esc_html(
+		$title .= $this->build_notice_badge_markup( $panel, $count_all );
+
+		$sr_label = EDMINBOOST_ANM_Settings::notice_panel_style_is_dropdown( $style )
+			? __( 'Open notifications', EDMINBOOST_ANM_TEXT_DOMAIN )
+			: __( 'View notice inbox', EDMINBOOST_ANM_TEXT_DOMAIN );
+
+		if ( $count_all > 0 && EDMINBOOST_ANM_Settings::notice_panel_badge_style_is_hidden( $badge_style ) ) {
+			$sr_label = sprintf(
+				/* translators: 1: action label, 2: notice count phrase */
+				__( '%1$s (%2$s)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				$sr_label,
 				sprintf(
 					/* translators: %d: notice count */
 					_n( '%d notice', '%d notices', $count_all, EDMINBOOST_ANM_TEXT_DOMAIN ),
 					$count_all
 				)
 			);
-
-			if ( 'dot' === $badge_style ) {
-				$title .= sprintf(
-					'<span class="edminboost-anm-notices-badge edminboost-anm-notices-badge--dot"><span class="screen-reader-text">%s</span></span>',
-					$count_label
-				);
-			} else {
-				$title .= sprintf(
-					'<span class="edminboost-anm-notices-badge"><span class="screen-reader-text">%1$s</span><span aria-hidden="true">%2$d</span></span>',
-					$count_label,
-					$count_all
-				);
-			}
 		}
 
-		$sr_label = 'dropdown' === $style
-			? esc_html__( 'Open notifications', EDMINBOOST_ANM_TEXT_DOMAIN )
-			: esc_html__( 'View notice inbox', EDMINBOOST_ANM_TEXT_DOMAIN );
-
-		$title .= sprintf( '<span class="screen-reader-text">%s</span>', $sr_label );
+		$title .= sprintf( '<span class="screen-reader-text">%s</span>', esc_html( $sr_label ) );
 
 		return $title;
+	}
+
+	/**
+	 * Build bell unread badge markup (dot, number, or none).
+	 *
+	 * @param array $panel     Notice panel settings.
+	 * @param int   $count_all Active inbox count.
+	 * @return string
+	 */
+	private function build_notice_badge_markup( $panel, $count_all ) {
+		if ( $count_all <= 0 ) {
+			return '';
+		}
+
+		$badge_style = $panel['badge_style'] ?? 'count';
+
+		if ( EDMINBOOST_ANM_Settings::notice_panel_badge_style_is_hidden( $badge_style ) ) {
+			return '';
+		}
+
+		$count_label = esc_html(
+			sprintf(
+				/* translators: %d: notice count */
+				_n( '%d notice', '%d notices', $count_all, EDMINBOOST_ANM_TEXT_DOMAIN ),
+				$count_all
+			)
+		);
+
+		if ( EDMINBOOST_ANM_Settings::notice_panel_badge_style_uses_dot( $badge_style ) ) {
+			$classes = 'edminboost-anm-notices-badge edminboost-anm-notices-badge--dot';
+			if ( 'dot_pulse' === sanitize_key( $badge_style ) ) {
+				$classes .= ' edminboost-anm-notices-badge--pulse';
+			}
+
+			return sprintf(
+				'<span class="%1$s"><span class="screen-reader-text">%2$s</span></span>',
+				esc_attr( $classes ),
+				$count_label
+			);
+		}
+
+		$display = EDMINBOOST_ANM_Settings::format_notice_panel_badge_display_count( $count_all, $badge_style );
+
+		return sprintf(
+			'<span class="edminboost-anm-notices-badge"><span class="screen-reader-text">%1$s</span><span aria-hidden="true">%2$s</span></span>',
+			$count_label,
+			esc_html( $display )
+		);
 	}
 
 	/**
@@ -285,9 +331,10 @@ class EDMINBOOST_ANM_Notices {
 	 *
 	 * @param int    $total     Total active inbox count.
 	 * @param string $inbox_url Inbox admin URL.
+	 * @param string $style     Panel style slug.
 	 * @return void
 	 */
-	private function render_dropdown_panel( $total, $inbox_url ) {
+	private function render_dropdown_panel( $total, $inbox_url, $style = 'dropdown' ) {
 		$notices = EDMINBOOST_ANM_Inbox::query(
 			array(
 				'filter'   => 'all',
@@ -297,9 +344,10 @@ class EDMINBOOST_ANM_Notices {
 			)
 		);
 
-		$edminboost_anm_notices   = $notices;
-		$edminboost_anm_inbox_url = $inbox_url;
-		$edminboost_anm_total     = (int) $total;
+		$edminboost_anm_notices        = $notices;
+		$edminboost_anm_inbox_url      = $inbox_url;
+		$edminboost_anm_total          = (int) $total;
+		$edminboost_anm_panel_layout   = 'dropdown_compact' === sanitize_key( $style ) ? 'compact' : 'detailed';
 
 		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-notice-panel-dropdown.php';
 	}

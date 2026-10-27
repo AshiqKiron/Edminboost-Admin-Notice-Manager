@@ -38,6 +38,7 @@ class EDMINBOOST_ANM_Ajax {
 			'edminboost_anm_reset_hidden_notices',
 			'edminboost_anm_notice_hide',
 			'edminboost_anm_digest_preview',
+			'edminboost_anm_webhook_preview',
 		);
 
 		foreach ( $actions as $action ) {
@@ -607,6 +608,25 @@ class EDMINBOOST_ANM_Ajax {
 		}
 
 		wp_send_json_success( EDMINBOOST_ANM_Digest::get_preview( $settings ) );
+	}
+
+	/**
+	 * Preview webhook alert text and JSON payload using saved or unsaved message field.
+	 *
+	 * @return void
+	 */
+	public function handle_webhook_preview() {
+		$this->verify_request();
+
+		$settings = EDMINBOOST_ANM_Settings::get();
+
+		if ( isset( $_POST['webhook'] ) && is_array( $_POST['webhook'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$webhook_input = wp_unslash( $_POST['webhook'] );
+			$settings['webhook']['message'] = sanitize_textarea_field( $webhook_input['message'] ?? '' );
+		}
+
+		wp_send_json_success( EDMINBOOST_ANM_Webhook::get_preview( $settings ) );
 	}
 
 	/**

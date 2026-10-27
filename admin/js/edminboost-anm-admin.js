@@ -948,21 +948,37 @@
 			popup.hidden = false;
 
 			var rect = trigger.getBoundingClientRect();
-			var top = rect.bottom + window.scrollY + 6;
-			var left = rect.left + window.scrollX;
+			var placement = trigger.getAttribute('data-tip-placement') || 'below';
+			var popupRect = popup.getBoundingClientRect();
+			var top;
+			var left;
+
+			if (placement === 'left') {
+				top = rect.top + window.scrollY + (rect.height - popupRect.height) / 2;
+				left = rect.left + window.scrollX - popupRect.width - 8;
+				if (left < window.scrollX + 8) {
+					left = rect.right + window.scrollX + 8;
+				}
+			} else {
+				top = rect.bottom + window.scrollY + 6;
+				left = rect.left + window.scrollX;
+				var maxLeft = window.scrollX + document.documentElement.clientWidth - popupRect.width - 8;
+				if (left > maxLeft) {
+					left = Math.max(window.scrollX + 8, maxLeft);
+				}
+			}
 
 			popup.style.top = top + 'px';
 			popup.style.left = left + 'px';
-
-			var popupRect = popup.getBoundingClientRect();
-			var maxLeft = window.scrollX + document.documentElement.clientWidth - popupRect.width - 8;
-			if (left > maxLeft) {
-				left = Math.max(window.scrollX + 8, maxLeft);
-				popup.style.left = left + 'px';
-			}
 		}
 
 		tips.forEach(function (tip) {
+			tip.addEventListener('click', function (event) {
+				event.stopPropagation();
+			});
+			tip.addEventListener('mousedown', function (event) {
+				event.stopPropagation();
+			});
 			tip.addEventListener('mouseenter', function () {
 				showTip(tip);
 			});
@@ -1036,36 +1052,84 @@
 	}
 
 	function initBlockAdRedirectsSettings() {
-		var tbody = document.querySelector('[data-edminboost-anm-redirect-block-rows]');
-		var addBtn = document.querySelector('[data-edminboost-anm-add-redirect-block]');
-		var template = document.getElementById('edminboost-anm-redirect-block-row-template');
-
-		if (!tbody || !addBtn || !template) {
+		var root = document.querySelector('[data-edminboost-anm-redirect-block]');
+		if (!root) {
 			return;
 		}
 
-		function ensureAtLeastOneRow() {
-			if (!tbody.querySelector('tr')) {
-				addRow();
+		var tbody = root.querySelector('[data-edminboost-anm-redirect-block-rows]');
+		var addBtn = root.querySelector('[data-edminboost-anm-add-redirect-block]');
+		if (!tbody || !addBtn) {
+			return;
+		}
+
+		function templateRow() {
+			return tbody.querySelector('.edminboost-anm-redirect-block-row-template');
+		}
+
+		function visibleRows() {
+			return tbody.querySelectorAll('tr:not(.edminboost-anm-redirect-block-row-template)');
+		}
+
+		function prepareClonedRow(clone) {
+			clone.classList.remove('edminboost-anm-redirect-block-row-template');
+			clone.hidden = false;
+			clone.removeAttribute('aria-hidden');
+
+			var input = clone.querySelector('input[type="text"]');
+			if (input) {
+				input.value = '';
+				input.disabled = false;
+				input.removeAttribute('tabindex');
+				input.removeAttribute('id');
+			}
+
+			var label = clone.querySelector('label[for]');
+			if (label) {
+				label.removeAttribute('for');
+			}
+
+			var removeBtn = clone.querySelector('.edminboost-anm-redirect-block-remove');
+			if (removeBtn) {
+				removeBtn.removeAttribute('tabindex');
+				removeBtn.removeAttribute('aria-hidden');
 			}
 		}
 
 		function addRow() {
-			var clone = template.content.cloneNode(true);
-			tbody.appendChild(clone);
+			var proto = templateRow();
+			if (!proto) {
+				return;
+			}
+
+			var clone = proto.cloneNode(true);
+			prepareClonedRow(clone);
+			tbody.insertBefore(clone, proto);
 		}
 
-		addBtn.addEventListener('click', addRow);
+		function ensureAtLeastOneRow() {
+			if (visibleRows().length === 0) {
+				addRow();
+			}
+		}
+
+		addBtn.addEventListener('click', function (event) {
+			event.preventDefault();
+			addRow();
+		});
 
 		tbody.addEventListener('click', function (event) {
 			var removeBtn = event.target.closest('.edminboost-anm-redirect-block-remove');
 			if (!removeBtn) {
 				return;
 			}
+
 			var row = removeBtn.closest('tr');
-			if (row) {
-				row.remove();
+			if (!row || row.classList.contains('edminboost-anm-redirect-block-row-template')) {
+				return;
 			}
+
+			row.remove();
 			ensureAtLeastOneRow();
 		});
 	}
@@ -1081,10 +1145,80 @@
 		var toEl = panel.querySelector('[data-edminboost-anm-digest-preview-to]');
 		var fromEl = panel.querySelector('[data-edminboost-anm-digest-preview-from]');
 		var subjectEl = panel.querySelector('[data-edminboost-anm-digest-preview-subject]');
-		var bodyEl = panel.querySelector('[data-edminboost-anm-digest-preview-body]');
+		var contentEl = panel.querySelector('[data-edminboost-anm-digest-preview-content]');
 		var i18n = data.i18n || {};
 		var refreshTimer = null;
 		var loadingText = i18n.digestPreviewLoading || 'Loading preview…';
+
+		function escapeHtml(text) {
+			var div = document.createElement('div');
+			div.textContent = text == null ? '' : String(text);
+			return div.innerHTML;
+		}
+
+		function noticeTypeClass(type) {
+			var slug = String(type || 'info').toLowerCase();
+			if (slug === 'warning' || slug === 'warn') {
+				return 'is-warning';
+			}
+			if (slug === 'error') {
+				return 'is-error';
+			}
+			if (slug === 'success') {
+				return 'is-success';
+			}
+			return 'is-info';
+		}
+
+		function renderDigestContent(content) {
+			if (!contentEl) {
+				return;
+			}
+
+			if (!content) {
+				contentEl.className = 'edminboost-anm-digest-preview__content is-error';
+				contentEl.textContent = i18n.digestPreviewError || 'Could not load digest preview.';
+				return;
+			}
+
+			var html = '';
+			html += '<p class="edminboost-anm-digest-preview__intro">' + escapeHtml(content.intro) + '</p>';
+
+			if (content.stats) {
+				html += '<section class="edminboost-anm-digest-preview__section">';
+				html += '<h5 class="edminboost-anm-digest-preview__section-title">' + escapeHtml(i18n.digestPreviewAtGlance || 'At a glance') + '</h5>';
+				html += '<ul class="edminboost-anm-digest-preview__stats">';
+				html += '<li class="edminboost-anm-digest-preview__stat"><span class="edminboost-anm-digest-preview__stat-value">' + escapeHtml(content.stats.monthly_blocked) + '</span><span class="edminboost-anm-digest-preview__stat-label">' + escapeHtml(i18n.digestPreviewBlocked || 'Blocked this month') + '</span></li>';
+				html += '<li class="edminboost-anm-digest-preview__stat"><span class="edminboost-anm-digest-preview__stat-value">' + escapeHtml(content.stats.active_rules) + '</span><span class="edminboost-anm-digest-preview__stat-label">' + escapeHtml(i18n.digestPreviewRules || 'Active auto-rules') + '</span></li>';
+				html += '</ul></section>';
+			}
+
+			if (content.recent) {
+				html += '<section class="edminboost-anm-digest-preview__section">';
+				html += '<h5 class="edminboost-anm-digest-preview__section-title">' + escapeHtml(i18n.digestPreviewRecent || 'Recent intercepted notices') + '</h5>';
+				if (content.recent.empty) {
+					html += '<p class="edminboost-anm-digest-preview__empty">' + escapeHtml(i18n.digestPreviewNoNotices || 'No intercepted notices in the inbox yet.') + '</p>';
+				} else {
+					html += '<ul class="edminboost-anm-digest-preview__notice-list">';
+					content.recent.items.forEach(function (item) {
+						html += '<li class="edminboost-anm-digest-preview__notice">';
+						html += '<p class="edminboost-anm-digest-preview__notice-source"><span>' + escapeHtml(item.source) + '</span>';
+						html += '<span class="edminboost-anm-digest-preview__notice-type ' + noticeTypeClass(item.type) + '">' + escapeHtml(item.type || 'info') + '</span></p>';
+						html += '<p class="edminboost-anm-digest-preview__notice-message">' + escapeHtml(item.message) + '</p>';
+						html += '</li>';
+					});
+					html += '</ul>';
+				}
+				html += '</section>';
+			}
+
+			if (content.footer) {
+				html += '<p class="edminboost-anm-digest-preview__footer">' + escapeHtml(content.footer) + '</p>';
+			}
+
+			contentEl.className = 'edminboost-anm-digest-preview__content';
+			contentEl.innerHTML = html;
+		}
 
 		function fieldValue(id) {
 			var el = document.getElementById(id);
@@ -1106,8 +1240,9 @@
 			if (subjectEl) {
 				subjectEl.textContent = '';
 			}
-			if (bodyEl) {
-				bodyEl.textContent = '';
+			if (contentEl) {
+				contentEl.className = 'edminboost-anm-digest-preview__content is-loading';
+				contentEl.textContent = loadingText;
 			}
 		}
 
@@ -1133,7 +1268,6 @@
 
 			btn.disabled = true;
 			setLoadingState();
-			panel.hidden = false;
 
 			return fetch(data.ajaxUrl, {
 				method: 'POST',
@@ -1144,9 +1278,18 @@
 			}).then(function (result) {
 				btn.disabled = false;
 				if (!result.success || !result.data) {
-					setLoadingState();
-					if (bodyEl) {
-						bodyEl.textContent = (result.data && result.data.message) || i18n.digestPreviewError || 'Could not load digest preview.';
+					if (toEl) {
+						toEl.textContent = '';
+					}
+					if (fromEl) {
+						fromEl.textContent = '';
+					}
+					if (subjectEl) {
+						subjectEl.textContent = '';
+					}
+					if (contentEl) {
+						contentEl.className = 'edminboost-anm-digest-preview__content is-error';
+						contentEl.textContent = (result.data && result.data.message) || i18n.digestPreviewError || 'Could not load digest preview.';
 					}
 					return;
 				}
@@ -1160,22 +1303,26 @@
 				if (subjectEl) {
 					subjectEl.textContent = result.data.subject || '';
 				}
-				if (bodyEl) {
-					bodyEl.textContent = result.data.body || '';
-				}
+				renderDigestContent(result.data.content);
 			}).catch(function () {
 				btn.disabled = false;
-				setLoadingState();
-				if (bodyEl) {
-					bodyEl.textContent = i18n.digestPreviewError || 'Could not load digest preview.';
+				if (toEl) {
+					toEl.textContent = '';
+				}
+				if (fromEl) {
+					fromEl.textContent = '';
+				}
+				if (subjectEl) {
+					subjectEl.textContent = '';
+				}
+				if (contentEl) {
+					contentEl.className = 'edminboost-anm-digest-preview__content is-error';
+					contentEl.textContent = i18n.digestPreviewError || 'Could not load digest preview.';
 				}
 			});
 		}
 
 		function scheduleDigestPreviewRefresh() {
-			if (panel.hidden) {
-				return;
-			}
 			clearTimeout(refreshTimer);
 			refreshTimer = setTimeout(loadDigestPreview, 400);
 		}
@@ -1213,23 +1360,430 @@
 		}
 	}
 
-	function initNoticePanelSettings() {
-		var styleSelect = document.getElementById('edminboost-anm-notice-panel-style');
-		var dropdownRows = document.querySelectorAll('.edminboost-anm-notice-panel-dropdown-row');
-
-		if (!styleSelect || !dropdownRows.length) {
+	function initWebhookPreview() {
+		var btn = document.getElementById('edminboost-anm-webhook-preview-btn');
+		var panel = document.getElementById('edminboost-anm-webhook-preview');
+		var messageField = document.getElementById('edminboost-anm-webhook-message');
+		var settingsRoot = document.querySelector('[data-edminboost-anm-settings]');
+		if (!btn || !panel || !messageField) {
 			return;
 		}
 
-		function syncDropdownRows() {
-			var show = 'dropdown' === styleSelect.value;
-			dropdownRows.forEach(function (row) {
+		var sampleEl = panel.querySelector('[data-edminboost-anm-webhook-preview-sample]');
+		var textEl = panel.querySelector('[data-edminboost-anm-webhook-preview-text]');
+		var jsonEl = panel.querySelector('[data-edminboost-anm-webhook-preview-json]');
+		var i18n = data.i18n || {};
+		var refreshTimer = null;
+		var loadingText = i18n.webhookPreviewLoading || i18n.digestPreviewLoading || 'Loading preview…';
+
+		function escapeHtml(text) {
+			var div = document.createElement('div');
+			div.textContent = text == null ? '' : String(text);
+			return div.innerHTML;
+		}
+
+		function noticeTypeClass(type) {
+			var slug = String(type || 'info').toLowerCase();
+			if (slug === 'warning' || slug === 'warn') {
+				return 'is-warning';
+			}
+			if (slug === 'error') {
+				return 'is-error';
+			}
+			if (slug === 'success') {
+				return 'is-success';
+			}
+			return 'is-info';
+		}
+
+		function setLoadingState() {
+			if (sampleEl) {
+				sampleEl.textContent = loadingText;
+			}
+			if (textEl) {
+				textEl.className = 'edminboost-anm-webhook-preview__text is-loading';
+				textEl.textContent = loadingText;
+			}
+			if (jsonEl) {
+				jsonEl.className = 'edminboost-anm-webhook-preview__json is-loading';
+				jsonEl.textContent = loadingText;
+			}
+		}
+
+		function setErrorState(message) {
+			var errorText = message || i18n.webhookPreviewError || i18n.digestPreviewError || 'Could not load webhook preview.';
+			if (sampleEl) {
+				sampleEl.textContent = '';
+			}
+			if (textEl) {
+				textEl.className = 'edminboost-anm-webhook-preview__text is-error';
+				textEl.textContent = errorText;
+			}
+			if (jsonEl) {
+				jsonEl.className = 'edminboost-anm-webhook-preview__json is-error';
+				jsonEl.textContent = '';
+			}
+		}
+
+		function renderPreview(preview) {
+			if (!preview) {
+				setErrorState();
+				return;
+			}
+
+			var sample = preview.sample || {};
+			var sampleLabel = preview.sample_from_inbox
+				? (i18n.webhookPreviewInbox || 'Based on your latest inbox notice')
+				: (i18n.webhookPreviewSample || 'Sample notice');
+
+			if (sampleEl) {
+				sampleEl.innerHTML = '<strong>' + escapeHtml(sampleLabel) + ':</strong> '
+					+ escapeHtml(sample.source || '')
+					+ ' <span class="edminboost-anm-webhook-preview__type ' + noticeTypeClass(sample.type) + '">'
+					+ escapeHtml(sample.type || 'info')
+					+ '</span> — '
+					+ escapeHtml(sample.message || '');
+			}
+
+			if (textEl) {
+				textEl.className = 'edminboost-anm-webhook-preview__text';
+				textEl.textContent = preview.text || '';
+			}
+
+			if (jsonEl) {
+				jsonEl.className = 'edminboost-anm-webhook-preview__json';
+				try {
+					jsonEl.textContent = JSON.stringify(preview.payload || {}, null, 2);
+				} catch (err) {
+					jsonEl.textContent = '';
+				}
+			}
+		}
+
+		function loadWebhookPreview() {
+			var body = new FormData();
+			body.append('action', 'edminboost_anm_webhook_preview');
+			body.append('nonce', data.nonce || '');
+			body.append('webhook[message]', messageField.value || '');
+
+			btn.disabled = true;
+			setLoadingState();
+
+			return fetch(data.ajaxUrl, {
+				method: 'POST',
+				credentials: 'same-origin',
+				body: body
+			}).then(function (response) {
+				return response.json();
+			}).then(function (result) {
+				btn.disabled = false;
+				if (!result.success || !result.data) {
+					setErrorState(result.data && result.data.message);
+					return;
+				}
+				renderPreview(result.data);
+			}).catch(function () {
+				btn.disabled = false;
+				setErrorState();
+			});
+		}
+
+		function scheduleWebhookPreviewRefresh() {
+			clearTimeout(refreshTimer);
+			refreshTimer = setTimeout(loadWebhookPreview, 400);
+		}
+
+		btn.addEventListener('click', loadWebhookPreview);
+		messageField.addEventListener('input', scheduleWebhookPreviewRefresh);
+		messageField.addEventListener('change', scheduleWebhookPreviewRefresh);
+
+		if (settingsRoot) {
+			settingsRoot.addEventListener('edminboost-anm-settings-tab', function (event) {
+				if (event.detail && event.detail.tab === 'notifications') {
+					loadWebhookPreview();
+				}
+			});
+
+			if (settingsRoot.dataset.settingsTab === 'notifications') {
+				loadWebhookPreview();
+			}
+		}
+	}
+
+	function initNoticePanelSettings() {
+		var styleSelect = document.getElementById('edminboost-anm-notice-panel-style');
+		var positionSelect = document.getElementById('edminboost-anm-notice-panel-position');
+		var bellRows = document.querySelectorAll('.edminboost-anm-notice-panel-bell-row');
+
+		if (!styleSelect) {
+			return;
+		}
+
+		function styleUsesBell(style, position) {
+			if (style === 'bell_link' || style === 'dropdown' || style === 'dropdown_compact') {
+				return true;
+			}
+			return style === 'link' && position === 'before_profile';
+		}
+
+		function syncBellRows() {
+			var position = positionSelect ? positionSelect.value : 'default';
+			var show = styleUsesBell(styleSelect.value, position);
+			bellRows.forEach(function (row) {
 				row.hidden = !show;
 			});
 		}
 
-		styleSelect.addEventListener('change', syncDropdownRows);
-		syncDropdownRows();
+		styleSelect.addEventListener('change', syncBellRows);
+		if (positionSelect) {
+			positionSelect.addEventListener('change', syncBellRows);
+		}
+		syncBellRows();
+	}
+
+	function initNoticePanelPreview() {
+		var previewRoot = document.getElementById('edminboost-anm-notice-panel-preview');
+		var stage = previewRoot ? previewRoot.querySelector('[data-edminboost-anm-notice-panel-preview-stage]') : null;
+		if (!previewRoot || !stage) {
+			return;
+		}
+
+		var i18n = data.i18n || {};
+		var enabledCheckbox = document.getElementById('edminboost-anm-notice-panel');
+		var styleSelect = document.getElementById('edminboost-anm-notice-panel-style');
+		var badgeSelect = document.getElementById('edminboost-anm-notice-panel-badge');
+		var positionSelect = document.getElementById('edminboost-anm-notice-panel-position');
+		var colorFields = {
+			badge: document.getElementById('edminboost-anm-notice-color-badge'),
+			badge_text: document.getElementById('edminboost-anm-notice-color-badge-text'),
+			accent: document.getElementById('edminboost-anm-notice-color-accent'),
+			accent_hover: document.getElementById('edminboost-anm-notice-color-accent-hover'),
+			bell_active: document.getElementById('edminboost-anm-notice-color-bell-active')
+		};
+
+		function escapeHtml(text) {
+			if (text === null || text === undefined) {
+				return '';
+			}
+			var div = document.createElement('div');
+			div.textContent = String(text);
+			return div.innerHTML;
+		}
+
+		function styleUsesBell(style, position) {
+			if (style === 'bell_link' || style === 'dropdown' || style === 'dropdown_compact') {
+				return true;
+			}
+			return style === 'link' && position === 'before_profile';
+		}
+
+		function getPositionPreviewLayout(position) {
+			var layouts = data.noticePanelPositionLayouts || {};
+			return layouts[position] || 'right';
+		}
+
+		function isDropdownStyle(style) {
+			return style === 'dropdown' || style === 'dropdown_compact';
+		}
+
+		function readColors() {
+			return {
+				badge: (colorFields.badge && colorFields.badge.value) || '#d63638',
+				badge_text: (colorFields.badge_text && colorFields.badge_text.value) || '#ffffff',
+				accent: (colorFields.accent && colorFields.accent.value) || '#2271b1',
+				accent_hover: (colorFields.accent_hover && colorFields.accent_hover.value) || '#135e96',
+				bell_active: (colorFields.bell_active && colorFields.bell_active.value) || '#72aee6'
+			};
+		}
+
+		function formatBadgeDisplayCount(count, badgeStyle) {
+			if (badgeStyle === 'count_9plus' && count > 9) {
+				return '9+';
+			}
+			if (badgeStyle === 'count_99plus' && count > 99) {
+				return '99+';
+			}
+			return String(count);
+		}
+
+		function buildBadgeHtml(badgeStyle, count, colors, facebook) {
+			if (count <= 0 || badgeStyle === 'none') {
+				return '';
+			}
+			if (badgeStyle === 'dot' || badgeStyle === 'dot_pulse') {
+				var dotClass = 'edminboost-anm-notices-badge edminboost-anm-notices-badge--dot';
+				if (badgeStyle === 'dot_pulse') {
+					dotClass += ' edminboost-anm-notices-badge--pulse';
+				}
+				return '<span class="' + dotClass + '"><span class="screen-reader-text">' + escapeHtml(String(count)) + '</span></span>';
+			}
+			var display = formatBadgeDisplayCount(count, badgeStyle);
+			return '<span class="edminboost-anm-notices-badge"><span class="screen-reader-text">' + escapeHtml(String(count)) + '</span><span aria-hidden="true">' + escapeHtml(display) + '</span></span>';
+		}
+
+		function buildBellTrigger(badgeStyle, facebook) {
+			var count = 3;
+			return '<span class="edminboost-anm-notice-panel-preview__trigger edminboost-anm-notice-panel-preview__trigger--bell' + (facebook ? ' is-facebook' : '') + '">'
+				+ '<span class="ab-icon edminboost-anm-fb-bell" aria-hidden="true"></span>'
+				+ buildBadgeHtml(badgeStyle, count, null, facebook)
+				+ '</span>';
+		}
+
+		function buildLinkTrigger() {
+			return '<span class="edminboost-anm-notice-panel-preview__trigger edminboost-anm-notice-panel-preview__trigger--link">'
+				+ escapeHtml(i18n.noticePanelPreviewNotices || 'Notices')
+				+ ' <span class="awaiting-mod count-3"><span class="pending-count">3</span></span>'
+				+ '</span>';
+		}
+
+		function buildPanelHeaderHtml() {
+			return '<div class="edminboost-anm-notices-panel__header"><strong>'
+				+ escapeHtml(i18n.noticePanelPreviewAdminNotices || 'Admin notices')
+				+ '</strong><button type="button" class="edminboost-anm-notices-panel__close" aria-label="'
+				+ escapeHtml(i18n.noticePanelPreviewClose || 'Close panel')
+				+ '" tabindex="-1">&times;</button></div>';
+		}
+
+		function buildPanelFooterHtml() {
+			return '<div class="edminboost-anm-notices-panel__footer"><a href="#" tabindex="-1" onclick="return false;">'
+				+ escapeHtml(i18n.noticePanelPreviewSeeAll || 'See all notifications')
+				+ '</a></div>';
+		}
+
+		function buildDetailedCardHtml(noticeClass, message) {
+			var logged = escapeHtml(i18n.noticePanelSampleFirstLogged || 'First logged: Mar 15, 2024 10:30 am');
+			var dismissLabel = escapeHtml(i18n.noticePanelPreviewDismiss || 'Dismiss from panel');
+			var html = '<li class="edminboost-anm-notices-panel__card">';
+			html += '<div class="edminboost-anm-notices-panel__notice-wrap">';
+			html += '<button type="button" class="edminboost-anm-notices-panel__dismiss" aria-label="' + dismissLabel + '" tabindex="-1">&times;</button>';
+			html += '<div class="edminboost-anm-notices-panel__notice-body"><div class="notice ' + noticeClass + '"><p>' + escapeHtml(message) + '</p></div></div>';
+			html += '</div>';
+			html += '<div class="edminboost-anm-notices-panel__options">';
+			html += '<span class="edminboost-anm-notices-panel__logged">' + logged + '</span>';
+			html += '<span class="edminboost-anm-notices-panel__actions">';
+			html += '<button type="button" class="edminboost-anm-notices-panel__action" tabindex="-1">' + escapeHtml(i18n.noticePanelPreviewDisplayNormal || 'Display notice as normal') + '</button>';
+			html += '<button type="button" class="edminboost-anm-notices-panel__action edminboost-anm-notices-panel__action--hide" tabindex="-1">';
+			html += '<span class="dashicons dashicons-hidden" aria-hidden="true"></span>' + escapeHtml(i18n.noticePanelPreviewHideForMe || 'Hide for me') + '</button>';
+			html += '<button type="button" class="edminboost-anm-notices-panel__action edminboost-anm-notices-panel__action--hide" tabindex="-1">';
+			html += '<span class="dashicons dashicons-hidden" aria-hidden="true"></span>' + escapeHtml(i18n.noticePanelPreviewHideForAll || 'Hide for all') + '</button>';
+			html += '</span></div></li>';
+			return html;
+		}
+
+		function buildCompactPanel() {
+			var samples = [
+				{ type: 'warning', message: i18n.noticePanelSample1 || 'A plugin update is available.', source: i18n.noticePanelSampleSource || 'Sample Plugin' },
+				{ type: 'upsell', message: i18n.noticePanelSample2 || 'Please review our product.', source: i18n.noticePanelSampleSource || 'Sample Plugin' },
+				{ type: 'success', message: i18n.noticePanelSample3 || 'Site health check found improvements.', source: 'WordPress' }
+			];
+			var html = '<div class="edminboost-anm-notices-panel edminboost-anm-notices-panel--compact edminboost-anm-notice-panel-preview__panel">';
+			html += buildPanelHeaderHtml();
+			html += '<ul class="edminboost-anm-notices-panel__list">';
+			samples.forEach(function (item) {
+				var typeClass = item.type === 'success' ? 'is-type-success' : (item.type === 'warning' ? 'is-type-warning' : 'is-type-info');
+				html += '<li class="edminboost-anm-notices-panel__item ' + typeClass + '">';
+				html += '<span class="edminboost-anm-notices-panel__type">' + escapeHtml(item.type) + '</span>';
+				html += '<span class="edminboost-anm-notices-panel__message">' + escapeHtml(item.message) + '</span>';
+				html += '<span class="edminboost-anm-notices-panel__meta"><span class="edminboost-anm-notices-panel__source">' + escapeHtml(item.source) + '</span></span>';
+				html += '</li>';
+			});
+			html += '</ul>';
+			html += buildPanelFooterHtml();
+			html += '</div>';
+			return html;
+		}
+
+		function buildDetailedPanel() {
+			var html = '<div class="edminboost-anm-notices-panel edminboost-anm-notices-panel--detailed edminboost-anm-notice-panel-preview__panel">';
+			html += buildPanelHeaderHtml();
+			html += '<ul class="edminboost-anm-notices-panel__list">';
+			html += buildDetailedCardHtml('notice-warning', i18n.noticePanelSample1 || 'A plugin update is available.');
+			html += buildDetailedCardHtml('notice-info', i18n.noticePanelSample2 || 'Please review our product on WordPress.org.');
+			html += '</ul>';
+			html += buildPanelFooterHtml();
+			html += '</div>';
+			return html;
+		}
+
+		function renderPreview() {
+			if (enabledCheckbox && !enabledCheckbox.checked) {
+				stage.innerHTML = '<p class="edminboost-anm-notice-panel-preview__disabled">' + escapeHtml(i18n.noticePanelPreviewDisabled || 'Enable the admin bar panel to preview.') + '</p>';
+				return;
+			}
+
+			var style = styleSelect ? styleSelect.value : 'link';
+			var badgeStyle = badgeSelect ? badgeSelect.value : 'count';
+			var position = positionSelect ? positionSelect.value : 'default';
+			var colors = readColors();
+			var usesBell = styleUsesBell(style, position);
+			var previewLayout = getPositionPreviewLayout(position);
+			var facebook = previewLayout === 'profile_before';
+			var cssVars = '--edminboost-anm-notice-badge-bg:' + colors.badge + ';'
+				+ '--edminboost-anm-notice-badge-text:' + colors.badge_text + ';'
+				+ '--edminboost-anm-notice-accent:' + colors.accent + ';'
+				+ '--edminboost-anm-notice-accent-hover:' + colors.accent_hover + ';'
+				+ '--edminboost-anm-notice-bell-active:' + colors.bell_active + ';';
+
+			var triggerHtml = usesBell ? buildBellTrigger(badgeStyle, facebook) : buildLinkTrigger();
+			var panelHtml = '';
+			if (isDropdownStyle(style)) {
+				panelHtml = style === 'dropdown_compact' ? buildCompactPanel() : buildDetailedPanel();
+			}
+
+			var profileHtml = (previewLayout === 'profile_before' || previewLayout === 'profile_after')
+				? '<span class="edminboost-anm-notice-panel-preview__profile">' + escapeHtml(i18n.noticePanelPreviewHowdy || 'Howdy, Admin') + '</span>'
+				: '';
+			var siteHtml = previewLayout === 'left'
+				? '<span class="edminboost-anm-notice-panel-preview__site">' + escapeHtml(i18n.noticePanelPreviewSiteName || 'My Site') + '</span>'
+				: '';
+			var barInnerHtml = '';
+			if (previewLayout === 'profile_after') {
+				barInnerHtml = profileHtml + triggerHtml;
+			} else if (previewLayout === 'left') {
+				barInnerHtml = siteHtml + triggerHtml;
+			} else {
+				barInnerHtml = triggerHtml + profileHtml;
+			}
+			var mockBarClass = 'edminboost-anm-notice-panel-preview__mock-bar';
+			if (previewLayout === 'left') {
+				mockBarClass += ' is-left-slot';
+			} else if (previewLayout === 'profile_before' || previewLayout === 'profile_after') {
+				mockBarClass += ' is-profile-slot';
+			}
+
+			stage.innerHTML = '<div class="' + mockBarClass + '" style="' + cssVars + '">'
+				+ '<div class="edminboost-anm-notice-panel-preview__bar-inner">'
+				+ barInnerHtml
+				+ '</div>'
+				+ (panelHtml ? '<div class="edminboost-anm-notice-panel-preview__panel-wrap">' + panelHtml + '</div>' : '')
+				+ '</div>';
+		}
+
+		function bindColorField(field) {
+			if (!field) {
+				return;
+			}
+			field.addEventListener('input', renderPreview);
+			field.addEventListener('change', renderPreview);
+		}
+
+		if (enabledCheckbox) {
+			enabledCheckbox.addEventListener('change', renderPreview);
+		}
+		if (styleSelect) {
+			styleSelect.addEventListener('change', renderPreview);
+		}
+		if (badgeSelect) {
+			badgeSelect.addEventListener('change', renderPreview);
+		}
+		if (positionSelect) {
+			positionSelect.addEventListener('change', renderPreview);
+		}
+		Object.keys(colorFields).forEach(function (key) {
+			bindColorField(colorFields[key]);
+		});
+
+		renderPreview();
 	}
 
 	document.addEventListener('DOMContentLoaded', function () {
@@ -1247,6 +1801,8 @@
 		initManageNoticesMode();
 		initResetHiddenNotices();
 		initNoticePanelSettings();
+		initNoticePanelPreview();
 		initDigestPreview();
+		initWebhookPreview();
 	});
 }());

@@ -153,4 +153,72 @@ class EDMINBOOST_ANM_Webhook {
 			self::TOKEN_SITE_NAME       => $site_name,
 		);
 	}
+
+	/**
+	 * Sample notice used when the inbox is empty.
+	 *
+	 * @return array
+	 */
+	public static function get_sample_notice() {
+		return array(
+			'source_plugin' => __( 'Example Plugin', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'message'       => __( 'Your license will expire in 3 days. Renew now to keep receiving updates and support.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'type'          => 'warning',
+		);
+	}
+
+	/**
+	 * Notice data for webhook preview (latest inbox item or sample).
+	 *
+	 * @return array{ notice: array, from_inbox: bool }
+	 */
+	public static function get_preview_notice() {
+		$notices = EDMINBOOST_ANM_Inbox::get_all();
+
+		for ( $i = count( $notices ) - 1; $i >= 0; $i-- ) {
+			if ( ! isset( $notices[ $i ] ) || ! is_array( $notices[ $i ] ) ) {
+				continue;
+			}
+			if ( 'archived' === ( $notices[ $i ]['status'] ?? '' ) ) {
+				continue;
+			}
+
+			return array(
+				'notice'     => $notices[ $i ],
+				'from_inbox' => true,
+			);
+		}
+
+		return array(
+			'notice'     => self::get_sample_notice(),
+			'from_inbox' => false,
+		);
+	}
+
+	/**
+	 * Build admin preview data for unsaved or saved webhook settings.
+	 *
+	 * @param array|null $settings Optional full settings array.
+	 * @return array
+	 */
+	public static function get_preview( $settings = null ) {
+		if ( null === $settings ) {
+			$settings = EDMINBOOST_ANM_Settings::get();
+		}
+
+		$preview_notice = self::get_preview_notice();
+		$notice         = $preview_notice['notice'];
+		$payload        = self::build_payload( $notice, $settings );
+
+		return array(
+			'text'            => $payload['text'],
+			'payload'         => $payload,
+			'sample_from_inbox' => $preview_notice['from_inbox'],
+			'sample'          => array(
+				'source'  => (string) ( $notice['source_plugin'] ?? '' ),
+				'type'    => (string) ( $notice['type'] ?? 'info' ),
+				'message' => wp_html_excerpt( (string) ( $notice['message'] ?? '' ), 200, '…' ),
+			),
+		);
+	}
 }

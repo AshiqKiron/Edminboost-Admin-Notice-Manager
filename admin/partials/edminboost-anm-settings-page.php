@@ -225,6 +225,7 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 		$edminboost_anm_standard_modes    = $settings['standard_admin_notices'] ?? EDMINBOOST_ANM_Settings::get_standard_admin_notice_defaults();
 		$edminboost_anm_non_standard      = $settings['non_standard_admin_notices'] ?? array();
 		$edminboost_anm_no_level_mode     = $edminboost_anm_non_standard['no_level'] ?? 'inbox';
+		$edminboost_anm_notice_handling_tip = __( 'Used when Notice display (General tab) is Hide selected. Inbox hides on the dashboard and shows in the plugin panel; Hide removes everywhere; Default keeps normal WordPress behavior.', EDMINBOOST_ANM_TEXT_DOMAIN );
 		?>
 		<div class="edminboost-anm-card">
 			<h2><?php esc_html_e( 'Notice handling', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
@@ -243,6 +244,7 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 					?>
 					<tr>
 						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( $edminboost_anm_notice_handling_tip ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
 							<label for="<?php echo esc_attr( $edminboost_anm_field_id ); ?>"><?php echo esc_html( $edminboost_anm_level_label ); ?></label>
 						</th>
 						<td>
@@ -260,6 +262,7 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 			<table class="form-table edminboost-anm-notice-policy-table edminboost-anm-notice-handling-table" role="presentation">
 				<tr>
 					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( $edminboost_anm_notice_handling_tip ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
 						<label for="edminboost-anm-non-standard-no-level"><?php esc_html_e( 'No level notices', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
 					</th>
 					<td>
@@ -272,6 +275,7 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 				</tr>
 				<tr>
 					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Skip interception for notices matching these jQuery-compatible selectors (comma-separated).', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
 						<label for="edminboost-anm-css-ignore-selectors"><?php esc_html_e( 'CSS ignore selectors', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
 					</th>
 					<td>
@@ -282,7 +286,6 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 							name="<?php echo esc_attr( $edminboost_anm_option_name . '[non_standard_admin_notices][css_ignore_selectors]' ); ?>"
 							value="<?php echo esc_attr( $edminboost_anm_non_standard['css_ignore_selectors'] ?? '' ); ?>"
 						/>
-						<p class="description"><?php esc_html_e( 'Skip interception for notices matching these jQuery-compatible selectors (comma-separated).', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 					</td>
 				</tr>
 			</table>
@@ -303,6 +306,7 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 			'only'   => __( 'Hide notifications only from these users', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			'except' => __( 'Hide notifications to all users but not these', EDMINBOOST_ANM_TEXT_DOMAIN ),
 		);
+		$edminboost_anm_acl_role_tip    = __( 'Whether users with this role still see intercepted notices on the dashboard.', EDMINBOOST_ANM_TEXT_DOMAIN );
 		?>
 		<div class="edminboost-anm-card">
 			<h2><?php esc_html_e( 'Access & visibility', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
@@ -317,6 +321,7 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 					?>
 					<tr>
 						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( $edminboost_anm_acl_role_tip ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
 							<label for="<?php echo esc_attr( $edminboost_anm_acl_field_id ); ?>"><?php echo esc_html( $edminboost_anm_acl_slug ); ?></label>
 						</th>
 						<td>
@@ -331,7 +336,10 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 			<h3 class="edminboost-anm-settings-subheading"><?php esc_html_e( 'By user account', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h3>
 			<table class="form-table edminboost-anm-notice-policy-table" role="presentation">
 				<tr>
-					<th scope="row"><?php esc_html_e( 'Visibility', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Refine notice hiding per user account. Role ACL applies first; these options limit which accounts are affected.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<?php esc_html_e( 'Visibility', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+					</th>
 					<td>
 						<fieldset class="edminboost-anm-hiding-visibility-options" data-edminboost-anm-hiding-visibility>
 							<legend class="screen-reader-text"><?php esc_html_e( 'Visibility', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></legend>
@@ -400,15 +408,24 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 			<?php echo 'admin_bar' !== $edminboost_anm_active_tab ? ' hidden' : ''; ?>
 		>
 		<?php
-		$edminboost_anm_panel_style       = $settings['notice_panel']['style'] ?? 'link';
-		$edminboost_anm_panel_colors       = EDMINBOOST_ANM_Settings::get_notice_panel_colors( $settings['notice_panel'] ?? array() );
-		$edminboost_anm_dropdown_hidden    = 'dropdown' !== $edminboost_anm_panel_style ? ' hidden' : '';
+		$edminboost_anm_panel_style     = $settings['notice_panel']['style'] ?? 'link';
+		$edminboost_anm_panel_position  = $settings['notice_panel']['position'] ?? 'default';
+		$edminboost_anm_panel_colors    = EDMINBOOST_ANM_Settings::get_notice_panel_colors( $settings['notice_panel'] ?? array() );
+		$edminboost_anm_panel_styles    = EDMINBOOST_ANM_Settings::get_notice_panel_styles();
+		$edminboost_anm_badge_styles    = EDMINBOOST_ANM_Settings::get_notice_panel_badge_styles();
+		$edminboost_anm_panel_positions   = EDMINBOOST_ANM_Settings::get_notice_panel_positions();
+		$edminboost_anm_bell_opts_hidden = EDMINBOOST_ANM_Settings::notice_panel_style_uses_bell( $edminboost_anm_panel_style, $edminboost_anm_panel_position ) ? '' : ' hidden';
 		?>
-		<div class="edminboost-anm-card">
+		<div class="edminboost-anm-card edminboost-anm-notice-panel-layout">
 			<h2 class="screen-reader-text"><?php esc_html_e( 'Admin bar', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+			<div class="edminboost-anm-notice-panel-layout__columns">
+			<div class="edminboost-anm-notice-panel-layout__settings">
 			<table class="form-table" role="presentation">
 				<tr>
-					<th scope="row"><?php esc_html_e( 'Admin bar panel', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Adds a WordPress admin bar entry so users can open captured notices without visiting the Inbox.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<?php esc_html_e( 'Admin bar panel', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+					</th>
 					<td>
 						<label for="edminboost-anm-notice-panel">
 							<input type="checkbox" id="edminboost-anm-notice-panel" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[notice_panel][enabled]" value="1" <?php checked( ! empty( $settings['notice_panel']['enabled'] ) ); ?> />
@@ -417,27 +434,36 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="edminboost-anm-notice-panel-style"><?php esc_html_e( 'Panel style', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label></th>
+					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Choose how the admin bar entry looks: text link, bell icon, or a dropdown panel with recent inbox notices.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<label for="edminboost-anm-notice-panel-style"><?php esc_html_e( 'Panel style', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+					</th>
 					<td>
 						<select id="edminboost-anm-notice-panel-style" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[notice_panel][style]">
-							<option value="link" <?php selected( $settings['notice_panel']['style'] ?? 'link', 'link' ); ?>><?php esc_html_e( 'Text link with count', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
-							<option value="dropdown" <?php selected( $settings['notice_panel']['style'] ?? 'link', 'dropdown' ); ?>><?php esc_html_e( 'Notification dropdown (bell icon)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+							<?php foreach ( $edminboost_anm_panel_styles as $edminboost_anm_style_slug => $edminboost_anm_style_label ) : ?>
+								<option value="<?php echo esc_attr( $edminboost_anm_style_slug ); ?>" <?php selected( $edminboost_anm_panel_style, $edminboost_anm_style_slug ); ?>><?php echo esc_html( $edminboost_anm_style_label ); ?></option>
+							<?php endforeach; ?>
 						</select>
-						<p class="description"><?php esc_html_e( 'Dropdown style opens a Facebook-like notice box listing recent inbox items.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 					</td>
 				</tr>
-				<tr class="edminboost-anm-notice-panel-dropdown-row" <?php echo $edminboost_anm_dropdown_hidden; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-					<th scope="row"><label for="edminboost-anm-notice-panel-badge"><?php esc_html_e( 'Unread indicator', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label></th>
+				<tr class="edminboost-anm-notice-panel-bell-row" <?php echo $edminboost_anm_bell_opts_hidden; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'How unread notices appear on the bell icon for bell and dropdown panel styles.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<label for="edminboost-anm-notice-panel-badge"><?php esc_html_e( 'Unread indicator', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+					</th>
 					<td>
 						<select id="edminboost-anm-notice-panel-badge" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[notice_panel][badge_style]">
-							<option value="count" <?php selected( $settings['notice_panel']['badge_style'] ?? 'count', 'count' ); ?>><?php esc_html_e( 'Number badge', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
-							<option value="dot" <?php selected( $settings['notice_panel']['badge_style'] ?? 'count', 'dot' ); ?>><?php esc_html_e( 'Dot only (no count)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+							<?php foreach ( $edminboost_anm_badge_styles as $edminboost_anm_badge_slug => $edminboost_anm_badge_label ) : ?>
+								<option value="<?php echo esc_attr( $edminboost_anm_badge_slug ); ?>" <?php selected( $settings['notice_panel']['badge_style'] ?? 'count', $edminboost_anm_badge_slug ); ?>><?php echo esc_html( $edminboost_anm_badge_label ); ?></option>
+							<?php endforeach; ?>
 						</select>
-						<p class="description"><?php esc_html_e( 'How unread notices appear on the bell icon when using the notification dropdown.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 					</td>
 				</tr>
-				<tr class="edminboost-anm-notice-panel-dropdown-row" <?php echo $edminboost_anm_dropdown_hidden; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-					<th scope="row"><?php esc_html_e( 'Panel colors', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+				<tr class="edminboost-anm-notice-panel-bell-row" <?php echo $edminboost_anm_bell_opts_hidden; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Colors apply to the bell badge, Howdy dot, dropdown count pill, and footer links.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<?php esc_html_e( 'Panel colors', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+					</th>
 					<td>
 						<fieldset class="edminboost-anm-notice-panel-colors">
 							<legend class="screen-reader-text"><?php esc_html_e( 'Panel colors', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></legend>
@@ -462,19 +488,31 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 								<input type="color" id="edminboost-anm-notice-color-bell-active" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[notice_panel][colors][bell_active]" value="<?php echo esc_attr( $edminboost_anm_panel_colors['bell_active'] ); ?>" />
 							</p>
 						</fieldset>
-						<p class="description"><?php esc_html_e( 'Colors apply to the bell badge, Howdy dot, dropdown count pill, and footer links.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="edminboost-anm-notice-panel-position"><?php esc_html_e( 'Panel position', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label></th>
+					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Choose where the panel appears in the WordPress admin bar — left cluster, top-right area, or beside the profile menu.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<label for="edminboost-anm-notice-panel-position"><?php esc_html_e( 'Panel position', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+					</th>
 					<td>
 						<select id="edminboost-anm-notice-panel-position" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[notice_panel][position]">
-							<option value="default" <?php selected( $settings['notice_panel']['position'] ?? 'default', 'default' ); ?>><?php esc_html_e( 'Default admin bar slot', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
-							<option value="before_profile" <?php selected( $settings['notice_panel']['position'] ?? 'default', 'before_profile' ); ?>><?php esc_html_e( 'Top right, beside “Howdy” profile menu', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+							<?php foreach ( $edminboost_anm_panel_positions as $edminboost_anm_position_slug => $edminboost_anm_position_label ) : ?>
+								<option value="<?php echo esc_attr( $edminboost_anm_position_slug ); ?>" <?php selected( $edminboost_anm_panel_position, $edminboost_anm_position_slug ); ?>><?php echo esc_html( $edminboost_anm_position_label ); ?></option>
+							<?php endforeach; ?>
 						</select>
 					</td>
 				</tr>
 			</table>
+			</div>
+			<aside class="edminboost-anm-notice-panel-layout__preview" aria-labelledby="edminboost-anm-notice-panel-preview-heading">
+				<div id="edminboost-anm-notice-panel-preview" class="edminboost-anm-notice-panel-preview" aria-live="polite">
+					<h4 id="edminboost-anm-notice-panel-preview-heading" class="edminboost-anm-notice-panel-preview__heading"><?php esc_html_e( 'Panel preview', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h4>
+					<p class="description edminboost-anm-notice-panel-preview__hint"><?php esc_html_e( 'Updates as you change style, position, badge, and colors. Sample notices shown for layout only.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+					<div class="edminboost-anm-notice-panel-preview__stage" data-edminboost-anm-notice-panel-preview-stage></div>
+				</div>
+			</aside>
+			</div>
 		</div>
 		</div>
 
@@ -491,7 +529,10 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 			<p><?php esc_html_e( 'Suppress review requests, promotional nags, and upsell notices that match these phrases.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 			<table class="form-table" role="presentation">
 				<tr>
-					<th scope="row"><?php esc_html_e( 'Upsell preset', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Suppress review requests, promotional nags, and upsell notices that match built-in and custom phrases.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<?php esc_html_e( 'Upsell preset', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+					</th>
 					<td>
 						<label for="edminboost-anm-upsell-preset">
 							<input type="checkbox" id="edminboost-anm-upsell-preset" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[upsell_preset][enabled]" value="1" <?php checked( ! empty( $settings['upsell_preset']['enabled'] ) ); ?> />
@@ -501,21 +542,22 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 				</tr>
 				<tr>
 					<th scope="row">
+						<?php
+						echo EDMINBOOST_ANM_Admin::help_tip( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper.
+							sprintf(
+								/* translators: %d: built-in phrase count */
+								__( 'One phrase per line. %d built-in phrases are always active; duplicates are ignored.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+								$edminboost_anm_builtin_count
+							)
+						);
+						?>
 						<label for="edminboost-anm-custom-phrases"><?php esc_html_e( 'Custom phrases', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
 					</th>
 					<td>
 						<textarea id="edminboost-anm-custom-phrases" class="large-text code" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[upsell_preset][custom_phrases]" rows="8" placeholder="<?php esc_attr_e( 'One phrase per line, e.g.&#10;try our pro version&#10;limited offer', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"><?php echo esc_textarea( implode( "\n", $edminboost_anm_custom_phrases ) ); ?></textarea>
-						<p class="description">
-							<?php
-							echo esc_html(
-								sprintf(
-									/* translators: %d: built-in phrase count */
-									__( '%d built-in phrases are always active. Add your own below (one per line). Duplicates are ignored.', EDMINBOOST_ANM_TEXT_DOMAIN ),
-									$edminboost_anm_builtin_count,
-								)
-							);
-							if ( ! empty( $edminboost_anm_custom_phrases ) ) {
-								echo ' ';
+						<?php if ( ! empty( $edminboost_anm_custom_phrases ) ) : ?>
+							<p class="description">
+								<?php
 								echo esc_html(
 									sprintf(
 										/* translators: %d: custom phrase count */
@@ -523,9 +565,9 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 										count( $edminboost_anm_custom_phrases )
 									)
 								);
-							}
-							?>
-						</p>
+								?>
+							</p>
+						<?php endif; ?>
 					</td>
 				</tr>
 			</table>
@@ -536,8 +578,8 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 			<table class="form-table" role="presentation">
 				<tr>
 					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Notices containing any of these words (comma-separated) will not be shown on the dashboard.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
 						<?php esc_html_e( 'Spam words', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
-						<p class="description"><?php esc_html_e( 'Set words considered spam. Admin notices that contain any of these words will not be shown.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 					</th>
 					<td>
 						<label class="screen-reader-text" for="edminboost-anm-spam-words"><?php esc_html_e( 'Spam words', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
@@ -553,8 +595,8 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 				</tr>
 				<tr>
 					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Notices with any whitelist word stay on screen and are not intercepted by this plugin.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
 						<?php esc_html_e( 'Whitelist', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
-						<p class="description"><?php esc_html_e( 'Notices that contain any whitelist word are always shown on screen and are not intercepted by this plugin.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 					</th>
 					<td>
 						<label class="screen-reader-text" for="edminboost-anm-whitelist-words"><?php esc_html_e( 'Whitelist', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
@@ -591,7 +633,10 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 				<p><?php esc_html_e( 'Protect WordPress core security alerts, PHP fatal errors, and SSL warnings from accidental filtering.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Safety guard', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Protect WordPress core security alerts, PHP fatal errors, and SSL warnings from accidental filtering.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+							<?php esc_html_e( 'Safety guard', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</th>
 						<td>
 							<label for="edminboost-anm-safety-guard">
 								<input type="checkbox" id="edminboost-anm-safety-guard" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[safety_guard][enabled]" value="1" <?php checked( ! empty( $settings['safety_guard']['enabled'] ) ); ?> />
@@ -614,7 +659,10 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 				<p><?php esc_html_e( 'Hide all plugin/theme update notices and promotional nags from non-admin roles (Editors, Authors, Managers).', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Client shield', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Hide plugin and theme update notices and promotional nags from selected non-admin roles.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+							<?php esc_html_e( 'Client shield', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</th>
 						<td>
 							<label for="edminboost-anm-client-shield">
 								<input type="checkbox" id="edminboost-anm-client-shield" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[client_shield][enabled]" value="1" <?php checked( ! empty( $settings['client_shield']['enabled'] ) ); ?> />
@@ -623,7 +671,10 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Roles to shield', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Which roles receive the Client Shield experience when shield mode is enabled.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+							<?php esc_html_e( 'Roles to shield', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</th>
 						<td>
 							<?php foreach ( $edminboost_anm_roles as $role_slug => $role_label ) : ?>
 								<label style="display:inline-block;margin-right:16px;">
@@ -646,15 +697,17 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 				$edminboost_anm_redirect_block_urls = array( '' );
 			}
 			?>
-			<div class="edminboost-anm-feature-block">
+			<div class="edminboost-anm-feature-block" data-edminboost-anm-redirect-block>
 				<div class="edminboost-anm-feature-block__header">
 					<span class="dashicons dashicons-admin-links" aria-hidden="true"></span>
 					<h3><?php esc_html_e( 'Block ad redirects', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h3>
 				</div>
-				<p class="description"><?php esc_html_e( 'Some plugins open a page automatically after installation or update to show announcements, promotions, or other information. Enter the URLs of those pages here to prevent them from opening automatically.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Block ad redirects', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Block admin URLs that plugins open automatically after install or update (announcements, promotions, etc.).', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+							<?php esc_html_e( 'Block ad redirects', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</th>
 						<td>
 							<label for="edminboost-anm-block-ad-redirects">
 								<input type="checkbox" id="edminboost-anm-block-ad-redirects" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[block_ad_redirects][enabled]" value="1" <?php checked( ! empty( $edminboost_anm_redirect_block['enabled'] ) ); ?> />
@@ -662,55 +715,65 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 							</label>
 						</td>
 					</tr>
-				</table>
-				<table class="widefat edminboost-anm-redirect-block-table" role="presentation">
-					<thead>
-						<tr>
-							<th scope="col"><?php esc_html_e( 'Enter URL to block', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
-							<th scope="col" class="edminboost-anm-redirect-block-table__action"><?php esc_html_e( 'Action', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
-						</tr>
-					</thead>
-					<tbody data-edminboost-anm-redirect-block-rows>
-						<?php foreach ( $edminboost_anm_redirect_block_urls as $edminboost_anm_redirect_index => $edminboost_anm_redirect_url ) : ?>
-							<tr>
-								<td>
-									<label class="screen-reader-text" for="<?php echo esc_attr( 'edminboost-anm-redirect-block-' . $edminboost_anm_redirect_index ); ?>"><?php esc_html_e( 'Enter URL to block', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
-									<input
-										type="text"
-										class="large-text code"
-										id="<?php echo esc_attr( 'edminboost-anm-redirect-block-' . $edminboost_anm_redirect_index ); ?>"
-										name="<?php echo esc_attr( $edminboost_anm_option_name . '[block_ad_redirects][urls][]' ); ?>"
-										value="<?php echo esc_attr( $edminboost_anm_redirect_url ); ?>"
-										placeholder="<?php esc_attr_e( 'e.g. admin.php?page=my-plugin-welcome', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"
-									/>
-								</td>
-								<td class="edminboost-anm-redirect-block-table__action">
-									<button type="button" class="button-link-delete edminboost-anm-redirect-block-remove"><?php esc_html_e( 'Remove', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
-								</td>
-							</tr>
-						<?php endforeach; ?>
-					</tbody>
-				</table>
-				<p>
-					<button type="button" class="button" data-edminboost-anm-add-redirect-block"><?php esc_html_e( 'Add URL', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
-				</p>
-				<template id="edminboost-anm-redirect-block-row-template">
 					<tr>
+						<th scope="row">
+							<?php esc_html_e( 'Blocked URLs', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</th>
 						<td>
-							<label class="screen-reader-text"><?php esc_html_e( 'Enter URL to block', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
-							<input
-								type="text"
-								class="large-text code"
-								name="<?php echo esc_attr( $edminboost_anm_option_name . '[block_ad_redirects][urls][]' ); ?>"
-								value=""
-								placeholder="<?php esc_attr_e( 'e.g. admin.php?page=my-plugin-welcome', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"
-							/>
-						</td>
-						<td class="edminboost-anm-redirect-block-table__action">
-							<button type="button" class="button-link-delete edminboost-anm-redirect-block-remove"><?php esc_html_e( 'Remove', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
+							<p class="description">
+								<?php esc_html_e( 'Some plugins open a page automatically after installation or update to show announcements, promotions, or other information. Enter the URLs of those pages here to prevent them from opening automatically.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+							</p>
+							<table class="wp-list-table widefat fixed striped edminboost-anm-redirect-block-table">
+								<thead>
+									<tr>
+										<th scope="col" class="column-primary"><?php esc_html_e( 'URL to block', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+										<th scope="col" class="column-actions"><?php esc_html_e( 'Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+									</tr>
+								</thead>
+								<tbody data-edminboost-anm-redirect-block-rows="">
+									<?php foreach ( $edminboost_anm_redirect_block_urls as $edminboost_anm_redirect_index => $edminboost_anm_redirect_url ) : ?>
+										<tr>
+											<td class="column-primary" data-colname="<?php esc_attr_e( 'URL to block', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">
+												<label class="screen-reader-text" for="<?php echo esc_attr( 'edminboost-anm-redirect-block-' . $edminboost_anm_redirect_index ); ?>"><?php esc_html_e( 'URL to block', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+												<input
+													type="text"
+													class="large-text code"
+													id="<?php echo esc_attr( 'edminboost-anm-redirect-block-' . $edminboost_anm_redirect_index ); ?>"
+													name="<?php echo esc_attr( $edminboost_anm_option_name . '[block_ad_redirects][urls][]' ); ?>"
+													value="<?php echo esc_attr( $edminboost_anm_redirect_url ); ?>"
+													placeholder="<?php esc_attr_e( 'e.g. admin.php?page=my-plugin-welcome', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"
+												/>
+											</td>
+											<td class="column-actions" data-colname="<?php esc_attr_e( 'Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">
+												<button type="button" class="button button-secondary edminboost-anm-redirect-block-remove"><?php esc_html_e( 'Remove', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
+											</td>
+										</tr>
+									<?php endforeach; ?>
+									<tr class="edminboost-anm-redirect-block-row-template" hidden aria-hidden="true">
+										<td class="column-primary">
+											<label class="screen-reader-text"><?php esc_html_e( 'URL to block', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+											<input
+												type="text"
+												class="large-text code"
+												name="<?php echo esc_attr( $edminboost_anm_option_name . '[block_ad_redirects][urls][]' ); ?>"
+												value=""
+												placeholder="<?php esc_attr_e( 'e.g. admin.php?page=my-plugin-welcome', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"
+												disabled
+												tabindex="-1"
+											/>
+										</td>
+										<td class="column-actions">
+											<button type="button" class="button button-secondary edminboost-anm-redirect-block-remove" tabindex="-1" aria-hidden="true"><?php esc_html_e( 'Remove', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							<p class="edminboost-anm-redirect-block-add">
+								<button type="button" class="button button-secondary" data-edminboost-anm-add-redirect-block=""><?php esc_html_e( 'Add URL', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
+							</p>
 						</td>
 					</tr>
-				</template>
+				</table>
 			</div>
 		</div>
 		</div>
@@ -735,7 +798,10 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 				<div class="edminboost-anm-digest-layout__settings">
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Email digest', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Sends a weekly plain-text email summary of silenced notices via WordPress wp_mail().', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+							<?php esc_html_e( 'Email digest', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</th>
 						<td>
 							<label for="edminboost-anm-digest-enabled">
 								<input type="checkbox" id="edminboost-anm-digest-enabled" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[digest][enabled]" value="1" <?php checked( ! empty( $settings['digest']['enabled'] ) ); ?> />
@@ -744,14 +810,19 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="edminboost-anm-digest-recipients"><?php esc_html_e( 'Recipients', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label></th>
+						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Comma-separated email addresses that receive the weekly digest.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+							<label for="edminboost-anm-digest-recipients"><?php esc_html_e( 'Recipients', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+						</th>
 						<td>
 							<input type="text" id="edminboost-anm-digest-recipients" class="regular-text" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[digest][recipients]" value="<?php echo esc_attr( $settings['digest']['recipients'] ?? '' ); ?>" />
-							<p class="description"><?php esc_html_e( 'Comma-separated email addresses.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="edminboost-anm-digest-subject"><?php esc_html_e( 'Email subject', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label></th>
+						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Leave blank to use the default subject line for the digest email.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+							<label for="edminboost-anm-digest-subject"><?php esc_html_e( 'Email subject', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+						</th>
 						<td>
 							<input type="text" id="edminboost-anm-digest-subject" class="large-text" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[digest][subject]" value="<?php echo esc_attr( $settings['digest']['subject'] ?? '' ); ?>" placeholder="<?php echo esc_attr( EDMINBOOST_ANM_Digest::get_default_subject( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) ) ); ?>" />
 							<p class="description">
@@ -766,7 +837,10 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="edminboost-anm-digest-intro"><?php esc_html_e( 'Opening message', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label></th>
+						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Opening paragraph at the top of the digest. Leave blank for the default text.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+							<label for="edminboost-anm-digest-intro"><?php esc_html_e( 'Opening message', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+						</th>
 						<td>
 							<textarea id="edminboost-anm-digest-intro" class="large-text" rows="3" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[digest][intro]"><?php echo esc_textarea( $settings['digest']['intro'] ?? '' ); ?></textarea>
 							<p class="description">
@@ -781,7 +855,10 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Email sections', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Choose whether the email includes stats, recent inbox notices, or both.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+							<?php esc_html_e( 'Email sections', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</th>
 						<td>
 							<fieldset>
 								<legend class="screen-reader-text"><?php esc_html_e( 'Email sections', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></legend>
@@ -798,14 +875,19 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="edminboost-anm-digest-recent-count"><?php esc_html_e( 'Recent notices limit', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label></th>
+						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'How many inbox notices to list when the recent notices section is enabled (1–25).', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+							<label for="edminboost-anm-digest-recent-count"><?php esc_html_e( 'Recent notices limit', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+						</th>
 						<td>
 							<input type="number" id="edminboost-anm-digest-recent-count" class="small-text" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[digest][recent_notices_count]" value="<?php echo esc_attr( (string) ( $settings['digest']['recent_notices_count'] ?? 10 ) ); ?>" min="1" max="25" step="1" />
-							<p class="description"><?php esc_html_e( 'How many inbox notices to list when the recent notices section is enabled (1–25).', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="edminboost-anm-digest-footer"><?php esc_html_e( 'Closing message', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label></th>
+						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Optional closing paragraph appended to the digest email.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+							<label for="edminboost-anm-digest-footer"><?php esc_html_e( 'Closing message', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+						</th>
 						<td>
 							<textarea id="edminboost-anm-digest-footer" class="large-text" rows="2" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[digest][footer]"><?php echo esc_textarea( $settings['digest']['footer'] ?? '' ); ?></textarea>
 							<p class="description">
@@ -850,7 +932,10 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 			<div class="edminboost-anm-feature-block">
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Webhook alerts', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Opt-in: POST notice summaries to your URL when notices are captured. Disabled by default; no data is sent until enabled.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+							<?php esc_html_e( 'Webhook alerts', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</th>
 						<td>
 							<label for="edminboost-anm-webhook-enabled">
 								<input type="checkbox" id="edminboost-anm-webhook-enabled" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[webhook][enabled]" value="1" <?php checked( ! empty( $settings['webhook']['enabled'] ) ); ?> />
@@ -859,14 +944,19 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="edminboost-anm-webhook-url"><?php esc_html_e( 'Webhook URL', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label></th>
+						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'HTTPS endpoint for JSON payloads (Slack, Discord, custom integrations).', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+							<label for="edminboost-anm-webhook-url"><?php esc_html_e( 'Webhook URL', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+						</th>
 						<td>
 							<input type="url" id="edminboost-anm-webhook-url" class="large-text" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[webhook][url]" value="<?php echo esc_attr( $settings['webhook']['url'] ?? '' ); ?>" placeholder="https://hooks.slack.com/services/..." />
-							<p class="description"><?php esc_html_e( 'When enabled, notice summaries are sent to this URL (Slack, Discord, etc.). No data is sent unless you enable this option.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="edminboost-anm-webhook-message"><?php esc_html_e( 'Alert message', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label></th>
+						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Plain-text alert for the JSON text field. Leave blank for the default; placeholders are listed below.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+							<label for="edminboost-anm-webhook-message"><?php esc_html_e( 'Alert message', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+						</th>
 						<td>
 							<textarea id="edminboost-anm-webhook-message" class="large-text" rows="3" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[webhook][message]"><?php echo esc_textarea( $settings['webhook']['message'] ?? '' ); ?></textarea>
 							<p class="description">
@@ -878,6 +968,20 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 								<code><?php echo esc_html( EDMINBOOST_ANM_Webhook::TOKEN_SITE ); ?></code>,
 								<code><?php echo esc_html( EDMINBOOST_ANM_Webhook::TOKEN_SITE_NAME ); ?></code>
 							</p>
+							<div id="edminboost-anm-webhook-preview" class="edminboost-anm-webhook-preview" aria-live="polite">
+								<div class="edminboost-anm-webhook-preview__toolbar">
+									<h4 id="edminboost-anm-webhook-preview-heading" class="edminboost-anm-webhook-preview__heading"><?php esc_html_e( 'Alert preview', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h4>
+									<button type="button" class="button button-small" id="edminboost-anm-webhook-preview-btn"><?php esc_html_e( 'Refresh', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
+								</div>
+								<p class="description edminboost-anm-webhook-preview__hint"><?php esc_html_e( 'Updates as you edit. Placeholders are filled using your latest inbox notice or sample data.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+								<p class="edminboost-anm-webhook-preview__sample" data-edminboost-anm-webhook-preview-sample></p>
+								<div class="edminboost-anm-webhook-preview__panel">
+									<p class="edminboost-anm-webhook-preview__label"><?php esc_html_e( 'Alert text (`text` field)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+									<div class="edminboost-anm-webhook-preview__text" data-edminboost-anm-webhook-preview-text></div>
+									<p class="edminboost-anm-webhook-preview__label"><?php esc_html_e( 'JSON payload', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+									<pre class="edminboost-anm-webhook-preview__json" data-edminboost-anm-webhook-preview-json></pre>
+								</div>
+							</div>
 						</td>
 					</tr>
 				</table>
@@ -897,37 +1001,53 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 		<?php echo 'tools' !== $edminboost_anm_active_tab ? ' hidden' : ''; ?>
 	>
 	<div class="edminboost-anm-card">
-		<h2 class="screen-reader-text"><?php esc_html_e( 'Migration & Agency Tools', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+		<h2><?php esc_html_e( 'Competitor Importer', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+		<table class="form-table" role="presentation">
+			<tr>
+				<th scope="row">
+					<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Import rules from legacy Admin Notices Manager–compatible plugins detected on this site.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+					<?php esc_html_e( 'Legacy import', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+				</th>
+				<td>
+					<?php if ( ! empty( $legacy ) ) : ?>
+						<p><?php esc_html_e( 'Detected legacy plugin data. Click to import existing rules instantly.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+						<p class="description"><?php echo esc_html( implode( ', ', $legacy ) ); ?></p>
+					<?php else : ?>
+						<p class="description"><?php esc_html_e( 'No legacy Admin Notices Manager data detected. You can still run the importer to seed default rules.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+					<?php endif; ?>
+					<p>
+						<button type="button" class="button button-primary edminboost-anm-run-importer"><?php esc_html_e( 'Run One-Click Importer', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
+					</p>
+				</td>
+			</tr>
+		</table>
 
-		<div class="edminboost-anm-feature-block">
-			<div class="edminboost-anm-feature-block__header">
-				<span class="dashicons dashicons-update" aria-hidden="true"></span>
-				<h3><?php esc_html_e( 'Competitor Importer', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h3>
-			</div>
-			<?php if ( ! empty( $legacy ) ) : ?>
-				<p><?php esc_html_e( 'Detected legacy plugin data. Click to import existing rules instantly.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
-				<p class="edminboost-anm-muted"><?php echo esc_html( implode( ', ', $legacy ) ); ?></p>
-			<?php else : ?>
-				<p><?php esc_html_e( 'No legacy Admin Notices Manager data detected. You can still run the importer to seed default rules.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
-			<?php endif; ?>
-			<p><button type="button" class="button button-primary edminboost-anm-run-importer"><?php esc_html_e( 'Run One-Click Importer', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button></p>
-		</div>
-
-		<div class="edminboost-anm-feature-block">
-			<div class="edminboost-anm-feature-block__header">
-				<span class="dashicons dashicons-media-code" aria-hidden="true"></span>
-				<h3><?php esc_html_e( 'Agency JSON Configuration', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h3>
-			</div>
-			<p><?php esc_html_e( 'Export your custom ruleset for client site deployment or upload an existing template JSON file.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
-			<p>
-				<a href="<?php echo esc_url( $export_url ); ?>" class="button"><?php esc_html_e( 'Export Rules (JSON)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></a>
-			</p>
-			<form class="edminboost-anm-import-form" enctype="multipart/form-data">
-				<label for="edminboost-anm-import-file"><?php esc_html_e( 'Choose File:', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
-				<input type="file" id="edminboost-anm-import-file" name="import_file" accept=".json,application/json" />
-				<button type="submit" class="button"><?php esc_html_e( 'Import Rules', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
-			</form>
-		</div>
+		<h2><?php esc_html_e( 'Agency JSON Configuration', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+		<table class="form-table" role="presentation">
+			<tr>
+				<th scope="row">
+					<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Download your rules as JSON for backup or deployment to client sites.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+					<?php esc_html_e( 'Export', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+				</th>
+				<td>
+					<p>
+						<a href="<?php echo esc_url( $export_url ); ?>" class="button button-secondary"><?php esc_html_e( 'Export Rules (JSON)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></a>
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Upload a JSON rules file exported from this plugin or another site.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+					<label for="edminboost-anm-import-file"><?php esc_html_e( 'Import', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+				</th>
+				<td>
+					<form class="edminboost-anm-import-form" enctype="multipart/form-data">
+						<input type="file" id="edminboost-anm-import-file" name="import_file" accept=".json,application/json" />
+						<button type="submit" class="button button-secondary"><?php esc_html_e( 'Import Rules', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
+					</form>
+				</td>
+			</tr>
+		</table>
 	</div>
 	</div>
 	</div>
