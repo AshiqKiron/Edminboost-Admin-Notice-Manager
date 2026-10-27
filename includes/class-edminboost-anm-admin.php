@@ -205,6 +205,13 @@ class EDMINBOOST_ANM_Admin {
 				'resetHiddenSuccess' => __( 'Hidden notices were reset.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'resetHiddenError'   => __( 'Could not reset hidden notices.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'resetHiddenConfirmAll' => __( 'Reset hidden notice preferences for every user on this site?', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'digestPreviewLoading'  => __( 'Loading preview…', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'digestPreviewError'    => __( 'Could not load digest preview.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'digestPreviewAtGlance' => __( 'At a glance', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'digestPreviewRecent'   => __( 'Recent intercepted notices', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'digestPreviewNoNotices'=> __( 'No intercepted notices in the inbox yet.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'digestPreviewBlocked'  => __( 'Blocked this month', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'digestPreviewRules'    => __( 'Active auto-rules', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			),
 		);
 	}
@@ -407,6 +414,23 @@ class EDMINBOOST_ANM_Admin {
 		);
 
 		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-settings-page.php';
+	}
+
+	/**
+	 * Render a settings help tip (WordPress dashicons + hover tooltip).
+	 *
+	 * @param string $message Help text.
+	 * @return string Safe HTML.
+	 */
+	public static function help_tip( $message ) {
+		$message = (string) $message;
+		$label   = wp_strip_all_tags( $message );
+
+		return sprintf(
+			'<span class="dashicons dashicons-info-outline edminboost-anm-help-tip" tabindex="0" role="button" aria-label="%1$s" data-tip="%2$s"></span>',
+			esc_attr( $label ),
+			esc_attr( $message )
+		);
 	}
 
 	/**

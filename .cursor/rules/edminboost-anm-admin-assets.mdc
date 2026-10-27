@@ -15,6 +15,9 @@ alwaysApply: false
 - Use `fetch`/`admin-ajax.php` with `edminboostAnmData.ajaxUrl`, `nonce`, and localized `i18n` for errors/success.
 - Inbox: sort/filter/pagination via `edminboost_anm_inbox_list` (updates `#edminboost-anm-inbox-rows` HTML from server-rendered partial).
 - Rules: WP core preset conversion via `edminboost_anm_convert_wp_preset` (toggle undo supported).
+- Settings: tabbed UI via `initSettingsTabs()` on `[data-edminboost-anm-settings]` — `?tab=` query sync, `history.replaceState`, keyboard (Arrow/Home/End), `edminboost-anm-settings-tab` custom event; legacy `?tab=upsell` maps to `filtering`. Tools tab adds `.is-tab-tools` on the form (hides main Save button where appropriate). Preserve active tab in `_wp_http_referer` on submit.
+- Settings: digest live preview via `initDigestPreview()` — POST `edminboost_anm_digest_preview` with unsaved `digest[...]` fields; debounced refresh when preview panel is open; auto-load on Notifications tab.
+- Settings: field help via `initSettingsHelpTips()` — `.edminboost-anm-help-tip[data-tip]` (markup from `EDMINBOOST_ANM_Admin::help_tip()`).
 - No jQuery unless WordPress already loads it for the screen.
 - Use `DOMContentLoaded` for initialization.
 
@@ -48,7 +51,9 @@ alwaysApply: false
 		importSuccess, importError, actionSuccess, actionError,
 		createRule, editRule, statusActive, statusInactive,
 		seedSuccess, seedError, triggerError, viewInbox,
-		convertedToRule, undoConversion, alreadyConverted
+		convertedToRule, undoConversion, alreadyConverted,
+		resetHiddenSuccess, resetHiddenError, resetHiddenConfirmAll,
+		digestPreviewLoading, digestPreviewError
 	}
 }
 ```
@@ -58,7 +63,8 @@ alwaysApply: false
 - Prefix all selectors with `.edminboost-anm-` to avoid admin conflicts.
 - Layout: `.edminboost-anm-wrap`, `.edminboost-anm-hero`, `.edminboost-anm-card`, `.edminboost-anm-status`.
 - Status modifiers: `.is-active`, `.is-inactive`, `.is-ready`.
-- Page modifiers: `.edminboost-anm-settings`, inbox list table, rules presets.
+- Page modifiers: `.edminboost-anm-settings`, `.edminboost-anm-settings-tabs`, `.edminboost-anm-tab-panel`, `.edminboost-anm-settings-form.is-tab-tools`, inbox list table, rules presets.
+- Help tips: `.edminboost-anm-help-tip`, `.edminboost-anm-help-tip-popup`.
 - Admin bar: `.edminboost-anm-notices--dropdown`, `.edminboost-anm-notices--open`, `.edminboost-anm-notices-badge`, `.edminboost-anm-howdy-dot`.
 
 ## Partials (`admin/partials/`)
@@ -69,7 +75,7 @@ alwaysApply: false
 | `edminboost-anm-inbox-page.php` | Inbox list table shell (filters, bulk actions) |
 | `edminboost-anm-inbox-table-rows.php` | `<tr>` rows only — included from page render and AJAX `rows` HTML |
 | `edminboost-anm-rules-page.php` | Filter rules CRUD + WP preset conversion UI |
-| `edminboost-anm-settings-page.php` | Tabbed Settings API form (General, Upsell Blacklist, Security, Notifications, Migration & Tools) |
+| `edminboost-anm-settings-page.php` | Tabbed Settings API form — tabs: `general`, `notices`, `admin_bar`, `filtering`, `security`, `notifications`, `tools` (labels in `$edminboost_anm_settings_tabs`; legacy `?tab=upsell` → `filtering`) |
 | `edminboost-anm-notice-panel-dropdown.php` | Admin bar dropdown preview list (max 8 notices) |
 
 - Reusable row/panel partials: set `$edminboost_anm_*` variables before `include`; document `@var` at top.

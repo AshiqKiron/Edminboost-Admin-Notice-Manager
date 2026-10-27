@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 - Check capabilities before rendering admin pages: `current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY )`.
 - Escape output: `esc_html()`, `esc_attr()`, `esc_url()`, `esc_html__()`, `esc_html_e()`.
 - Sanitize all settings via `EDMINBOOST_ANM_Settings::sanitize()` as `sanitize_callback` in `register_setting()`.
-- New AJAX handlers: register in `EDMINBOOST_ANM_Ajax::register_hooks()`, implement `handle_*`, call `verify_request()`.
+- New AJAX handlers: register in `EDMINBOOST_ANM_Ajax::register_hooks()`, implement `handle_*`, call `verify_request()` (digest preview: sanitize nested input with dedicated helpers when accepting unsaved form fields).
 
 ## WordPress APIs
 
@@ -77,8 +77,21 @@ array(
 	'upsell_preset'     => array( 'enabled' => false, 'custom_phrases' => array() ),
 	'safety_guard'      => array( 'enabled' => true, 'mode' => 'strict' ),
 	'client_shield'     => array( 'enabled' => false, 'roles' => array( ... ) ),
-	'digest'            => array( 'enabled' => false, 'recipients' => 'admin@...' ),
-	'webhook'           => array( 'enabled' => false, 'url' => '' ),
+	'digest'            => array(
+		'enabled'                => false,
+		'recipients'             => 'admin@...',
+		'subject'                => '',  // empty = default; supports {site_name}
+		'intro'                  => '',
+		'include_stats'          => true,
+		'include_recent_notices' => true,
+		'recent_notices_count'   => 10,  // clamped 1–25 in sanitize
+		'footer'                 => '',
+	),
+	'webhook'           => array(
+		'enabled' => false,
+		'url'     => '',
+		'message' => '',  // empty = default template; token placeholders in EDMINBOOST_ANM_Webhook
+	),
 	'word_filters'      => array( 'spam_words' => array(), 'whitelist_words' => array() ),
 	'block_ad_redirects'=> array( 'enabled' => false, 'urls' => array() ),
 )
@@ -98,6 +111,11 @@ Separate options: `RULES_OPTION` (rule list), `INBOX_OPTION` (captured notices),
 | `edminboost-anm-notice-panel-dropdown.php` | Admin bar dropdown preview |
 
 `EDMINBOOST_ANM_Notices::DROPDOWN_PREVIEW_LIMIT` (8) caps dropdown preview items.
+
+- Settings help tips: `EDMINBOOST_ANM_Admin::help_tip( $message )` — escaped dashicons + `data-tip` for JS popup.
+- Digest: `EDMINBOOST_ANM_Digest::build_email()`, `get_preview()`, `get_recipients()`, `SITE_NAME_TOKEN`; filter `edminboost_anm_digest_email`.
+- Webhook: `EDMINBOOST_ANM_Webhook::build_payload()`, `build_message_text()`; filter `edminboost_anm_webhook_payload`.
+- Sanitize helpers: `EDMINBOOST_ANM_Settings::sanitize_digest_settings()`, `sanitize_webhook_settings()` (shared by Settings API and digest preview AJAX).
 
 - Document `@var` annotations at the top of partials.
 - Prefix partial-local variables with `$edminboost_anm_` to avoid collisions.

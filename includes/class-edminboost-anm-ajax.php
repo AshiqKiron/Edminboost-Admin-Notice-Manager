@@ -37,6 +37,7 @@ class EDMINBOOST_ANM_Ajax {
 			'edminboost_anm_search_users',
 			'edminboost_anm_reset_hidden_notices',
 			'edminboost_anm_notice_hide',
+			'edminboost_anm_digest_preview',
 		);
 
 		foreach ( $actions as $action ) {
@@ -583,6 +584,29 @@ class EDMINBOOST_ANM_Ajax {
 		}
 
 		return $types;
+	}
+
+	/**
+	 * Preview weekly digest email using saved or unsaved settings fields.
+	 *
+	 * @return void
+	 */
+	public function handle_digest_preview() {
+		$this->verify_request();
+
+		$settings = EDMINBOOST_ANM_Settings::get();
+		$defaults = EDMINBOOST_ANM_Settings::get_defaults();
+
+		if ( isset( $_POST['digest'] ) && is_array( $_POST['digest'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$digest_input = wp_unslash( $_POST['digest'] );
+			$settings['digest'] = EDMINBOOST_ANM_Settings::sanitize_digest_settings(
+				$digest_input,
+				$defaults['digest']
+			);
+		}
+
+		wp_send_json_success( EDMINBOOST_ANM_Digest::get_preview( $settings ) );
 	}
 
 	/**

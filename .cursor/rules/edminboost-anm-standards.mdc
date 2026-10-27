@@ -30,6 +30,8 @@ Cross-cutting quality standards. See also: `edminboost-anm-project.mdc`, `edminb
 - Respect keyboard navigation and focus states.
 - Use meaningful headings and notices.
 - Inbox and rules UI: preserve focus and confirm destructive actions (delete rule, bulk inbox actions).
+- Settings tabs: `role="tablist"` / `role="tab"` / `role="tabpanel"` with `aria-selected`, `aria-controls`, and arrow-key navigation; panels use `hidden` when inactive.
+- Settings help tips: `role="button"`, `aria-label`, and `role="tooltip"` on the floating popup; support keyboard focus.
 - Admin bar dropdown: use `aria-haspopup`, `aria-expanded`, `aria-controls`, and screen-reader text for counts; panel `#edminboost-anm-notices-panel` uses `hidden` when closed.
 
 ## Admin UX

@@ -572,6 +572,9 @@
 		function tabFromUrl() {
 			var params = new URLSearchParams(window.location.search);
 			var slug = params.get('tab') || defaultTab;
+			if (slug === 'upsell') {
+				slug = 'filtering';
+			}
 			return panelForTab(slug) ? slug : 'general';
 		}
 
@@ -604,6 +607,12 @@
 			}
 			window.history.replaceState({}, '', url.toString());
 			root.dataset.settingsTab = slug;
+
+			root.dispatchEvent(
+				new CustomEvent('edminboost-anm-settings-tab', {
+					detail: { tab: slug }
+				})
+			);
 		}
 
 		tabs.forEach(function (tab) {
@@ -913,39 +922,59 @@
 	}
 
 	function initSettingsHelpTips() {
-		document.querySelectorAll('.edminboost-anm-help-tip[data-tip]').forEach(function (btn) {
-			btn.addEventListener('click', function () {
-				window.alert(btn.getAttribute('data-tip') || '');
-			});
-		});
-	}
+		var tips = document.querySelectorAll('.edminboost-anm-help-tip[data-tip]');
+		if (!tips.length) {
+			return;
+		}
 
-	function initSettingsSwitches() {
-		document.querySelectorAll('[data-edminboost-anm-switch]').forEach(function (wrap) {
-			var input = wrap.querySelector('.edminboost-anm-switch__input');
-			var options = wrap.querySelectorAll('.edminboost-anm-switch__option');
-			if (!input || !options.length) {
+		var popup = document.createElement('div');
+		popup.className = 'edminboost-anm-help-tip-popup';
+		popup.setAttribute('role', 'tooltip');
+		popup.hidden = true;
+		document.body.appendChild(popup);
+
+		function hideTip() {
+			popup.hidden = true;
+			popup.textContent = '';
+		}
+
+		function showTip(trigger) {
+			var text = trigger.getAttribute('data-tip') || '';
+			if (!text) {
 				return;
 			}
 
-			function sync() {
-				var on = input.checked;
-				options.forEach(function (option) {
-					var active = (option.dataset.value === '1') === on;
-					option.classList.toggle('is-active', active);
-					option.setAttribute('aria-pressed', active ? 'true' : 'false');
-				});
+			popup.textContent = text;
+			popup.hidden = false;
+
+			var rect = trigger.getBoundingClientRect();
+			var top = rect.bottom + window.scrollY + 6;
+			var left = rect.left + window.scrollX;
+
+			popup.style.top = top + 'px';
+			popup.style.left = left + 'px';
+
+			var popupRect = popup.getBoundingClientRect();
+			var maxLeft = window.scrollX + document.documentElement.clientWidth - popupRect.width - 8;
+			if (left > maxLeft) {
+				left = Math.max(window.scrollX + 8, maxLeft);
+				popup.style.left = left + 'px';
 			}
+		}
 
-			options.forEach(function (option) {
-				option.addEventListener('click', function () {
-					input.checked = option.dataset.value === '1';
-					sync();
-				});
+		tips.forEach(function (tip) {
+			tip.addEventListener('mouseenter', function () {
+				showTip(tip);
 			});
-
-			sync();
+			tip.addEventListener('mouseleave', hideTip);
+			tip.addEventListener('focus', function () {
+				showTip(tip);
+			});
+			tip.addEventListener('blur', hideTip);
 		});
+
+		document.addEventListener('scroll', hideTip, true);
+		window.addEventListener('resize', hideTip);
 	}
 
 	function initManageNoticesMode() {
@@ -1041,6 +1070,149 @@
 		});
 	}
 
+	function initDigestPreview() {
+		var btn = document.getElementById('edminboost-anm-digest-preview-btn');
+		var panel = document.getElementById('edminboost-anm-digest-preview');
+		var settingsRoot = document.querySelector('[data-edminboost-anm-settings]');
+		if (!btn || !panel) {
+			return;
+		}
+
+		var toEl = panel.querySelector('[data-edminboost-anm-digest-preview-to]');
+		var fromEl = panel.querySelector('[data-edminboost-anm-digest-preview-from]');
+		var subjectEl = panel.querySelector('[data-edminboost-anm-digest-preview-subject]');
+		var bodyEl = panel.querySelector('[data-edminboost-anm-digest-preview-body]');
+		var i18n = data.i18n || {};
+		var refreshTimer = null;
+		var loadingText = i18n.digestPreviewLoading || 'Loading preview…';
+
+		function fieldValue(id) {
+			var el = document.getElementById(id);
+			return el ? el.value : '';
+		}
+
+		function fieldChecked(id) {
+			var el = document.getElementById(id);
+			return el ? el.checked : false;
+		}
+
+		function setLoadingState() {
+			if (toEl) {
+				toEl.textContent = loadingText;
+			}
+			if (fromEl) {
+				fromEl.textContent = '';
+			}
+			if (subjectEl) {
+				subjectEl.textContent = '';
+			}
+			if (bodyEl) {
+				bodyEl.textContent = '';
+			}
+		}
+
+		function loadDigestPreview() {
+			var body = new FormData();
+			body.append('action', 'edminboost_anm_digest_preview');
+			body.append('nonce', data.nonce || '');
+			body.append('digest[recipients]', fieldValue('edminboost-anm-digest-recipients'));
+			body.append('digest[subject]', fieldValue('edminboost-anm-digest-subject'));
+			body.append('digest[intro]', fieldValue('edminboost-anm-digest-intro'));
+			body.append('digest[footer]', fieldValue('edminboost-anm-digest-footer'));
+			body.append('digest[recent_notices_count]', fieldValue('edminboost-anm-digest-recent-count'));
+
+			if (fieldChecked('edminboost-anm-digest-enabled')) {
+				body.append('digest[enabled]', '1');
+			}
+			if (fieldChecked('edminboost-anm-digest-include-stats')) {
+				body.append('digest[include_stats]', '1');
+			}
+			if (fieldChecked('edminboost-anm-digest-include-recent')) {
+				body.append('digest[include_recent_notices]', '1');
+			}
+
+			btn.disabled = true;
+			setLoadingState();
+			panel.hidden = false;
+
+			return fetch(data.ajaxUrl, {
+				method: 'POST',
+				credentials: 'same-origin',
+				body: body
+			}).then(function (response) {
+				return response.json();
+			}).then(function (result) {
+				btn.disabled = false;
+				if (!result.success || !result.data) {
+					setLoadingState();
+					if (bodyEl) {
+						bodyEl.textContent = (result.data && result.data.message) || i18n.digestPreviewError || 'Could not load digest preview.';
+					}
+					return;
+				}
+
+				if (toEl) {
+					toEl.textContent = result.data.to || '';
+				}
+				if (fromEl) {
+					fromEl.textContent = result.data.from || '';
+				}
+				if (subjectEl) {
+					subjectEl.textContent = result.data.subject || '';
+				}
+				if (bodyEl) {
+					bodyEl.textContent = result.data.body || '';
+				}
+			}).catch(function () {
+				btn.disabled = false;
+				setLoadingState();
+				if (bodyEl) {
+					bodyEl.textContent = i18n.digestPreviewError || 'Could not load digest preview.';
+				}
+			});
+		}
+
+		function scheduleDigestPreviewRefresh() {
+			if (panel.hidden) {
+				return;
+			}
+			clearTimeout(refreshTimer);
+			refreshTimer = setTimeout(loadDigestPreview, 400);
+		}
+
+		btn.addEventListener('click', loadDigestPreview);
+
+		[
+			'edminboost-anm-digest-recipients',
+			'edminboost-anm-digest-subject',
+			'edminboost-anm-digest-intro',
+			'edminboost-anm-digest-footer',
+			'edminboost-anm-digest-recent-count',
+			'edminboost-anm-digest-enabled',
+			'edminboost-anm-digest-include-stats',
+			'edminboost-anm-digest-include-recent'
+		].forEach(function (fieldId) {
+			var field = document.getElementById(fieldId);
+			if (!field) {
+				return;
+			}
+			field.addEventListener('input', scheduleDigestPreviewRefresh);
+			field.addEventListener('change', scheduleDigestPreviewRefresh);
+		});
+
+		if (settingsRoot) {
+			settingsRoot.addEventListener('edminboost-anm-settings-tab', function (event) {
+				if (event.detail && event.detail.tab === 'notifications') {
+					loadDigestPreview();
+				}
+			});
+
+			if (settingsRoot.dataset.settingsTab === 'notifications') {
+				loadDigestPreview();
+			}
+		}
+	}
+
 	function initNoticePanelSettings() {
 		var styleSelect = document.getElementById('edminboost-anm-notice-panel-style');
 		var dropdownRows = document.querySelectorAll('.edminboost-anm-notice-panel-dropdown-row');
@@ -1072,9 +1244,9 @@
 		initHidingNotificationsSettings();
 		initBlockAdRedirectsSettings();
 		initSettingsHelpTips();
-		initSettingsSwitches();
 		initManageNoticesMode();
 		initResetHiddenNotices();
 		initNoticePanelSettings();
+		initDigestPreview();
 	});
 }());

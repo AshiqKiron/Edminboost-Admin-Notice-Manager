@@ -152,12 +152,19 @@ class EDMINBOOST_ANM_Settings {
 				'roles'   => array( 'editor', 'author', 'shop_manager' ),
 			),
 			'digest'            => array(
-				'enabled'     => false,
-				'recipients'  => get_option( 'admin_email' ),
+				'enabled'               => false,
+				'recipients'            => get_option( 'admin_email' ),
+				'subject'               => '',
+				'intro'                 => '',
+				'include_stats'         => true,
+				'include_recent_notices' => true,
+				'recent_notices_count'  => 10,
+				'footer'                => '',
 			),
 			'webhook'           => array(
 				'enabled' => false,
 				'url'     => '',
+				'message' => '',
 			),
 			'word_filters'      => array(
 				'spam_words'      => array(),
@@ -440,21 +447,13 @@ class EDMINBOOST_ANM_Settings {
 			? $input['digest']
 			: array();
 
-		$output['digest'] = array(
-			'enabled'    => ! empty( $digest_input['enabled'] ),
-			'recipients' => sanitize_text_field( $digest_input['recipients'] ?? $defaults['digest']['recipients'] ),
-		);
+		$output['digest'] = self::sanitize_digest_settings( $digest_input, $defaults['digest'] );
 
 		$webhook_input = isset( $input['webhook'] ) && is_array( $input['webhook'] )
 			? $input['webhook']
 			: array();
 
-		$output['webhook'] = array(
-			'enabled' => ! empty( $webhook_input['enabled'] ),
-			'url'     => ! empty( $webhook_input['enabled'] )
-				? esc_url_raw( $webhook_input['url'] ?? '' )
-				: '',
-		);
+		$output['webhook'] = self::sanitize_webhook_settings( $webhook_input, $defaults['webhook'] );
 
 		$redirect_input = isset( $input['block_ad_redirects'] ) && is_array( $input['block_ad_redirects'] )
 			? $input['block_ad_redirects']
@@ -1001,6 +1000,47 @@ class EDMINBOOST_ANM_Settings {
 		}
 
 		return array_values( array_unique( $patterns ) );
+	}
+
+	/**
+	 * Sanitize webhook settings from Settings API input.
+	 *
+	 * @param array $input    Raw webhook settings.
+	 * @param array $defaults Webhook defaults from get_defaults().
+	 * @return array
+	 */
+	public static function sanitize_webhook_settings( array $input, array $defaults ) {
+		return array(
+			'enabled' => ! empty( $input['enabled'] ),
+			'url'     => ! empty( $input['enabled'] )
+				? esc_url_raw( $input['url'] ?? '' )
+				: '',
+			'message' => sanitize_textarea_field( $input['message'] ?? '' ),
+		);
+	}
+
+	/**
+	 * Sanitize digest settings from Settings API or preview AJAX input.
+	 *
+	 * @param array $input    Raw digest settings.
+	 * @param array $defaults Digest defaults from get_defaults().
+	 * @return array
+	 */
+	public static function sanitize_digest_settings( array $input, array $defaults ) {
+		$recent_count = isset( $input['recent_notices_count'] )
+			? absint( $input['recent_notices_count'] )
+			: (int) ( $defaults['recent_notices_count'] ?? 10 );
+
+		return array(
+			'enabled'                => ! empty( $input['enabled'] ),
+			'recipients'             => sanitize_text_field( $input['recipients'] ?? $defaults['recipients'] ),
+			'subject'                => sanitize_text_field( $input['subject'] ?? '' ),
+			'intro'                  => sanitize_textarea_field( $input['intro'] ?? '' ),
+			'include_stats'          => ! empty( $input['include_stats'] ),
+			'include_recent_notices' => ! empty( $input['include_recent_notices'] ),
+			'recent_notices_count'   => max( 1, min( 25, $recent_count ) ),
+			'footer'                 => sanitize_textarea_field( $input['footer'] ?? '' ),
+		);
 	}
 
 	/**

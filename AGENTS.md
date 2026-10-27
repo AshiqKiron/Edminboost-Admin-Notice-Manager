@@ -49,7 +49,7 @@ languages/  uninstall.php  readme.txt  composer.json
 
 - Bootstrap defines constants and calls `edminboost_anm_run_plugin()`.
 - `EDMINBOOST_ANM_Plugin::run()` wires i18n, admin menu/settings/assets, and on `init`: notices, interceptor, AJAX, digest, ad redirects.
-- Settings: primary option via `EDMINBOOST_ANM_Settings` (Settings API group `edminboost_anm_settings_group`). Rules and inbox stored in separate options. Tabbed settings UI (General, Upsell Blacklist, Security, Notifications, Migration & Tools).
+- Settings: primary option via `EDMINBOOST_ANM_Settings` (Settings API group `edminboost_anm_settings_group`). Rules and inbox stored in separate options. Tabbed settings UI (General, Notices & access, Admin bar, Filtering, Security, Notifications, Migration & Tools).
 - Options API only — no custom tables. No REST API.
 - AJAX for dashboard/rules/inbox (including `edminboost_anm_inbox_list` sort), importer, capture, WP preset conversion, user search, notice hide/reset hidden; weekly digest via WP-Cron; optional webhook (user URL, off by default).
 - **Ad redirects**: optional `block_ad_redirects` URL blocklist — admin-only redirect filtering via `EDMINBOOST_ANM_Ad_Redirects`.
@@ -79,6 +79,7 @@ Registered in `EDMINBOOST_ANM_Ajax::register_hooks()` — all use `verify_reques
 | `edminboost_anm_search_users` | User picker for hiding-notifications settings |
 | `edminboost_anm_notice_hide` | Per-user or site-wide hide from inline UI or dropdown |
 | `edminboost_anm_reset_hidden_notices` | Reset hidden-notice preferences (user or site) |
+| `edminboost_anm_digest_preview` | Plain-text weekly digest preview (unsaved `digest` fields sanitized server-side) |
 | `edminboost_anm_seed_test_notices` / `edminboost_anm_trigger_test_notices` | `verify_debug_request()` |
 
 ## Extension Hooks
@@ -89,6 +90,8 @@ Registered in `EDMINBOOST_ANM_Ajax::register_hooks()` — all use `verify_reques
 - `edminboost_anm_notices_loaded` — after notice manager hooks register
 - `edminboost_anm_upsell_preset_phrases` — filter upsell phrase preset list
 - `edminboost_anm_wp_notice_presets` — filter WordPress core notice presets (Rules UI)
+- `edminboost_anm_digest_email` — filter digest subject/body before send or preview
+- `edminboost_anm_webhook_payload` — filter outbound webhook JSON payload
 
 ## Cursor Rules
 
