@@ -53,8 +53,10 @@ Yes. When uninstalled, all plugin options are removed from the database.
 == Changelog ==
 
 = 1.1.1 =
+* Settings (General): removed duplicate Enable plugin toggle; use Dashboard Quick Status to turn interception on or off.
 * Plugin admin screens: hide WordPress admin notices (including debug test banners) so dashboard and settings layouts stay clean; live test notices still fire on the main Dashboard home as documented.
-* Settings (General): Display experience presets — leave notices on the dashboard, clean dashboard with inbox/admin bar (recommended), or toolbar-only; advanced section retains raw hide/show modes.
+* Settings (General): Display experience presets with live layout preview — leave notices on the dashboard, clean dashboard with inbox/admin bar (recommended), or toolbar-only; advanced section retains raw hide/show modes.
+* Settings (General): Live preview for update nags and reset hidden notices — sample core/plugin update banners and a hidden notice update as you toggle options or run Reset.
 * Settings: Access & visibility is its own tab (role ACL and per-user hiding); the Notices tab covers notice handling only.
 * Settings (Admin bar): Additional panel positions — left bar (after site name or updates), top-right first slot, and before or after the Howdy profile menu.
 * Settings (Admin bar): Live panel preview on the right — updates as you change style, position, badge, and colors.

@@ -191,7 +191,12 @@ class EDMINBOOST_ANM_Notices {
 			. '.edminboost-anm-wrap .notice,.edminboost-anm-wrap .update-nag,.edminboost-anm-wrap div.error,.edminboost-anm-wrap div.updated{'
 			. 'display:none!important;}'
 			. '.edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__notice-body .notice,'
-			. '.edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__notice-body .update-nag{'
+			. '.edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__notice-body .update-nag,'
+			. '.edminboost-anm-display-experience-preview .edminboost-anm-display-experience-preview__notice,'
+			. '.edminboost-anm-general-options-preview .edminboost-anm-display-experience-preview__notice,'
+			. '.edminboost-anm-display-experience-preview .edminboost-anm-notices-panel__notice-body .notice,'
+			. '.edminboost-anm-display-experience-preview .edminboost-anm-notices-panel__notice-body .update-nag,'
+			. '.edminboost-anm-general-options-preview .update-nag{'
 			. 'display:block!important;}';
 	}
 

@@ -19,11 +19,13 @@ alwaysApply: false
 - Settings: digest live preview via `initDigestPreview()` — POST `edminboost_anm_digest_preview` with unsaved `digest[...]` fields; renders structured `content` into `[data-edminboost-anm-digest-preview-content]` with `escapeHtml()` (plain-text email still sent via `body`); debounced refresh when preview panel is open; auto-load on Notifications tab.
 - Settings: webhook live preview via `initWebhookPreview()` — POST `edminboost_anm_webhook_preview` with unsaved `webhook[message]`; shows sample line, alert `text`, and formatted JSON payload; debounced refresh; auto-load on Notifications tab.
 - Settings (Access tab): `initHidingNotificationsSettings()` on `[data-edminboost-anm-hiding-visibility]` — radio modes with nested `.edminboost-anm-hiding-visibility-options__option` user pickers (`only` / `except`); syncs chips/hidden inputs via `edminboost_anm_search_users`.
-- Settings (Admin bar tab): `initNoticePanelPreview()` — toggles `.edminboost-anm-notice-panel-bell-row` (`syncBellRows`), applies panel color CSS vars on `#edminboost-anm-notice-panel-preview`, renders mock admin bar + open dropdown into `[data-edminboost-anm-notice-panel-preview-stage]` using `noticePanelPositionLayouts`, realistic localized sample notices (per-notice `noticePanelSample*Source` keys), and color inputs; refreshes on tab switch (`edminboost-anm-settings-tab` → `admin_bar`); escape all dynamic strings.
+- Shared settings preview helpers (top of file): `anmPreviewEscapeHtml`, `anmReadNoticePanelPreviewOptions`, `anmApplyNoticePanelPreviewColors`, `anmPreviewBuildMockBarHtml`, etc. — used by General display preview and Admin bar tab preview; escape all dynamic strings.
+- Settings (Admin bar tab): `initNoticePanelPreview()` — toggles `.edminboost-anm-notice-panel-bell-row` (`syncBellRows`), applies panel color CSS vars on `#edminboost-anm-notice-panel-preview`, renders mock admin bar + open dropdown into `[data-edminboost-anm-notice-panel-preview-stage]` using shared preview helpers + `noticePanelPositionLayouts`; refreshes on tab switch (`edminboost-anm-settings-tab` → `admin_bar`).
 - Plugin screens: `initHidePluginAdminNotices()` — adds `.edminboost-anm-notice-hidden` to stray `.notice` nodes (excludes admin bar panel preview); CSS also via `EDMINBOOST_ANM_Notices::get_plugin_screen_notice_hide_css()`.
 - Dashboard: Quick Status enable toggle reloads the page after successful AJAX save (reflects global kill switch across admin).
 - Settings: field help via `initSettingsHelpTips()` — `.edminboost-anm-help-tip[data-tip]` with optional `data-tip-placement` (`below` default, `left`); hover/focus popup; `click`/`mousedown` use `stopPropagation` so tips do not toggle segmented controls.
-- Settings: display experience — `initDisplayExperience()` on `[data-edminboost-anm-display-experience]` (preset cards sync hidden `manage_notices_mode`); advanced modes in `[data-edminboost-anm-display-experience-advanced]`; toggles `[data-edminboost-anm-toolbar-option-row]` when mode is `show_all`.
+- Settings: display experience — `initDisplayExperience()` on `[data-edminboost-anm-display-experience]` (preset card click selects radio); calls `anmRenderDisplayExperiencePreview(mode)` on mode change and when Admin bar tab fields change (style, badge, position, colors — unsaved values drive the General mock); advanced modes in `[data-edminboost-anm-display-experience-advanced]`; toggles `[data-edminboost-anm-toolbar-option-row]` when mode is `show_all`; sticky right column `#edminboost-anm-display-experience-preview` (`data-preview-mode`, caption via `displayExperiencePreviewCaption*` i18n).
+- Settings (General): `initGeneralOptionsPreview()` on `[data-edminboost-anm-general-options]` — `#edminboost-anm-general-options-preview` mock for update-nag toggles (`data-hide-plugin` / `data-hide-core` on frame) and reset-hidden scope; listens for bubbling `edminboost-anm-reset-hidden-success` from `initResetHiddenNotices()` to reveal sample hidden notice; `generalOptionsPreview*` i18n.
 - Settings: ad redirect URL list — `initBlockAdRedirectsSettings()` on `[data-edminboost-anm-redirect-block]`; clones hidden template row `.edminboost-anm-redirect-block-row-template` into `[data-edminboost-anm-redirect-block-rows]`; `block_ad_redirects[urls][]` inputs.
 - No jQuery unless WordPress already loads it for the screen.
 - Use `DOMContentLoaded` for initialization.
@@ -67,7 +69,8 @@ alwaysApply: false
 		digestPreviewBlocked, digestPreviewRules,
 		webhookPreviewLoading, webhookPreviewError,
 		webhookPreviewSample, webhookPreviewInbox,
-		noticePanelPreview*, noticePanelSample* // mock bar/panel strings; sample notices include per-row source keys
+		noticePanelPreview*, noticePanelSample*,
+		displayExperiencePreview*, generalOptionsPreview* // General tab live preview copy
 	}
 }
 ```
@@ -77,7 +80,7 @@ alwaysApply: false
 - Prefix all selectors with `.edminboost-anm-` to avoid admin conflicts.
 - Layout: `.edminboost-anm-wrap`, `.edminboost-anm-hero`, `.edminboost-anm-card`, `.edminboost-anm-status`.
 - Status modifiers: `.is-active`, `.is-inactive`, `.is-ready`.
-- Page modifiers: `.edminboost-anm-settings`, `.edminboost-anm-settings-tabs`, `.edminboost-anm-tab-panel`, `.edminboost-anm-settings-form.is-tab-tools`, `.edminboost-anm-segmented`, `.edminboost-anm-display-experience*`, `.edminboost-anm-hiding-visibility-options*`, `.edminboost-anm-notice-handling-table`, `.edminboost-anm-digest-layout__columns`, `.edminboost-anm-redirect-block-*`, inbox list table, rules presets.
+- Page modifiers: `.edminboost-anm-settings`, `.edminboost-anm-settings-tabs`, `.edminboost-anm-tab-panel`, `.edminboost-anm-settings-form.is-tab-tools`, `.edminboost-anm-segmented`, `.edminboost-anm-display-experience*`, `.edminboost-anm-display-experience-layout*`, `.edminboost-anm-general-options-layout*`, `.edminboost-anm-display-experience-preview*`, `.edminboost-anm-general-options-preview*`, `.edminboost-anm-hiding-visibility-options*`, `.edminboost-anm-notice-handling-table`, `.edminboost-anm-digest-layout__columns`, `.edminboost-anm-redirect-block-*`, inbox list table, rules presets. General preview frames use `[hidden]` / `data-*` attrs for CSS-driven mock states (update nags, hidden notice badge).
 - Help tips: `.edminboost-anm-help-tip`, `.edminboost-anm-help-tip-popup`.
 - Notifications previews: `.edminboost-anm-digest-preview*`, `.edminboost-anm-digest-layout__preview`, `.edminboost-anm-webhook-preview*` (notice-type modifiers `.is-info`, `.is-success`, `.is-warning`, `.is-error`).
 - Admin bar (live + settings mock): `.edminboost-anm-notices--dropdown`, `.edminboost-anm-notices--bell`, `.edminboost-anm-notices--facebook`, `.edminboost-anm-notices-badge--pulse`, `.edminboost-anm-notices-panel--compact`, `.edminboost-anm-notice-panel-layout__preview`, `.edminboost-anm-notice-panel-preview*` (preview colors via CSS vars scoped under `#edminboost-anm-notice-panel-preview`; bell icon uses dashicons).
@@ -92,7 +95,7 @@ alwaysApply: false
 | `edminboost-anm-inbox-page.php` | Inbox list table shell (filters, bulk actions) |
 | `edminboost-anm-inbox-table-rows.php` | `<tr>` rows only — included from page render and AJAX `rows` HTML |
 | `edminboost-anm-rules-page.php` | Filter rules CRUD + WP preset conversion UI |
-| `edminboost-anm-settings-page.php` | Tabbed Settings API form — tabs: `general`, `notices`, `access`, `admin_bar`, `filtering`, `security`, `notifications`, `tools` (labels in `$edminboost_anm_settings_tabs`; legacy `?tab=upsell` → `filtering`). Field help via `EDMINBOOST_ANM_Admin::help_tip()` beside labels (prefer tips over duplicate `.description` copy). Notifications: two-column digest layout (`edminboost-anm-digest-layout__settings` + sticky `__preview`). Security: redirect blocklist as core `widefat` list table with template row. Tools: importer/export as `form-table` rows. |
+| `edminboost-anm-settings-page.php` | Tabbed Settings API form — tabs: `general`, `notices`, `access`, `admin_bar`, `filtering`, `security`, `notifications`, `tools` (labels in `$edminboost_anm_settings_tabs`; legacy `?tab=upsell` → `filtering`). General: two-column **Display experience** + **Update & hidden notices** cards with sticky live previews (no duplicate global Enable toggle — Dashboard Quick Status only). Field help via `help_tip()`. Notifications: digest two-column layout. Security: redirect blocklist list table. Tools: importer/export rows. |
 | `edminboost-anm-notice-panel-dropdown.php` | Admin bar dropdown preview list (max 8 notices) |
 
 - Reusable row/panel partials: set `$edminboost_anm_*` variables before `include`; document `@var` at top.
@@ -105,7 +108,7 @@ alwaysApply: false
 
 | Handle | File | When |
 |--------|------|------|
-| `edminboost-anm-admin` (style) | `admin/css/edminboost-anm-admin.css` | Plugin screens (deps: `list-tables` on inbox/settings, `dashicons`) |
+| `edminboost-anm-admin` (style) | `admin/css/edminboost-anm-admin.css` | Plugin screens (deps: `list-tables` on inbox/settings, `dashicons`); inline `EDMINBOOST_ANM_Notices::get_plugin_screen_notice_hide_css()` on plugin screens |
 | `edminboost-anm-admin` (script) | `admin/js/edminboost-anm-admin.js` | Plugin screens only |
 | `list-tables` (style) | WordPress core | Inbox and Settings plugin screens |
 | `dashicons` (style) | WordPress core | Plugin screens; admin bar notice panel (live) |

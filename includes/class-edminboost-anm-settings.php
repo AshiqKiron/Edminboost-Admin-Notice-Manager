@@ -332,7 +332,10 @@ class EDMINBOOST_ANM_Settings {
 		$defaults = self::get_defaults();
 		$output   = self::get();
 
-		$output['enabled'] = ! empty( $input['enabled'] );
+		// Global enable is toggled from the dashboard only; omit from Settings form.
+		if ( array_key_exists( 'enabled', $input ) ) {
+			$output['enabled'] = ! empty( $input['enabled'] );
+		}
 
 		$manage_mode = sanitize_key( $input['manage_notices_mode'] ?? $output['manage_notices_mode'] ?? $defaults['manage_notices_mode'] );
 		if ( ! in_array( $manage_mode, self::MANAGE_NOTICES_MODES, true ) ) {

@@ -35,6 +35,420 @@
 		});
 	}
 
+	function anmPreviewEscapeHtml(text) {
+		if (text === null || text === undefined) {
+			return '';
+		}
+		var div = document.createElement('div');
+		div.textContent = String(text);
+		return div.innerHTML;
+	}
+
+	function anmPreviewStyleUsesBell(style, position) {
+		if (style === 'bell_link' || style === 'dropdown' || style === 'dropdown_compact') {
+			return true;
+		}
+		return style === 'link' && position === 'before_profile';
+	}
+
+	function anmPreviewIsDropdownStyle(style) {
+		return style === 'dropdown' || style === 'dropdown_compact';
+	}
+
+	function anmPreviewGetPositionLayout(position) {
+		var layouts = data.noticePanelPositionLayouts || {};
+		return layouts[position] || 'right';
+	}
+
+	function anmReadNoticePanelPreviewOptions() {
+		var styleSelect = document.getElementById('edminboost-anm-notice-panel-style');
+		var badgeSelect = document.getElementById('edminboost-anm-notice-panel-badge');
+		var positionSelect = document.getElementById('edminboost-anm-notice-panel-position');
+		var colorFields = {
+			badge: document.getElementById('edminboost-anm-notice-color-badge'),
+			badge_text: document.getElementById('edminboost-anm-notice-color-badge-text'),
+			accent: document.getElementById('edminboost-anm-notice-color-accent'),
+			accent_hover: document.getElementById('edminboost-anm-notice-color-accent-hover'),
+			bell_active: document.getElementById('edminboost-anm-notice-color-bell-active')
+		};
+
+		return {
+			style: styleSelect ? styleSelect.value : 'dropdown_compact',
+			badgeStyle: badgeSelect ? badgeSelect.value : 'count',
+			position: positionSelect ? positionSelect.value : 'default',
+			colors: {
+				badge: (colorFields.badge && colorFields.badge.value) || '#d63638',
+				badge_text: (colorFields.badge_text && colorFields.badge_text.value) || '#ffffff',
+				accent: (colorFields.accent && colorFields.accent.value) || '#2271b1',
+				accent_hover: (colorFields.accent_hover && colorFields.accent_hover.value) || '#135e96',
+				bell_active: (colorFields.bell_active && colorFields.bell_active.value) || '#72aee6'
+			}
+		};
+	}
+
+	function anmApplyNoticePanelPreviewColors(root, colors) {
+		if (!root) {
+			return;
+		}
+		root.style.setProperty('--edminboost-anm-notice-badge-bg', colors.badge);
+		root.style.setProperty('--edminboost-anm-notice-badge-text', colors.badge_text);
+		root.style.setProperty('--edminboost-anm-notice-accent', colors.accent);
+		root.style.setProperty('--edminboost-anm-notice-accent-hover', colors.accent_hover);
+		root.style.setProperty('--edminboost-anm-notice-bell-active', colors.bell_active);
+	}
+
+	function anmPreviewFormatBadgeCount(count, badgeStyle) {
+		if (badgeStyle === 'count_9plus' && count > 9) {
+			return '9+';
+		}
+		if (badgeStyle === 'count_99plus' && count > 99) {
+			return '99+';
+		}
+		return String(count);
+	}
+
+	function anmPreviewBuildBadgeHtml(badgeStyle, count) {
+		if (count <= 0 || badgeStyle === 'none') {
+			return '';
+		}
+		if (badgeStyle === 'dot' || badgeStyle === 'dot_pulse') {
+			var dotClass = 'edminboost-anm-notices-badge edminboost-anm-notices-badge--dot';
+			if (badgeStyle === 'dot_pulse') {
+				dotClass += ' edminboost-anm-notices-badge--pulse';
+			}
+			return '<span class="' + dotClass + '"><span class="screen-reader-text">' + anmPreviewEscapeHtml(String(count)) + '</span></span>';
+		}
+		var display = anmPreviewFormatBadgeCount(count, badgeStyle);
+		return '<span class="edminboost-anm-notices-badge"><span class="screen-reader-text">' + anmPreviewEscapeHtml(String(count)) + '</span><span aria-hidden="true">' + anmPreviewEscapeHtml(display) + '</span></span>';
+	}
+
+	function anmPreviewBuildPanelHeaderHtml(i18n) {
+		return '<div class="edminboost-anm-notices-panel__header"><strong>'
+			+ anmPreviewEscapeHtml(i18n.noticePanelPreviewAdminNotices || 'Admin notices')
+			+ '</strong><button type="button" class="edminboost-anm-notices-panel__close" aria-label="'
+			+ anmPreviewEscapeHtml(i18n.noticePanelPreviewClose || 'Close panel')
+			+ '" tabindex="-1">&times;</button></div>';
+	}
+
+	function anmPreviewBuildPanelFooterHtml(i18n) {
+		return '<div class="edminboost-anm-notices-panel__footer"><a href="#" tabindex="-1" onclick="return false;">'
+			+ anmPreviewEscapeHtml(i18n.noticePanelPreviewSeeAll || 'See all notifications')
+			+ '</a></div>';
+	}
+
+	function anmPreviewBuildCompactPanel(i18n) {
+		var samples = [
+			{
+				type: 'info',
+				message: i18n.noticePanelSample1 || 'There is a new version of Akismet Anti-spam available. View version 5.3.3 details or update now.',
+				source: i18n.noticePanelSample1Source || 'Akismet Anti-spam'
+			},
+			{
+				type: 'upsell',
+				message: i18n.noticePanelSample2 || 'Enjoying WPForms? Please leave us a review on WordPress.org — it only takes a minute.',
+				source: i18n.noticePanelSample2Source || 'WPForms'
+			},
+			{
+				type: 'warning',
+				message: i18n.noticePanelSample3 || 'Your license key expires in 14 days. Renew now to keep receiving updates and support.',
+				source: i18n.noticePanelSample3Source || 'Advanced Custom Fields'
+			}
+		];
+		var html = '<div class="edminboost-anm-notices-panel edminboost-anm-notices-panel--compact edminboost-anm-notice-panel-preview__panel">';
+		html += anmPreviewBuildPanelHeaderHtml(i18n);
+		html += '<ul class="edminboost-anm-notices-panel__list">';
+		samples.forEach(function (item) {
+			var typeClass = item.type === 'error' || item.type === 'critical' ? 'is-type-critical' : 'is-type-' + item.type;
+			html += '<li class="edminboost-anm-notices-panel__item ' + typeClass + '">';
+			html += '<span class="edminboost-anm-notices-panel__type">' + anmPreviewEscapeHtml(item.type) + '</span>';
+			html += '<span class="edminboost-anm-notices-panel__message">' + anmPreviewEscapeHtml(item.message) + '</span>';
+			html += '<span class="edminboost-anm-notices-panel__meta"><span class="edminboost-anm-notices-panel__source">' + anmPreviewEscapeHtml(item.source) + '</span></span>';
+			html += '</li>';
+		});
+		html += '</ul>';
+		html += anmPreviewBuildPanelFooterHtml(i18n);
+		html += '</div>';
+		return html;
+	}
+
+	function anmPreviewBuildTriggerHtml(i18n, style, badgeStyle, position, count) {
+		if (anmPreviewStyleUsesBell(style, position)) {
+			var triggerClass = 'edminboost-anm-notice-panel-preview__trigger edminboost-anm-notice-panel-preview__trigger--bell';
+			if (style === 'bell_link') {
+				triggerClass += ' is-style-bell-link';
+			} else if (anmPreviewIsDropdownStyle(style)) {
+				triggerClass += ' is-style-dropdown';
+			}
+			return '<span class="' + triggerClass + '">'
+				+ '<span class="ab-icon edminboost-anm-notice-panel-preview__bell-icon" aria-hidden="true"></span>'
+				+ anmPreviewBuildBadgeHtml(badgeStyle, count)
+				+ '</span>';
+		}
+		return '<span class="edminboost-anm-notice-panel-preview__trigger edminboost-anm-notice-panel-preview__trigger--link">'
+			+ anmPreviewEscapeHtml(i18n.noticePanelPreviewNotices || 'Notices')
+			+ ' <span class="awaiting-mod count-' + anmPreviewEscapeHtml(String(count)) + '"><span class="pending-count">' + anmPreviewEscapeHtml(String(count)) + '</span></span>'
+			+ '</span>';
+	}
+
+	function anmPreviewBuildMockBarHtml(i18n, panelOptions, openDropdown, noticeCount) {
+		var style = panelOptions.style;
+		var badgeStyle = panelOptions.badgeStyle;
+		var position = panelOptions.position;
+		var previewLayout = anmPreviewGetPositionLayout(position);
+		var triggerHtml = anmPreviewBuildTriggerHtml(i18n, style, badgeStyle, position, noticeCount);
+		var panelHtml = '';
+		if (openDropdown && anmPreviewIsDropdownStyle(style)) {
+			panelHtml = style === 'dropdown_compact' ? anmPreviewBuildCompactPanel(i18n) : anmPreviewBuildCompactPanel(i18n);
+		} else if (openDropdown && !anmPreviewIsDropdownStyle(style)) {
+			panelHtml = anmPreviewBuildCompactPanel(i18n);
+		}
+
+		var profileHtml = (previewLayout === 'profile_before' || previewLayout === 'profile_after')
+			? '<span class="edminboost-anm-notice-panel-preview__profile">' + anmPreviewEscapeHtml(i18n.noticePanelPreviewHowdy || 'Howdy, Admin') + '</span>'
+			: '';
+		var siteHtml = previewLayout === 'left'
+			? '<span class="edminboost-anm-notice-panel-preview__site">' + anmPreviewEscapeHtml(i18n.noticePanelPreviewSiteName || 'My Site') + '</span>'
+			: '';
+		var barInnerHtml = '';
+		if (previewLayout === 'profile_after') {
+			barInnerHtml = profileHtml + triggerHtml;
+		} else if (previewLayout === 'left') {
+			barInnerHtml = siteHtml + triggerHtml;
+		} else {
+			barInnerHtml = triggerHtml + profileHtml;
+		}
+
+		var mockBarClass = 'edminboost-anm-notice-panel-preview__mock-bar';
+		if (previewLayout === 'left') {
+			mockBarClass += ' is-left-slot';
+		} else if (previewLayout === 'profile_before' || previewLayout === 'profile_after') {
+			mockBarClass += ' is-profile-slot';
+		}
+		if (panelHtml) {
+			mockBarClass += ' is-dropdown-open';
+		}
+
+		return '<div class="' + mockBarClass + '">'
+			+ '<div class="edminboost-anm-notice-panel-preview__bar-inner">'
+			+ barInnerHtml
+			+ '</div>'
+			+ (panelHtml ? '<div class="edminboost-anm-notice-panel-preview__panel-wrap">' + panelHtml + '</div>' : '')
+			+ '</div>';
+	}
+
+	function anmPreviewBuildPlainAdminBarHtml(i18n) {
+		return '<div class="edminboost-anm-notice-panel-preview__mock-bar">'
+			+ '<div class="edminboost-anm-notice-panel-preview__bar-inner">'
+			+ '<span class="edminboost-anm-notice-panel-preview__site">' + anmPreviewEscapeHtml(i18n.noticePanelPreviewSiteName || 'My Site') + '</span>'
+			+ '<span class="edminboost-anm-notice-panel-preview__profile">' + anmPreviewEscapeHtml(i18n.noticePanelPreviewHowdy || 'Howdy, Admin') + '</span>'
+			+ '</div></div>';
+	}
+
+	function anmPreviewBuildDashboardNoticesHtml(i18n) {
+		var lines = [
+			{
+				className: 'notice notice-info',
+				text: i18n.displayExperiencePreviewNoticeUpdate || 'WordPress 6.7 is available. Please update now.'
+			},
+			{
+				className: 'notice notice-warning',
+				text: i18n.displayExperiencePreviewNoticeLicense || 'Please activate your SEO plugin license to receive updates.'
+			},
+			{
+				className: 'notice notice-info',
+				text: i18n.displayExperiencePreviewNoticeForm || 'You have a new form submission waiting in your inbox.'
+			}
+		];
+		return lines.map(function (line) {
+			return '<div class="' + line.className + ' edminboost-anm-display-experience-preview__notice"><p>'
+				+ anmPreviewEscapeHtml(line.text)
+				+ '</p></div>';
+		}).join('');
+	}
+
+	function anmRenderDisplayExperiencePreview(mode) {
+		var stage = document.querySelector('[data-edminboost-anm-display-experience-preview-stage]');
+		var previewRoot = document.getElementById('edminboost-anm-display-experience-preview');
+		var previewFrame = document.querySelector('[data-edminboost-anm-display-experience-preview-frame]');
+		var previewCaption = document.querySelector('[data-edminboost-anm-display-experience-preview-caption]');
+		var i18n = data.i18n || {};
+
+		if (!stage) {
+			return;
+		}
+
+		mode = mode || 'hide_selected';
+		if (previewFrame) {
+			previewFrame.setAttribute('data-preview-mode', mode);
+		}
+
+		var panelOptions = anmReadNoticePanelPreviewOptions();
+		anmApplyNoticePanelPreviewColors(previewRoot, panelOptions.colors);
+
+		var noticeCount = 3;
+		var adminBarHtml = '';
+		var dashboardInner = '';
+
+		if (mode === 'show_all') {
+			adminBarHtml = anmPreviewBuildPlainAdminBarHtml(i18n);
+			dashboardInner = '<div class="edminboost-anm-display-experience-preview__notices">'
+				+ anmPreviewBuildDashboardNoticesHtml(i18n)
+				+ '</div>';
+		} else if (mode === 'hide_selected' || mode === 'compact_panel') {
+			adminBarHtml = anmPreviewBuildMockBarHtml(i18n, panelOptions, true, noticeCount);
+			dashboardInner = '<p class="edminboost-anm-display-experience-preview__empty">'
+				+ anmPreviewEscapeHtml(i18n.displayExperiencePreviewDashboardClear || 'Dashboard notice area is clear.')
+				+ '</p>';
+			if (mode === 'hide_selected') {
+				dashboardInner += '<p class="edminboost-anm-display-experience-preview__inbox-hint">'
+					+ anmPreviewEscapeHtml(i18n.displayExperiencePreviewInboxHint || 'Matching notices appear in the inbox and admin bar panel above.')
+					+ '</p>';
+			}
+		} else {
+			adminBarHtml = anmPreviewBuildPlainAdminBarHtml(i18n);
+			dashboardInner = '<p class="edminboost-anm-display-experience-preview__empty edminboost-anm-display-experience-preview__empty--muted">'
+				+ anmPreviewEscapeHtml(i18n.displayExperiencePreviewHideAllDashboard || 'No notices shown on the dashboard.')
+				+ '</p>';
+		}
+
+		stage.innerHTML = adminBarHtml
+			+ '<div class="edminboost-anm-display-experience-preview__dashboard">'
+			+ '<p class="edminboost-anm-display-experience-preview__page-title">'
+			+ anmPreviewEscapeHtml(i18n.displayExperiencePreviewDashboardTitle || 'Dashboard')
+			+ '</p>'
+			+ dashboardInner
+			+ '</div>';
+
+		if (previewCaption) {
+			var caption = '';
+			switch (mode) {
+				case 'show_all':
+					caption = i18n.displayExperiencePreviewCaptionShowAll || '';
+					break;
+				case 'hide_selected':
+					caption = i18n.displayExperiencePreviewCaptionHideSelected || '';
+					break;
+				case 'hide_all':
+					caption = i18n.displayExperiencePreviewCaptionHideAll || '';
+					break;
+				default:
+					caption = '';
+			}
+			previewCaption.textContent = caption;
+		}
+	}
+
+	function initGeneralOptionsPreview() {
+		var root = document.querySelector('[data-edminboost-anm-general-options]');
+		if (!root) {
+			return;
+		}
+
+		var i18n = data.i18n || {};
+		var previewState = {
+			hiddenNoticeVisible: false
+		};
+
+		function renderGeneralOptionsPreview() {
+			var pluginCb = document.getElementById('edminboost-anm-disable-plugin-updates');
+			var coreCb = document.getElementById('edminboost-anm-disable-core-updates');
+			var frame = root.querySelector('[data-edminboost-anm-general-options-preview-frame]');
+			var stage = root.querySelector('[data-edminboost-anm-general-options-preview-stage]');
+			var captionEl = root.querySelector('[data-edminboost-anm-general-options-preview-caption]');
+			var hidePlugin = !!(pluginCb && pluginCb.checked);
+			var hideCore = !!(coreCb && coreCb.checked);
+			var scopeInput = root.querySelector('input[name="edminboost-anm-reset-hidden-scope"]:checked');
+			var resetScope = scopeInput ? scopeInput.value : 'current_user';
+			var hiddenVisible = previewState.hiddenNoticeVisible ? '1' : '0';
+
+			if (frame) {
+				frame.setAttribute('data-hide-plugin', hidePlugin ? '1' : '0');
+				frame.setAttribute('data-hide-core', hideCore ? '1' : '0');
+				frame.setAttribute('data-reset-scope', resetScope);
+				frame.setAttribute('data-hidden-notice-visible', hiddenVisible);
+			}
+
+			if (stage) {
+				var coreText = i18n.displayExperiencePreviewNoticeUpdate || 'WordPress 6.7 is available. Please update now.';
+				var pluginText = i18n.generalOptionsPreviewNoticePlugin || 'There are updates available for 3 plugins. View details or update now.';
+				var hiddenText = i18n.generalOptionsPreviewNoticeHidden || 'Thanks for using Contact Form 7! Please leave us a review on WordPress.org.';
+				var badgeText = i18n.generalOptionsPreviewHiddenBadge || 'Hidden for you';
+				var noticesHtml = ''
+					+ '<div class="update-nag edminboost-anm-display-experience-preview__notice edminboost-anm-general-options-preview__notice--core"><p>'
+					+ anmPreviewEscapeHtml(coreText)
+					+ '</p></div>'
+					+ '<div class="update-nag edminboost-anm-display-experience-preview__notice edminboost-anm-general-options-preview__notice--plugin"><p>'
+					+ anmPreviewEscapeHtml(pluginText)
+					+ '</p></div>'
+					+ '<div class="notice notice-info edminboost-anm-display-experience-preview__notice edminboost-anm-general-options-preview__notice--user-hidden">'
+					+ '<span class="edminboost-anm-general-options-preview__hidden-badge">' + anmPreviewEscapeHtml(badgeText) + '</span>'
+					+ '<p>' + anmPreviewEscapeHtml(hiddenText) + '</p></div>';
+
+				stage.innerHTML = '<div class="edminboost-anm-display-experience-preview__dashboard">'
+					+ '<p class="edminboost-anm-display-experience-preview__page-title">'
+					+ anmPreviewEscapeHtml(i18n.displayExperiencePreviewDashboardTitle || 'Dashboard')
+					+ '</p>'
+					+ '<div class="edminboost-anm-display-experience-preview__notices">' + noticesHtml + '</div>'
+					+ '</div>';
+			}
+
+			if (captionEl) {
+				var caption = '';
+				if (hideCore && hidePlugin) {
+					caption = i18n.generalOptionsPreviewCaptionHideBoth || '';
+				} else if (hideCore) {
+					caption = i18n.generalOptionsPreviewCaptionHideCore || '';
+				} else if (hidePlugin) {
+					caption = i18n.generalOptionsPreviewCaptionHidePlugin || '';
+				} else {
+					caption = i18n.generalOptionsPreviewCaptionDefault || '';
+				}
+				var resetHint = resetScope === 'all_users'
+					? (i18n.generalOptionsPreviewCaptionResetAll || '')
+					: (i18n.generalOptionsPreviewCaptionResetMe || '');
+				if (resetHint) {
+					caption = caption ? (caption + ' ' + resetHint) : resetHint;
+				}
+				captionEl.textContent = caption;
+			}
+		}
+
+		function bindField(field) {
+			if (!field) {
+				return;
+			}
+			field.addEventListener('change', function () {
+				renderGeneralOptionsPreview();
+			});
+		}
+
+		bindField(document.getElementById('edminboost-anm-disable-plugin-updates'));
+		bindField(document.getElementById('edminboost-anm-disable-core-updates'));
+
+		root.querySelectorAll('input[name="edminboost-anm-reset-hidden-scope"]').forEach(function (radio) {
+			radio.addEventListener('change', function () {
+				previewState.hiddenNoticeVisible = false;
+				renderGeneralOptionsPreview();
+			});
+		});
+
+		root.addEventListener('edminboost-anm-reset-hidden-success', function () {
+			previewState.hiddenNoticeVisible = true;
+			renderGeneralOptionsPreview();
+		});
+
+		var settingsRoot = document.querySelector('[data-edminboost-anm-settings]');
+		if (settingsRoot) {
+			settingsRoot.addEventListener('edminboost-anm-settings-tab', function (event) {
+				if (event.detail && event.detail.tab === 'general') {
+					renderGeneralOptionsPreview();
+				}
+			});
+		}
+
+		renderGeneralOptionsPreview();
+	}
+
 	function initWrap() {
 		var wrap = document.querySelector('.edminboost-anm-wrap');
 		if (wrap) {
@@ -53,7 +467,7 @@
 			if (!node || !node.matches || !node.matches(selector)) {
 				return false;
 			}
-			if (node.closest('.edminboost-anm-notice-panel-preview, #wpadminbar')) {
+			if (node.closest('.edminboost-anm-notice-panel-preview, .edminboost-anm-display-experience-preview, .edminboost-anm-general-options-preview, #wpadminbar')) {
 				return false;
 			}
 			return true;
@@ -1075,6 +1489,7 @@
 		function setMode(mode) {
 			hidden.value = mode;
 			syncUi(mode);
+			anmRenderDisplayExperiencePreview(mode);
 		}
 
 		presetInputs.forEach(function (radio) {
@@ -1083,6 +1498,17 @@
 					return;
 				}
 				setMode(radio.dataset.manageMode || '');
+			});
+		});
+
+		presetOptions.forEach(function (option) {
+			option.addEventListener('click', function () {
+				var input = option.querySelector('.edminboost-anm-display-experience__input');
+				if (!input) {
+					return;
+				}
+				input.checked = true;
+				setMode(input.dataset.manageMode || '');
 			});
 		});
 
@@ -1098,7 +1524,39 @@
 			});
 		});
 
+		[
+			'edminboost-anm-notice-panel-style',
+			'edminboost-anm-notice-panel-badge',
+			'edminboost-anm-notice-panel-position',
+			'edminboost-anm-notice-color-badge',
+			'edminboost-anm-notice-color-badge-text',
+			'edminboost-anm-notice-color-accent',
+			'edminboost-anm-notice-color-accent-hover',
+			'edminboost-anm-notice-color-bell-active'
+		].forEach(function (fieldId) {
+			var field = document.getElementById(fieldId);
+			if (!field) {
+				return;
+			}
+			field.addEventListener('change', function () {
+				anmRenderDisplayExperiencePreview(hidden.value || '');
+			});
+			field.addEventListener('input', function () {
+				anmRenderDisplayExperiencePreview(hidden.value || '');
+			});
+		});
+
+		var settingsRoot = document.querySelector('[data-edminboost-anm-settings]');
+		if (settingsRoot) {
+			settingsRoot.addEventListener('edminboost-anm-settings-tab', function (event) {
+				if (event.detail && event.detail.tab === 'general') {
+					anmRenderDisplayExperiencePreview(hidden.value || '');
+				}
+			});
+		}
+
 		syncUi(hidden.value || '');
+		anmRenderDisplayExperiencePreview(hidden.value || '');
 	}
 
 	function initResetHiddenNotices() {
@@ -1134,6 +1592,7 @@
 					feedback.textContent = (result.data && result.data.message) || i18n.resetHiddenSuccess || 'Hidden notices were reset.';
 					feedback.classList.remove('is-error');
 					feedback.classList.add('is-success');
+					root.dispatchEvent(new CustomEvent('edminboost-anm-reset-hidden-success', { bubbles: true }));
 				} else {
 					feedback.textContent = (result.data && result.data.message) || i18n.resetHiddenError || 'Could not reset hidden notices.';
 					feedback.classList.remove('is-success');
@@ -1950,6 +2409,7 @@
 		initBlockAdRedirectsSettings();
 		initSettingsHelpTips();
 		initDisplayExperience();
+		initGeneralOptionsPreview();
 		initResetHiddenNotices();
 		initNoticePanelPreview();
 		initDigestPreview();
