@@ -44,14 +44,16 @@ admin/
   partials/edminboost-anm-{dashboard,inbox,rules,settings}-page.php
   partials/edminboost-anm-inbox-table-rows.php
   partials/edminboost-anm-notice-panel-dropdown.php
-languages/  uninstall.php  readme.txt  composer.json
+languages/  # .pot, locale .po/.mo; optional build-translations.py
+uninstall.php  readme.txt  composer.json
 ```
 
 - Bootstrap defines constants and calls `edminboost_anm_run_plugin()`.
 - `EDMINBOOST_ANM_Plugin::run()` wires i18n, admin menu/settings/assets, and on `init`: notices, interceptor, AJAX, digest, ad redirects.
 - Settings: primary option via `EDMINBOOST_ANM_Settings` (Settings API group `edminboost_anm_settings_group`). Rules and inbox stored in separate options. Tabbed settings UI (General, Notices, Access & visibility, Admin bar, Filtering, Security, Notifications, Migration & Tools).
 - Options API only — no custom tables. No REST API.
-- AJAX for dashboard/rules/inbox (including `edminboost_anm_inbox_list` sort), importer, capture, WP preset conversion, user search, notice hide/reset hidden; weekly digest via WP-Cron; optional webhook (user URL, off by default).
+- AJAX for dashboard/rules/inbox (including `edminboost_anm_inbox_list` sort; inbox snooze toggle and read state), importer, capture, WP preset conversion, user search, notice hide/reset hidden; weekly digest via WP-Cron (`send_weekday`, custom `weekly` schedule); optional webhook (user URL preserved when disabled, off by default).
+- Auto-Rules: `keyword`, `regex`, and `css` selector match types; custom upsell blacklist phrases apply even when Kill All Upsells preset is off.
 - **Ad redirects**: optional `block_ad_redirects` URL blocklist — admin-only redirect filtering via `EDMINBOOST_ANM_Ad_Redirects`.
 - **Inline notice controls**: `edminboost-anm-notice-inline.js` on non–plugin-screen wp-admin for “Hide for me” / “Hide for all”.
 - **Notifications previews**: Settings Notifications tab — two-column digest form + sticky structured email preview; live webhook text/JSON preview (no send on preview).
@@ -78,13 +80,13 @@ Registered in `EDMINBOOST_ANM_Ajax::register_hooks()` — all use `verify_reques
 | Action | Purpose |
 |--------|---------|
 | `edminboost_anm_inbox_list` | Return sorted/filtered inbox `<tr>` HTML |
-| `edminboost_anm_inbox_action` | Row/bulk inbox mutations |
+| `edminboost_anm_inbox_action` | Row/bulk inbox mutations (read, snooze/unsnooze toggle, archive, etc.) |
 | `edminboost_anm_convert_wp_preset` | Create/undo rule from WP preset |
 | `edminboost_anm_capture_notice` | Interceptor capture endpoint |
 | `edminboost_anm_search_users` | User picker for hiding-notifications settings |
 | `edminboost_anm_notice_hide` | Per-user or site-wide hide from inline UI or dropdown |
 | `edminboost_anm_reset_hidden_notices` | Reset hidden-notice preferences (user or site) |
-| `edminboost_anm_digest_preview` | Digest preview: to/from/subject, plain `body`, and structured `content` for the settings UI (unsaved `digest` fields sanitized server-side) |
+| `edminboost_anm_digest_preview` | Digest preview: to/from/subject, plain `body`, structured `content`, and `next_send` (unsaved `digest` fields including `send_weekday` sanitized server-side) |
 | `edminboost_anm_webhook_preview` | Webhook alert text and JSON payload preview using latest inbox notice or sample data (unsaved `webhook[message]` sanitized server-side) |
 | `edminboost_anm_seed_test_notices` / `edminboost_anm_trigger_test_notices` | `verify_debug_request()` |
 
@@ -116,7 +118,7 @@ Persistent AI guidance lives in `.cursor/rules/`:
 - Admin-only plugin — limited front-end hooks for admin bar notice panel when the toolbar is visible.
 - Minimize diff scope; match existing file structure and style.
 - Add `index.php` silence files when creating new directories.
-- Update `readme.txt` changelog for user-facing changes.
+- Update `readme.txt` changelog for user-facing changes; keep `.cursor/rules/` and `AGENTS.md` in sync when behavior or architecture changes.
 - Update `uninstall.php` (and deactivator for cron) when adding stored options or schedules.
 - New AJAX actions: register in `EDMINBOOST_ANM_Ajax`, use `verify_request()` (or `verify_debug_request()` for debug-only).
 - Shared inbox row markup: update `edminboost-anm-inbox-table-rows.php` once for both full page and AJAX list responses.

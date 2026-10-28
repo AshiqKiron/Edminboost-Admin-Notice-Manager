@@ -600,7 +600,7 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 						echo EDMINBOOST_ANM_Admin::help_tip( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper.
 							sprintf(
 								/* translators: %d: built-in phrase count */
-								__( 'One phrase per line. %d built-in phrases are always active; duplicates are ignored.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+								__( 'One phrase per line. Custom phrases always suppress matching notices. %d built-in phrases apply when "Kill All Upsells" is enabled; duplicates are ignored.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 								$edminboost_anm_builtin_count
 							)
 						);
@@ -684,7 +684,6 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 					<span class="dashicons dashicons-shield" aria-hidden="true"></span>
 					<h3><?php esc_html_e( 'Critical Safety Guard', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h3>
 				</div>
-				<p><?php esc_html_e( 'Protect WordPress core security alerts, PHP fatal errors, and SSL warnings from accidental filtering.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 				<table class="form-table" role="presentation">
 					<tr>
 						<th scope="row">
@@ -710,7 +709,6 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 					<span class="dashicons dashicons-groups" aria-hidden="true"></span>
 					<h3><?php esc_html_e( 'Client Shield Mode', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h3>
 				</div>
-				<p><?php esc_html_e( 'Hide all plugin/theme update notices and promotional nags from non-admin roles (Editors, Authors, Managers).', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 				<table class="form-table" role="presentation">
 					<tr>
 						<th scope="row">
@@ -874,6 +872,26 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 					</tr>
 					<tr>
 						<th scope="row">
+							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Day of the week the digest is sent, using your site timezone. Emails go out around 9:00 AM local time on that day.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+							<label for="edminboost-anm-digest-send-weekday"><?php esc_html_e( 'Send on', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+						</th>
+						<td>
+							<?php
+							$edminboost_anm_digest_send_weekday = EDMINBOOST_ANM_Digest::sanitize_send_weekday(
+								$settings['digest']['send_weekday'] ?? EDMINBOOST_ANM_Digest::DEFAULT_SEND_WEEKDAY
+							);
+							?>
+							<select id="edminboost-anm-digest-send-weekday" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[digest][send_weekday]">
+								<?php foreach ( EDMINBOOST_ANM_Digest::get_send_weekday_choices() as $edminboost_anm_weekday_slug => $edminboost_anm_weekday_label ) : ?>
+									<option value="<?php echo esc_attr( $edminboost_anm_weekday_slug ); ?>" <?php selected( $edminboost_anm_digest_send_weekday, $edminboost_anm_weekday_slug ); ?>>
+										<?php echo esc_html( $edminboost_anm_weekday_label ); ?>
+									</option>
+								<?php endforeach; ?>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
 							<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Leave blank to use the default subject line for the digest email.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
 							<label for="edminboost-anm-digest-subject"><?php esc_html_e( 'Email subject', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
 						</th>
@@ -973,6 +991,10 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 								<div class="edminboost-anm-digest-preview__meta-row">
 									<dt><?php esc_html_e( 'From', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></dt>
 									<dd data-edminboost-anm-digest-preview-from></dd>
+								</div>
+								<div class="edminboost-anm-digest-preview__meta-row">
+									<dt><?php esc_html_e( 'Next send', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></dt>
+									<dd data-edminboost-anm-digest-preview-next-send></dd>
 								</div>
 							</dl>
 							<p class="edminboost-anm-digest-preview__subject-line" data-edminboost-anm-digest-preview-subject></p>

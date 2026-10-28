@@ -21,7 +21,7 @@ Cross-cutting quality standards. See also: `edminboost-anm-project.mdc`, `edminb
 - All user-facing strings must be translatable.
 - Use `EDMINBOOST_ANM_TEXT_DOMAIN` consistently; it must match `EDMINBOOST_ANM_PLUGIN_SLUG`.
 - Use `__()`, `_e()`, `esc_html__()`, `esc_attr__()`, etc. appropriately.
-- Text domain loads from `/languages` on `plugins_loaded` via `EDMINBOOST_ANM_Plugin::load_textdomain()`.
+- Text domain loads from `/languages` on `plugins_loaded` via `EDMINBOOST_ANM_Plugin::load_textdomain()`. Ship `.pot` plus locale `.po`/`.mo` as needed; optional `languages/build-translations.py` (polib / deep-translator) for regenerating translations — not loaded at runtime.
 
 ## Accessibility
 

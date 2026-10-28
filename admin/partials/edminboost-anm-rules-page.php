@@ -21,26 +21,26 @@ $edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
 		<button type="button" class="button button-primary edminboost-anm-add-rule"><?php esc_html_e( '+ Add New Rule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
 	</header>
 
-	<div class="edminboost-anm-card edminboost-anm-card--flush">
+	<div class="edminboost-anm-card edminboost-anm-card--flush edminboost-anm-card--list-table" data-edminboost-anm-rules-list>
 		<?php if ( ! empty( $rules ) ) : ?>
-			<table class="edminboost-anm-table widefat">
+			<table class="wp-list-table widefat fixed striped edminboost-anm-table edminboost-anm-rules-table">
 				<thead>
 					<tr>
-						<th><?php esc_html_e( 'Rule Name / Pattern', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
-						<th><?php esc_html_e( 'Target Type', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
-						<th><?php esc_html_e( 'Hit Count', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
-						<th><?php esc_html_e( 'Status / Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="col" class="manage-column column-primary"><?php esc_html_e( 'Rule Name / Pattern', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="col" class="manage-column"><?php esc_html_e( 'Target Type', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="col" class="manage-column"><?php esc_html_e( 'Hit Count', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="col" class="manage-column column-actions"><?php esc_html_e( 'Status / Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 					<?php foreach ( $rules as $rule ) : ?>
-						<tr data-rule-id="<?php echo esc_attr( $rule['id'] ); ?>">
-							<td>
+						<tr data-rule-id="<?php echo esc_attr( $rule['id'] ); ?>"<?php echo ! empty( $rule['wp_notice_preset'] ) ? ' data-wp-notice-preset="' . esc_attr( $rule['wp_notice_preset'] ) . '"' : ''; ?>>
+							<td class="column-primary" data-colname="<?php esc_attr_e( 'Rule Name / Pattern', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">
 								<strong><?php echo esc_html( $rule['name'] ?? '' ); ?></strong>
 								<br /><code><?php echo esc_html( $rule['match_string'] ?? '' ); ?></code>
 							</td>
-							<td><?php echo esc_html( EDMINBOOST_ANM_Rules::get_match_type_label( $rule['match_type'] ?? 'keyword' ) ); ?></td>
-							<td>
+							<td data-colname="<?php esc_attr_e( 'Target Type', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"><?php echo esc_html( EDMINBOOST_ANM_Rules::get_match_type_label( $rule['match_type'] ?? 'keyword' ) ); ?></td>
+							<td data-colname="<?php esc_attr_e( 'Hit Count', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">
 								<?php
 								echo esc_html(
 									sprintf(
@@ -51,7 +51,7 @@ $edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
 								);
 								?>
 							</td>
-							<td class="edminboost-anm-actions">
+							<td class="edminboost-anm-actions column-actions" data-colname="<?php esc_attr_e( 'Status / Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">
 								<label class="edminboost-anm-switch edminboost-anm-switch--inline">
 									<input type="checkbox" class="edminboost-anm-rule-toggle" data-id="<?php echo esc_attr( $rule['id'] ); ?>" <?php checked( ! empty( $rule['enabled'] ) ); ?> aria-label="<?php esc_attr_e( 'Toggle rule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" />
 									<span class="edminboost-anm-switch__slider"></span>
@@ -63,7 +63,12 @@ $edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
 									data-match-string="<?php echo esc_attr( $rule['match_string'] ?? '' ); ?>"
 									data-rule-action="<?php echo esc_attr( $rule['action'] ?? 'auto_dismiss_inbox' ); ?>"
 								><?php esc_html_e( 'Edit', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
-								<button type="button" class="button button-small edminboost-anm-delete-rule" data-id="<?php echo esc_attr( $rule['id'] ); ?>"><?php esc_html_e( 'Delete', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
+								<a href="#"
+									class="submitdelete edminboost-anm-delete-rule"
+									role="button"
+									data-id="<?php echo esc_attr( $rule['id'] ); ?>"
+									aria-label="<?php echo esc_attr( sprintf( /* translators: %s: rule name */ __( 'Delete rule “%s”', EDMINBOOST_ANM_TEXT_DOMAIN ), $rule['name'] ?? '' ) ); ?>"
+								><?php echo esc_html( _x( 'Delete', 'verb', EDMINBOOST_ANM_TEXT_DOMAIN ) ); ?></a>
 							</td>
 						</tr>
 					<?php endforeach; ?>
@@ -76,7 +81,7 @@ $edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
 		<?php endif; ?>
 	</div>
 
-	<div class="edminboost-anm-card edminboost-anm-card--flush edminboost-anm-wp-presets">
+	<div class="edminboost-anm-card edminboost-anm-card--flush edminboost-anm-card--list-table edminboost-anm-wp-presets">
 		<div class="edminboost-anm-card__heading edminboost-anm-wp-presets__heading">
 			<div>
 				<h2><?php esc_html_e( 'Default WordPress Notices', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
@@ -88,7 +93,7 @@ $edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
 				<thead>
 					<tr>
 						<th scope="col" class="manage-column column-source"><?php esc_html_e( 'Source Plugin', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
-						<th scope="col" class="manage-column column-message"><?php esc_html_e( 'Notice Message Preview', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="col" class="manage-column column-message column-primary"><?php esc_html_e( 'Notice Message Preview', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 						<th scope="col" class="manage-column column-type"><?php esc_html_e( 'Type', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 						<th scope="col" class="manage-column column-actions"><?php esc_html_e( 'Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 					</tr>
@@ -99,10 +104,10 @@ $edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
 						$edminboost_anm_is_converted = ! empty( $preset['converted'] );
 						?>
 						<tr data-preset-id="<?php echo esc_attr( $preset['id'] ?? '' ); ?>">
-							<td class="column-source"><?php echo esc_html( $preset['source'] ?? __( 'WordPress Core', EDMINBOOST_ANM_TEXT_DOMAIN ) ); ?></td>
-							<td class="column-message"><?php echo esc_html( $preset['message'] ?? '' ); ?></td>
-							<td class="column-type"><span class="edminboost-anm-badge edminboost-anm-badge--<?php echo esc_attr( $preset['type'] ?? 'info' ); ?>"><?php echo esc_html( EDMINBOOST_ANM_Inbox::get_type_label( $preset['type'] ?? 'info' ) ); ?></span></td>
-							<td class="edminboost-anm-actions column-actions">
+							<td class="column-source" data-colname="<?php esc_attr_e( 'Source Plugin', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"><?php echo esc_html( $preset['source'] ?? __( 'WordPress Core', EDMINBOOST_ANM_TEXT_DOMAIN ) ); ?></td>
+							<td class="column-message column-primary" data-colname="<?php esc_attr_e( 'Notice Message Preview', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"><?php echo esc_html( $preset['message'] ?? '' ); ?></td>
+							<td class="column-type" data-colname="<?php esc_attr_e( 'Type', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"><span class="edminboost-anm-badge edminboost-anm-badge--<?php echo esc_attr( $preset['type'] ?? 'info' ); ?>"><?php echo esc_html( EDMINBOOST_ANM_Inbox::get_type_label( $preset['type'] ?? 'info' ) ); ?></span></td>
+							<td class="edminboost-anm-actions column-actions" data-colname="<?php esc_attr_e( 'Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">
 								<button type="button" class="button button-small edminboost-anm-wp-preset-convert<?php echo $edminboost_anm_is_converted ? ' is-converted-to-rule' : ''; ?>" data-preset-id="<?php echo esc_attr( $preset['id'] ?? '' ); ?>" aria-pressed="<?php echo $edminboost_anm_is_converted ? 'true' : 'false'; ?>"<?php echo $edminboost_anm_is_converted ? ' title="' . esc_attr__( 'Converted to rule. Click again to undo.', EDMINBOOST_ANM_TEXT_DOMAIN ) . '"' : ''; ?>>
 									<?php esc_html_e( 'Convert to Rule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
 								</button>
@@ -113,7 +118,7 @@ $edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
 				<tfoot>
 					<tr>
 						<th scope="col" class="manage-column column-source"><?php esc_html_e( 'Source Plugin', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
-						<th scope="col" class="manage-column column-message"><?php esc_html_e( 'Notice Message Preview', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="col" class="manage-column column-message column-primary"><?php esc_html_e( 'Notice Message Preview', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 						<th scope="col" class="manage-column column-type"><?php esc_html_e( 'Type', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 						<th scope="col" class="manage-column column-actions"><?php esc_html_e( 'Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 					</tr>
@@ -128,32 +133,54 @@ $edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
 			<h2 id="edminboost-anm-rule-modal-title"><?php esc_html_e( 'Create New Filter Rule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
 			<form class="edminboost-anm-rule-form">
 				<input type="hidden" name="id" id="edminboost-anm-rule-id" value="" />
-				<p>
-					<label for="edminboost-anm-rule-name"><?php esc_html_e( 'Rule Name:', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
-					<input type="text" id="edminboost-anm-rule-name" name="name" class="regular-text" placeholder="<?php esc_attr_e( 'e.g., Hide Feedback Nags', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" required />
-				</p>
-				<fieldset>
-					<legend><?php esc_html_e( 'Match Type:', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></legend>
-					<label><input type="radio" name="match_type" value="keyword" checked /> <?php esc_html_e( 'Keyword Match', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
-					<label><input type="radio" name="match_type" value="regex" /> <?php esc_html_e( 'Regex Pattern', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
-					<label><input type="radio" name="match_type" value="css" /> <?php esc_html_e( 'CSS Selector', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
-				</fieldset>
-				<p>
-					<label for="edminboost-anm-rule-string"><?php esc_html_e( 'Match String:', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
-					<input type="text" id="edminboost-anm-rule-string" name="match_string" class="regular-text" placeholder="<?php esc_attr_e( 'Please rate our plugin', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" required />
-				</p>
-				<p>
-					<label for="edminboost-anm-rule-action"><?php esc_html_e( 'Action:', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
-					<select id="edminboost-anm-rule-action" name="rule_action">
-						<option value="auto_dismiss_inbox"><?php esc_html_e( 'Auto-Dismiss & Route to Inbox Archive', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
-						<option value="dismiss_only"><?php esc_html_e( 'Auto-Dismiss Only', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
-						<option value="route_inbox"><?php esc_html_e( 'Route to Inbox Only', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
-					</select>
-				</p>
-				<p class="edminboost-anm-modal__actions">
-					<button type="submit" class="button button-primary"><?php esc_html_e( 'Save Rule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
-					<button type="button" class="button edminboost-anm-modal-close"><?php esc_html_e( 'Cancel', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
-				</p>
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row">
+							<label for="edminboost-anm-rule-name"><?php esc_html_e( 'Rule Name', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+						</th>
+						<td>
+							<input type="text" id="edminboost-anm-rule-name" name="name" class="regular-text" placeholder="<?php esc_attr_e( 'e.g., Hide Feedback Nags', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" required />
+						</td>
+					</tr>
+					<tr class="edminboost-anm-rule-form__row-match-type">
+						<th scope="row"><?php esc_html_e( 'Match Type', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<td>
+							<fieldset class="edminboost-anm-rule-form__match-type">
+								<legend class="screen-reader-text"><?php esc_html_e( 'Match Type', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></legend>
+								<label><input type="radio" name="match_type" value="keyword" checked /> <?php esc_html_e( 'Keyword Match', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+								<label><input type="radio" name="match_type" value="regex" /> <?php esc_html_e( 'Regex Pattern', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+								<label><input type="radio" name="match_type" value="css" /> <?php esc_html_e( 'CSS Selector', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+							</fieldset>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="edminboost-anm-rule-string"><?php esc_html_e( 'Match String', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+						</th>
+						<td>
+							<input type="text" id="edminboost-anm-rule-string" name="match_string" class="regular-text" placeholder="<?php esc_attr_e( 'Please rate our plugin', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" required />
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="edminboost-anm-rule-action"><?php esc_html_e( 'Action', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+						</th>
+						<td>
+							<select id="edminboost-anm-rule-action" name="rule_action" class="regular-text">
+								<option value="auto_dismiss_inbox"><?php esc_html_e( 'Auto-Dismiss & Route to Inbox Archive', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+								<option value="dismiss_only"><?php esc_html_e( 'Auto-Dismiss Only', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+								<option value="route_inbox"><?php esc_html_e( 'Route to Inbox Only', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row" aria-hidden="true"></th>
+						<td class="edminboost-anm-modal__actions">
+							<button type="submit" class="button button-primary"><?php esc_html_e( 'Save Rule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
+							<button type="button" class="button edminboost-anm-modal-close"><?php esc_html_e( 'Cancel', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
+						</td>
+					</tr>
+				</table>
 			</form>
 		</div>
 	</div>

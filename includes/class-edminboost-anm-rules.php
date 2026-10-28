@@ -66,25 +66,60 @@ class EDMINBOOST_ANM_Rules {
 	}
 
 	/**
+	 * Custom upsell blacklist phrases from settings (always eligible for matching).
+	 *
+	 * @return array
+	 */
+	public static function get_custom_blacklist_phrases() {
+		$custom = EDMINBOOST_ANM_Settings::get()['upsell_preset']['custom_phrases'] ?? array();
+
+		if ( ! is_array( $custom ) ) {
+			return array();
+		}
+
+		return $custom;
+	}
+
+	/**
+	 * Phrases that currently suppress upsell notices (custom always; built-in when preset enabled).
+	 *
+	 * @return array
+	 */
+	public static function get_active_blacklist_phrases() {
+		$settings = EDMINBOOST_ANM_Settings::get();
+		$phrases  = self::get_custom_blacklist_phrases();
+
+		if ( ! empty( $settings['upsell_preset']['enabled'] ) ) {
+			$phrases = array_merge( self::get_builtin_preset_phrases(), $phrases );
+		}
+
+		return self::dedupe_phrases( $phrases );
+	}
+
+	/**
 	 * All active preset phrases (built-in plus custom settings).
 	 *
 	 * @return array
 	 */
 	public static function get_preset_phrases() {
-		$phrases = self::get_builtin_preset_phrases();
-		$custom  = EDMINBOOST_ANM_Settings::get()['upsell_preset']['custom_phrases'] ?? array();
+		return self::get_active_blacklist_phrases();
+	}
 
-		if ( ! is_array( $custom ) || empty( $custom ) ) {
-			return $phrases;
+	/**
+	 * Remove duplicate phrases (case-insensitive).
+	 *
+	 * @param array $phrases Phrase list.
+	 * @return array
+	 */
+	private static function dedupe_phrases( $phrases ) {
+		if ( ! is_array( $phrases ) || empty( $phrases ) ) {
+			return array();
 		}
 
-		$seen = array();
+		$unique = array();
+		$seen   = array();
 
 		foreach ( $phrases as $phrase ) {
-			$seen[ strtolower( $phrase ) ] = true;
-		}
-
-		foreach ( $custom as $phrase ) {
 			$phrase = trim( (string) $phrase );
 
 			if ( '' === $phrase ) {
@@ -98,10 +133,10 @@ class EDMINBOOST_ANM_Rules {
 			}
 
 			$seen[ $key ] = true;
-			$phrases[]    = $phrase;
+			$unique[]     = $phrase;
 		}
 
-		return $phrases;
+		return $unique;
 	}
 
 	/**
@@ -305,21 +340,11 @@ class EDMINBOOST_ANM_Rules {
 	 * @return array|null Matched rule info or preset match.
 	 */
 	public static function evaluate( $message, $html = '' ) {
-		$settings = EDMINBOOST_ANM_Settings::get();
 		$haystack = strtolower( wp_strip_all_tags( $message ) );
 
-		if ( ! empty( $settings['upsell_preset']['enabled'] ) ) {
-			foreach ( self::get_preset_phrases() as $phrase ) {
-				if ( false !== strpos( $haystack, strtolower( $phrase ) ) ) {
-					return array(
-						'source' => 'preset',
-						'id'     => 'upsell_preset',
-						'name'   => __( 'Upsell Preset', EDMINBOOST_ANM_TEXT_DOMAIN ),
-						'action' => 'auto_dismiss_inbox',
-						'type'   => 'upsell',
-					);
-				}
-			}
+		$blacklist_match = self::match_upsell_blacklist( $haystack );
+		if ( $blacklist_match ) {
+			return $blacklist_match;
 		}
 
 		foreach ( self::get_all() as $rule ) {
@@ -338,6 +363,9 @@ class EDMINBOOST_ANM_Rules {
 					}
 					break;
 				case 'css':
+					if ( self::html_matches_css_selector( $html, $string ) ) {
+						$matched = true;
+					}
 					break;
 				default:
 					if ( false !== stripos( $haystack, strtolower( $string ) ) ) {
@@ -354,6 +382,46 @@ class EDMINBOOST_ANM_Rules {
 					'name'   => $rule['name'],
 					'action' => $rule['action'],
 					'type'   => self::classify_type( $message ),
+				);
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Match notice text against custom blacklist and optional built-in upsell preset.
+	 *
+	 * @param string $haystack Lowercase plain notice text.
+	 * @return array|null
+	 */
+	private static function match_upsell_blacklist( $haystack ) {
+		foreach ( self::get_custom_blacklist_phrases() as $phrase ) {
+			if ( false !== strpos( $haystack, strtolower( $phrase ) ) ) {
+				return array(
+					'source' => 'custom_blacklist',
+					'id'     => 'upsell_custom_blacklist',
+					'name'   => __( 'Upsell Blacklist', EDMINBOOST_ANM_TEXT_DOMAIN ),
+					'action' => 'auto_dismiss_inbox',
+					'type'   => 'upsell',
+				);
+			}
+		}
+
+		$settings = EDMINBOOST_ANM_Settings::get();
+
+		if ( empty( $settings['upsell_preset']['enabled'] ) ) {
+			return null;
+		}
+
+		foreach ( self::get_builtin_preset_phrases() as $phrase ) {
+			if ( false !== strpos( $haystack, strtolower( $phrase ) ) ) {
+				return array(
+					'source' => 'preset',
+					'id'     => 'upsell_preset',
+					'name'   => __( 'Upsell Preset', EDMINBOOST_ANM_TEXT_DOMAIN ),
+					'action' => 'auto_dismiss_inbox',
+					'type'   => 'upsell',
 				);
 			}
 		}
@@ -530,7 +598,7 @@ class EDMINBOOST_ANM_Rules {
 			return 'critical';
 		}
 
-		foreach ( self::get_preset_phrases() as $phrase ) {
+		foreach ( self::get_active_blacklist_phrases() as $phrase ) {
 			if ( false !== strpos( $lower, strtolower( $phrase ) ) ) {
 				return 'upsell';
 			}

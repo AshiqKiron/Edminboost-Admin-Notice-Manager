@@ -13,10 +13,11 @@ alwaysApply: false
 - Wrap in an IIFE with `'use strict'`.
 - Scope DOM queries to `.edminboost-anm-wrap` or plugin-specific selectors.
 - Use `fetch`/`admin-ajax.php` with `edminboostAnmData.ajaxUrl`, `nonce`, and localized `i18n` for errors/success.
-- Inbox: sort/filter/pagination via `edminboost_anm_inbox_list` (updates `#edminboost-anm-inbox-rows` HTML from server-rendered partial).
-- Rules: WP core preset conversion via `edminboost_anm_convert_wp_preset` (toggle undo supported).
+- Inbox: sort/filter/pagination via `edminboost_anm_inbox_list` (updates `#edminboost-anm-inbox-rows` HTML from server-rendered partial); URL query sync for filters/sort/page.
+- Inbox row actions: Read via `edminboost_anm_inbox_action` (`read`) — disables button and adds `.is-read`; snooze menu with toggle unsnooze (repeat duration or `.edminboost-anm-inbox-snooze-toggle` when `.is-snoozed`) — `setInboxSnoozeState()` from AJAX `snoozed` + `duration` payload.
+- Rules: WP core preset conversion via `edminboost_anm_convert_wp_preset` (toggle undo supported); CRUD via save/delete/toggle AJAX with inline errors and empty state; delete uses core-style link + `confirm()`; match type includes CSS selector (`css`).
 - Settings: tabbed UI via `initSettingsTabs()` on `[data-edminboost-anm-settings]` — `?tab=` query sync, `history.replaceState`, keyboard (Arrow/Home/End), `edminboost-anm-settings-tab` custom event; legacy `?tab=upsell` maps to `filtering`. Tools tab adds `.is-tab-tools` on the form (hides main Save button where appropriate). Preserve active tab in `_wp_http_referer` on submit.
-- Settings: digest live preview via `initDigestPreview()` — POST `edminboost_anm_digest_preview` with unsaved `digest[...]` fields; renders structured `content` into `[data-edminboost-anm-digest-preview-content]` with `escapeHtml()` (plain-text email still sent via `body`); debounced refresh when preview panel is open; auto-load on Notifications tab.
+- Settings: digest live preview via `initDigestPreview()` — POST `edminboost_anm_digest_preview` with unsaved `digest[...]` fields (including `digest[send_weekday]`); renders structured `content` into `[data-edminboost-anm-digest-preview-content]` with `escapeHtml()`; updates next-send line from `next_send` in response; debounced refresh when preview panel is open; auto-load on Notifications tab (including `?tab=notifications` deep links).
 - Settings: webhook live preview via `initWebhookPreview()` — POST `edminboost_anm_webhook_preview` with unsaved `webhook[message]`; shows sample line, alert `text`, and formatted JSON payload; debounced refresh; auto-load on Notifications tab.
 - Settings (Access tab): `initHidingNotificationsSettings()` on `[data-edminboost-anm-hiding-visibility]` — radio modes with nested `.edminboost-anm-hiding-visibility-options__option` user pickers (`only` / `except`); syncs chips/hidden inputs via `edminboost_anm_search_users`.
 - Shared settings preview helpers (top of file): `anmPreviewEscapeHtml`, `anmReadNoticePanelPreviewOptions`, `anmApplyNoticePanelPreviewColors`, `anmPreviewBuildMockBarHtml`, etc. — used by General display preview and Admin bar tab preview; escape all dynamic strings.
@@ -40,7 +41,7 @@ alwaysApply: false
 
 - Loaded when admin bar panel is shown, style is dropdown (`dropdown`, `dropdown_compact`), and user has capability — in wp-admin or on the front end when `is_admin_bar_showing()` (via `EDMINBOOST_ANM_Notices::enqueue_admin_bar_dropdown_script()`).
 - Targets `#wp-admin-bar-edminboost-anm-notices` — toggles `#edminboost-anm-notices-panel` with `aria-expanded`, click-outside close, Escape key.
-- `positionPanel()` — fixed placement with viewport clamping (`left`, `maxWidth`; width from measured panel or 480 detailed / 360 compact fallback); clears inline position on close.
+- `positionPanel()` — fixed placement with viewport clamping (`left`, `maxWidth`; width from measured panel or 480 detailed / 360 compact fallback); left admin bar positions avoid overlapping the wp-admin menu; clears inline position on close.
 - Panel row actions (hide for me/all, display as normal) use localized `edminboostAnmNotices` (`ajaxUrl`, `nonce`, `badgeStyle`, `i18n`). Markup from `edminboost-anm-notice-panel-dropdown.php` via admin bar `meta.html` (`$edminboost_anm_panel_layout` `detailed`|`compact`); hide buttons wrap label text in `.edminboost-anm-notices-panel__action-label`.
 - After hide actions, `updateBadgeCount()` respects `badgeStyle` (dot/none/capped counts via `formatBadgeDisplayCount`).
 
@@ -63,6 +64,7 @@ alwaysApply: false
 		importSuccess, importError, actionSuccess, actionError,
 		createRule, editRule, statusActive, statusInactive,
 		seedSuccess, seedError, triggerError, viewInbox,
+		undoSnooze,
 		convertedToRule, undoConversion, alreadyConverted,
 		resetHiddenSuccess, resetHiddenError, resetHiddenConfirmAll,
 		digestPreviewLoading, digestPreviewError,

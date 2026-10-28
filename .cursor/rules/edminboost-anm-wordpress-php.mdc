@@ -79,6 +79,7 @@ array(
 	'digest'            => array(
 		'enabled'                => false,
 		'recipients'             => 'admin@...',
+		'send_weekday'           => 'monday',  // EDMINBOOST_ANM_Digest::DEFAULT_SEND_WEEKDAY; see get_send_weekday_choices()
 		'subject'                => '',  // empty = default; supports {site_name}
 		'intro'                  => '',
 		'include_stats'          => true,
@@ -115,9 +116,13 @@ Separate options: `RULES_OPTION` (rule list), `INBOX_OPTION` (captured notices),
 - Settings sanitize: `enabled` updated only when present in `$input` (Dashboard AJAX / explicit posts); other fields unchanged on Settings save.
 - Display experience: `EDMINBOOST_ANM_Settings::DISPLAY_EXPERIENCE_PRESETS`, `get_display_experience_presets()`, `get_display_experience_preset_for_mode()`, `get_manage_notices_mode_labels()` — presets map to stored `manage_notices_mode`.
 - Notice panel save: `sanitize()` sets `notice_panel.enabled` to true (no Settings UI toggle); `should_show_admin_bar_notice_panel()` checks plugin enabled + stored `notice_panel.enabled`.
-- Notice panel: `EDMINBOOST_ANM_Settings::get_notice_panel_*()` registries; `get_notice_panel_admin_bar_placement()`, `get_notice_panel_preview_layout()`, `notice_panel_style_is_dropdown()`, `notice_panel_style_uses_bell()`, `format_notice_panel_badge_display_count()`, etc. `EDMINBOOST_ANM_Notices::build_notice_badge_markup()` mirrors badge rules for live admin bar; `enqueue_admin_bar_dropdown_script()` shared for wp-admin and front-end admin bar dropdown JS; `get_plugin_screen_notice_hide_css()` + `hide_notices_on_plugin_screens()` for plugin-page notice clutter (exceptions for settings preview mocks).
+- Notice panel: `EDMINBOOST_ANM_Settings::get_notice_panel_*()` registries; `get_notice_panel_admin_bar_placement()`, `get_notice_panel_preview_layout()` (default position → `left`), `notice_panel_position_uses_left_admin_bar()`, `notice_panel_style_is_dropdown()`, `notice_panel_style_uses_bell()`, `format_notice_panel_badge_display_count()`, etc. `EDMINBOOST_ANM_Notices::build_notice_badge_markup()` mirrors badge rules for live admin bar; `enqueue_admin_bar_dropdown_script()` shared for wp-admin and front-end admin bar dropdown JS; `get_plugin_screen_notice_hide_css()` + `hide_notices_on_plugin_screens()` for plugin-page notice clutter (exceptions for settings preview mocks).
+- Inbox: `EDMINBOOST_ANM_Inbox::snooze()` / `unsnooze()`, `is_actively_snoozed()`, `get_snooze_duration_key()`, `mark_read()`.
+- Settings sanitize: update `upsell_preset` and `word_filters` only when present in `$input` (other tabs omit those keys).
+- Webhook save: `sanitize_webhook_settings()` keeps `url` when disabled (do not wipe stored URL on toggle-off).
 - Admin routing: `EDMINBOOST_ANM_Admin::is_plugin_screen( $hook_suffix )` — screen id, optional hook suffix, or `$_GET['page']` contains `PAGE_SLUG`.
-- Digest: `EDMINBOOST_ANM_Digest::build_email_content()`, `format_email_body_plain()`, `build_email()`, `get_preview()` (includes structured `content` + plain `body`), `get_recipients()`, `SITE_NAME_TOKEN`; filter `edminboost_anm_digest_email`.
+- Digest: `EDMINBOOST_ANM_Digest::build_email_content()`, `format_email_body_plain()`, `build_email()`, `get_preview()` (structured `content`, plain `body`, `next_send`), `get_recipients()`, `SITE_NAME_TOKEN`, `add_cron_schedules()`, `sync_schedule()`, `sanitize_send_weekday()`, `get_next_send_timestamp()`; filter `edminboost_anm_digest_email`.
+- Rules: `save()` allows `match_type` `keyword`|`regex`|`css`; `html_matches_css_selector()`, `get_custom_blacklist_phrases()`, `get_active_blacklist_phrases()`.
 - Webhook: `EDMINBOOST_ANM_Webhook::build_payload()`, `build_message_text()`, `get_preview()`, `get_preview_notice()`, `get_sample_notice()`; filter `edminboost_anm_webhook_payload`.
 - Sanitize helpers: `EDMINBOOST_ANM_Settings::sanitize_digest_settings()`, `sanitize_webhook_settings()` (Settings API save; digest preview uses full digest sanitizer; webhook preview AJAX sanitizes `message` only).
 

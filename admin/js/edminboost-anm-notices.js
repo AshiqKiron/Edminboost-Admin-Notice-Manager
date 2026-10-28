@@ -29,27 +29,44 @@
 			return panel.classList.contains('edminboost-anm-notices-panel--detailed') ? 480 : 360;
 		}
 
+		function getMinPanelLeft(margin) {
+			var wpcontent = document.getElementById('wpcontent');
+			if (wpcontent) {
+				return Math.max(margin, wpcontent.getBoundingClientRect().left);
+			}
+
+			var menu = document.getElementById('adminmenuwrap');
+			if (menu) {
+				return Math.max(margin, menu.getBoundingClientRect().right);
+			}
+
+			return margin;
+		}
+
 		function positionPanel() {
 			var rect = trigger.getBoundingClientRect();
 			var margin = 8;
+			var minLeft = getMinPanelLeft(margin);
 			var viewportWidth = window.innerWidth;
 			var maxPanelWidth = Math.max(margin * 2, viewportWidth - margin * 2);
 			var panelWidth = Math.min(getPanelWidth(), maxPanelWidth);
 			var left = rect.right - panelWidth;
 
-			if (left < margin) {
+			if (left < minLeft) {
 				left = rect.left;
 			}
 			if (left + panelWidth > viewportWidth - margin) {
 				left = viewportWidth - margin - panelWidth;
 			}
-			left = Math.max(margin, left);
+			left = Math.max(minLeft, left);
 
 			panel.style.position = 'fixed';
-			panel.style.top = rect.bottom + 'px';
-			panel.style.left = left + 'px';
+			panel.style.top = Math.round(rect.bottom) + 'px';
+			panel.style.left = Math.round(left) + 'px';
 			panel.style.right = 'auto';
+			panel.style.width = panelWidth + 'px';
 			panel.style.maxWidth = maxPanelWidth + 'px';
+			panel.style.zIndex = '100001';
 		}
 
 		function resetPanelPosition() {
@@ -57,7 +74,9 @@
 			panel.style.top = '';
 			panel.style.right = '';
 			panel.style.left = '';
+			panel.style.width = '';
 			panel.style.maxWidth = '';
+			panel.style.zIndex = '';
 		}
 
 		function closePanel() {
@@ -194,11 +213,14 @@
 			runPanelAction(action, id, card);
 		});
 
-		window.addEventListener('resize', function () {
+		function repositionOpenPanel() {
 			if (!panel.hidden) {
 				positionPanel();
 			}
-		});
+		}
+
+		window.addEventListener('resize', repositionOpenPanel);
+		window.addEventListener('scroll', repositionOpenPanel, true);
 
 		document.addEventListener('click', function (event) {
 			if (panel.hidden) {

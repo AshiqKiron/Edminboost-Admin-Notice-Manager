@@ -53,7 +53,16 @@ Yes. When uninstalled, all plugin options are removed from the database.
 == Changelog ==
 
 = 1.1.1 =
-* Admin bar dropdown: panel positioning stays within the viewport on narrow screens.
+* Admin UI: responsive layouts for Dashboard, Inbox, Rules, and Settings on phones and tablets; WordPress list-table mobile rows for inbox and rules tables; admin bar notice dropdown clamps to the viewport.
+* Notice Inbox: pagination controls with AJAX sort/filter; column alignment; select-all, snooze menu, and URL state (including `orderby=type&order=desc`) stay in sync.
+* Notice Inbox: Read disables after use; snooze (1 or 7 days) toggles like Convert to Rule—click Snooze again or the same duration to unsnooze without reloading.
+* Auto-Rules: CSS selector rules match notice markup; preset convert/delete stay in sync with the rules list; toggle/save/delete show errors and empty state when the last rule is removed.
+* Auto-Rules: delete uses the WordPress admin delete link style and core confirmation dialog.
+* Settings (Notifications): choose which weekday the weekly digest email is sent (site timezone, 9:00 AM local); preview shows the next scheduled send time.
+* Settings (Notifications): register a weekly WP-Cron interval so the email digest can schedule when enabled; preserve webhook URL when the integration is turned off.
+* Settings (Notifications): load digest and webhook live previews when opening the tab (including direct links with `?tab=notifications`).
+* Settings (Filtering): custom upsell blacklist phrases suppress matching notices without enabling the Kill All Upsells preset; spam words, whitelist, and filtering lists persist when other settings tabs are saved.
+* Admin bar dropdown: panel positioning stays within the viewport and no longer overlaps the admin menu when the bell is on the left side of the toolbar.
 * Admin bar bell styles: fixed bell trigger using the wrong Dashicon (now shows the bell icon in the toolbar and settings preview).
 * Settings (Admin bar): removed separate “Show notices in the WordPress admin bar” toggle; panel styling and placement settings apply whenever the admin bar panel is active for your display experience.
 * Settings (General): removed “Hidden notices in toolbar” option; use the Admin bar tab to control the notice panel.

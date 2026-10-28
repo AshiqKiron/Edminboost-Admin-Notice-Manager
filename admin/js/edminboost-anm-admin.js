@@ -35,6 +35,193 @@
 		});
 	}
 
+	var anmConfirmModalState = {
+		previousFocus: null,
+		onConfirm: null,
+		openOptions: null,
+		pausedModals: []
+	};
+	var anmConfirmRoot = null;
+	var anmConfirmRootEl = null;
+
+	function getWpConfirmDialog() {
+		return window.wp && wp.components && wp.components.__experimentalConfirmDialog
+			? wp.components.__experimentalConfirmDialog
+			: null;
+	}
+
+	function ensureAnmConfirmRoot() {
+		if (anmConfirmRootEl) {
+			return;
+		}
+
+		anmConfirmRootEl = document.createElement('div');
+		anmConfirmRootEl.id = 'edminboost-anm-wp-confirm-root';
+		document.body.appendChild(anmConfirmRootEl);
+
+		if (wp.element && typeof wp.element.createRoot === 'function') {
+			anmConfirmRoot = wp.element.createRoot(anmConfirmRootEl);
+		}
+	}
+
+	function renderAnmConfirmDialog(props) {
+		var ConfirmDialog = getWpConfirmDialog();
+		if (!ConfirmDialog || !wp.element || typeof wp.element.createElement !== 'function') {
+			return false;
+		}
+
+		ensureAnmConfirmRoot();
+		var element = wp.element.createElement(ConfirmDialog, props);
+		if (anmConfirmRoot) {
+			anmConfirmRoot.render(element);
+		} else if (typeof wp.element.render === 'function') {
+			wp.element.render(element, anmConfirmRootEl);
+		} else {
+			return false;
+		}
+
+		return true;
+	}
+
+	function unmountAnmConfirmDialog() {
+		if (!anmConfirmRootEl) {
+			return;
+		}
+
+		if (anmConfirmRoot) {
+			anmConfirmRoot.render(null);
+		} else if (wp.element && typeof wp.element.render === 'function') {
+			wp.element.render(null, anmConfirmRootEl);
+		}
+	}
+
+	function pauseAnmModals() {
+		anmConfirmModalState.pausedModals = [];
+		document.querySelectorAll('.edminboost-anm-modal.is-open').forEach(function (node) {
+			anmConfirmModalState.pausedModals.push(node);
+			node.classList.remove('is-open');
+			node.setAttribute('aria-hidden', 'true');
+		});
+	}
+
+	function resumeAnmModals() {
+		anmConfirmModalState.pausedModals.forEach(function (node) {
+			node.classList.add('is-open');
+			node.setAttribute('aria-hidden', 'false');
+		});
+		anmConfirmModalState.pausedModals = [];
+	}
+
+	function finishAnmConfirmModal(resumeModals) {
+		unmountAnmConfirmDialog();
+
+		if (resumeModals !== false) {
+			resumeAnmModals();
+		} else {
+			anmConfirmModalState.pausedModals = [];
+		}
+
+		if (anmConfirmModalState.previousFocus && typeof anmConfirmModalState.previousFocus.focus === 'function') {
+			anmConfirmModalState.previousFocus.focus();
+		}
+
+		anmConfirmModalState.previousFocus = null;
+		anmConfirmModalState.onConfirm = null;
+		anmConfirmModalState.openOptions = null;
+	}
+
+	function buildAnmConfirmDialogProps(isBusy) {
+		var i18n = data.i18n || {};
+		var options = anmConfirmModalState.openOptions || {};
+		var createElement = wp.element.createElement;
+		var message = options.message || '';
+		var children = message;
+
+		if (options.title && options.title !== message) {
+			children = createElement(
+				wp.element.Fragment,
+				null,
+				createElement('strong', null, options.title),
+				createElement('br', null),
+				createElement('br', null),
+				message
+			);
+		}
+
+		return {
+			isOpen: true,
+			onCancel: function () {
+				finishAnmConfirmModal(true);
+			},
+			onConfirm: function () {
+				if (!anmConfirmModalState.onConfirm) {
+					finishAnmConfirmModal(true);
+					return;
+				}
+
+				var result;
+				try {
+					result = anmConfirmModalState.onConfirm();
+				} catch (err) {
+					window.alert(err.message || i18n.actionError || 'Action failed.');
+					return;
+				}
+
+				if (result && typeof result.then === 'function') {
+					renderAnmConfirmDialog(buildAnmConfirmDialogProps(true));
+					result.then(function () {
+						finishAnmConfirmModal(false);
+					}).catch(function (err) {
+						renderAnmConfirmDialog(buildAnmConfirmDialogProps(false));
+						window.alert(err.message || i18n.actionError || 'Action failed.');
+					});
+					return;
+				}
+
+				finishAnmConfirmModal(false);
+			},
+			confirmButtonText: options.confirmText || i18n.confirmDeleteButton || 'Delete',
+			cancelButtonText: i18n.cancel || 'Cancel',
+			isBusy: !!isBusy,
+			children: children
+		};
+	}
+
+	function openAnmConfirmModal(options) {
+		options = options || {};
+		var i18n = data.i18n || {};
+
+		function runLegacyConfirm() {
+			if (window.confirm(options.message || i18n.confirmDelete || 'Are you sure?')) {
+				if (typeof options.onConfirm === 'function') {
+					options.onConfirm();
+				}
+			}
+		}
+
+		if (!getWpConfirmDialog()) {
+			runLegacyConfirm();
+			return;
+		}
+
+		pauseAnmModals();
+		anmConfirmModalState.previousFocus = document.activeElement;
+		anmConfirmModalState.onConfirm = typeof options.onConfirm === 'function' ? options.onConfirm : null;
+		anmConfirmModalState.openOptions = options;
+
+		if (!renderAnmConfirmDialog(buildAnmConfirmDialogProps(false))) {
+			resumeAnmModals();
+			anmConfirmModalState.onConfirm = null;
+			anmConfirmModalState.openOptions = null;
+			anmConfirmModalState.previousFocus = null;
+			runLegacyConfirm();
+		}
+	}
+
+	function initAnmConfirmModal() {
+		ensureAnmConfirmRoot();
+	}
+
 	function anmPreviewEscapeHtml(text) {
 		if (text === null || text === undefined) {
 			return '';
@@ -545,6 +732,23 @@
 		});
 	}
 
+	function syncRulesListEmptyState(root) {
+		var listCard = root.querySelector('[data-edminboost-anm-rules-list]');
+		if (!listCard) {
+			return;
+		}
+
+		var tbody = listCard.querySelector('tbody');
+		if (!tbody || tbody.querySelector('tr')) {
+			return;
+		}
+
+		var i18n = data.i18n || {};
+		listCard.innerHTML = '<div class="edminboost-anm-empty"><p>'
+			+ anmPreviewEscapeHtml(i18n.rulesEmpty || 'No auto-rules yet. Add a rule or convert an inbox notice to get started.')
+			+ '</p></div>';
+	}
+
 	function initRuleModal() {
 		var root = document.querySelector('[data-edminboost-anm-rules]');
 		if (!root) {
@@ -554,6 +758,7 @@
 		var modal = document.getElementById('edminboost-anm-rule-modal');
 		var form = modal ? modal.querySelector('.edminboost-anm-rule-form') : null;
 		var title = document.getElementById('edminboost-anm-rule-modal-title');
+		var i18n = data.i18n || {};
 
 		function openModal(editData) {
 			if (!modal || !form) {
@@ -576,6 +781,11 @@
 
 			modal.classList.add('is-open');
 			modal.setAttribute('aria-hidden', 'false');
+
+			var nameField = document.getElementById('edminboost-anm-rule-name');
+			if (nameField && typeof nameField.focus === 'function') {
+				nameField.focus();
+			}
 		}
 
 		function closeModal() {
@@ -584,6 +794,18 @@
 				modal.setAttribute('aria-hidden', 'true');
 			}
 		}
+
+		function onRuleModalKeydown(event) {
+			if (event.key !== 'Escape' || !modal || !modal.classList.contains('is-open')) {
+				return;
+			}
+			if (anmConfirmModalState.openOptions) {
+				return;
+			}
+			closeModal();
+		}
+
+		document.addEventListener('keydown', onRuleModalKeydown);
 
 		root.querySelectorAll('.edminboost-anm-add-rule').forEach(function (btn) {
 			btn.addEventListener('click', function () {
@@ -603,17 +825,30 @@
 			});
 		});
 
-		root.querySelectorAll('.edminboost-anm-delete-rule').forEach(function (btn) {
-			btn.addEventListener('click', function () {
-				if (!window.confirm((data.i18n && data.i18n.confirmDelete) || 'Delete this rule?')) {
-					return;
-				}
-				apiPost('edminboost_anm_delete_rule', { id: btn.dataset.id }).then(function (result) {
-					if (result.success) {
-						var row = btn.closest('tr');
-						if (row) {
-							row.remove();
-						}
+		root.querySelectorAll('.edminboost-anm-delete-rule').forEach(function (link) {
+			link.addEventListener('click', function (event) {
+				event.preventDefault();
+				openAnmConfirmModal({
+					title: i18n.confirmDeleteTitle || 'Delete rule',
+					message: i18n.confirmDelete || 'Are you sure you want to delete this rule?',
+					confirmText: i18n.confirmDeleteButton || 'Delete',
+					onConfirm: function () {
+						return apiPost('edminboost_anm_delete_rule', { id: link.dataset.id }).then(function (result) {
+							if (!result.success) {
+								window.alert((result.data && result.data.message) || i18n.actionError || 'Action failed.');
+								return;
+							}
+							var row = link.closest('tr');
+							var presetId = (result.data && result.data.wp_notice_preset) || (row && row.dataset.wpNoticePreset);
+							if (row) {
+								row.remove();
+							}
+							if (presetId) {
+								var presetRow = root.querySelector('[data-preset-id="' + presetId + '"]');
+								unmarkWpPresetConverted(presetRow);
+							}
+							syncRulesListEmptyState(root);
+						});
 					}
 				});
 			});
@@ -624,6 +859,10 @@
 				apiPost('edminboost_anm_toggle_rule', {
 					id: toggle.dataset.id,
 					enabled: toggle.checked ? '1' : '0'
+				}).then(function (result) {
+					if (!result.success) {
+						toggle.checked = !toggle.checked;
+					}
 				});
 			});
 		});
@@ -642,7 +881,9 @@
 				}).then(function (result) {
 					if (result.success) {
 						window.location.reload();
+						return;
 					}
+					window.alert((result.data && result.data.message) || i18n.actionError || 'Action failed.');
 				});
 			});
 		}
@@ -660,14 +901,10 @@
 				}
 				apiPost('edminboost_anm_convert_wp_preset', payload).then(function (result) {
 					if (!result.success) {
-						window.alert((result.data && result.data.message) || (data.i18n && data.i18n.actionError) || 'Action failed.');
+						window.alert((result.data && result.data.message) || i18n.actionError || 'Action failed.');
 						return;
 					}
-					if (isConverted) {
-						unmarkWpPresetConverted(btn.closest('tr'));
-					} else {
-						markWpPresetConverted(btn.closest('tr'));
-					}
+					window.location.reload();
 				});
 			});
 		});
@@ -703,6 +940,44 @@
 		setConvertButtonConverted(row ? row.querySelector('.edminboost-anm-inbox-convert') : null, false);
 	}
 
+	function setInboxReadState(row, read) {
+		if (!row) {
+			return;
+		}
+		var readBtn = row.querySelector('.edminboost-anm-inbox-read');
+		row.classList.toggle('is-read', read);
+		if (readBtn) {
+			readBtn.disabled = read;
+			if (read) {
+				readBtn.setAttribute('aria-disabled', 'true');
+			} else {
+				readBtn.removeAttribute('aria-disabled');
+			}
+		}
+	}
+
+	function setInboxSnoozeState(row, snoozed, durationKey) {
+		if (!row) {
+			return;
+		}
+		var snoozeTooltip = (data.i18n && data.i18n.undoSnooze) || 'Snoozed. Click again to unsnooze.';
+		var toggle = row.querySelector('.edminboost-anm-inbox-snooze-toggle');
+		if (toggle) {
+			toggle.classList.toggle('is-snoozed', snoozed);
+			toggle.setAttribute('aria-pressed', snoozed ? 'true' : 'false');
+			if (snoozed) {
+				toggle.setAttribute('title', snoozeTooltip);
+			} else {
+				toggle.removeAttribute('title');
+			}
+		}
+		row.querySelectorAll('.edminboost-anm-inbox-snooze').forEach(function (btn) {
+			var active = snoozed && btn.dataset.duration === durationKey;
+			btn.classList.toggle('is-snoozed-active', active);
+			btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+		});
+	}
+
 	function updateInboxSortHeaders(table, orderby, order) {
 		if (!table) {
 			return;
@@ -721,7 +996,28 @@
 		});
 	}
 
-	function updateInboxUrlState(root, orderby, order) {
+	function syncInboxSearchHiddenInput(searchForm, name, value, removeWhen) {
+		if (!searchForm) {
+			return;
+		}
+		var input = searchForm.querySelector('input[name="' + name + '"]');
+		if (removeWhen) {
+			if (input) {
+				input.remove();
+			}
+			return;
+		}
+		if (!input) {
+			input = document.createElement('input');
+			input.type = 'hidden';
+			input.name = name;
+			searchForm.appendChild(input);
+		}
+		input.value = value;
+	}
+
+	function updateInboxUrlState(root, orderby, order, page) {
+		page = parseInt(page, 10) || 1;
 		var params = new URLSearchParams(window.location.search);
 		if ('date' === orderby && 'desc' === order) {
 			params.delete('orderby');
@@ -730,39 +1026,35 @@
 			params.set('orderby', orderby);
 			params.set('order', order);
 		}
+		if (page <= 1) {
+			params.delete('paged');
+		} else {
+			params.set('paged', String(page));
+		}
 		var query = params.toString();
 		var nextUrl = window.location.pathname + (query ? '?' + query : '') + window.location.hash;
 		window.history.replaceState({}, '', nextUrl);
 
 		var searchForm = root.querySelector('.edminboost-anm-search');
-		if (!searchForm) {
-			return;
-		}
-		var orderbyInput = searchForm.querySelector('input[name="orderby"]');
-		var orderInput = searchForm.querySelector('input[name="order"]');
-		if ('date' === orderby && 'desc' === order) {
-			if (orderbyInput) {
-				orderbyInput.remove();
+		syncInboxSearchHiddenInput(searchForm, 'orderby', orderby, 'date' === orderby && 'desc' === order);
+		syncInboxSearchHiddenInput(searchForm, 'order', order, 'date' === orderby && 'desc' === order);
+		syncInboxSearchHiddenInput(searchForm, 'paged', String(page), page <= 1);
+	}
+
+	function resetInboxRowSelection(root) {
+		root.querySelectorAll('.edminboost-anm-inbox-select-all').forEach(function (cb) {
+			cb.checked = false;
+		});
+	}
+
+	function closeInboxDropdowns(root) {
+		root.querySelectorAll('.edminboost-anm-dropdown.is-open').forEach(function (dropdown) {
+			dropdown.classList.remove('is-open');
+			var toggle = dropdown.querySelector('.edminboost-anm-dropdown__toggle');
+			if (toggle) {
+				toggle.setAttribute('aria-expanded', 'false');
 			}
-			if (orderInput) {
-				orderInput.remove();
-			}
-			return;
-		}
-		if (!orderbyInput) {
-			orderbyInput = document.createElement('input');
-			orderbyInput.type = 'hidden';
-			orderbyInput.name = 'orderby';
-			searchForm.appendChild(orderbyInput);
-		}
-		if (!orderInput) {
-			orderInput = document.createElement('input');
-			orderInput.type = 'hidden';
-			orderInput.name = 'order';
-			searchForm.appendChild(orderInput);
-		}
-		orderbyInput.value = orderby;
-		orderInput.value = order;
+		});
 	}
 
 	function fetchInboxRows(root, orderby, order) {
@@ -783,13 +1075,28 @@
 		}).then(function (result) {
 			tbody.classList.remove('is-loading');
 			if (!result.success) {
+				window.alert((result.data && result.data.message) || (data.i18n && data.i18n.actionError) || 'Action failed.');
 				return;
 			}
 			tbody.innerHTML = result.data.rows || '';
 			root.dataset.inboxOrderby = result.data.orderby || orderby;
 			root.dataset.inboxOrder = result.data.order || order;
+			if (result.data.page) {
+				root.dataset.inboxPage = String(result.data.page);
+			}
 			updateInboxSortHeaders(table, root.dataset.inboxOrderby, root.dataset.inboxOrder);
-			updateInboxUrlState(root, root.dataset.inboxOrderby, root.dataset.inboxOrder);
+			updateInboxUrlState(
+				root,
+				root.dataset.inboxOrderby,
+				root.dataset.inboxOrder,
+				root.dataset.inboxPage || '1'
+			);
+			resetInboxRowSelection(root);
+			closeInboxDropdowns(root);
+			var pager = root.querySelector('[data-edminboost-anm-inbox-pager]');
+			if (pager && typeof result.data.pager === 'string') {
+				pager.innerHTML = result.data.pager;
+			}
 			var showing = root.querySelector('[data-edminboost-anm-inbox-showing]');
 			if (showing && result.data.showing) {
 				showing.textContent = result.data.showing;
@@ -803,15 +1110,36 @@
 			return;
 		}
 
+		var table = root.querySelector('.edminboost-anm-inbox-table');
+		updateInboxSortHeaders(table, root.dataset.inboxOrderby || 'date', root.dataset.inboxOrder || 'desc');
+
 		root.addEventListener('change', function (event) {
-			if (event.target.id === 'edminboost-anm-select-all') {
+			if (event.target.classList.contains('edminboost-anm-inbox-select-all')) {
 				root.querySelectorAll('.edminboost-anm-notice-check').forEach(function (cb) {
+					cb.checked = event.target.checked;
+				});
+				root.querySelectorAll('.edminboost-anm-inbox-select-all').forEach(function (cb) {
 					cb.checked = event.target.checked;
 				});
 			}
 		});
 
+		document.addEventListener('click', function (event) {
+			if (!root.contains(event.target)) {
+				closeInboxDropdowns(root);
+			}
+		});
+
 		root.addEventListener('click', function (event) {
+			var pageLink = event.target.closest('.edminboost-anm-inbox-page-link');
+			if (pageLink && root.contains(pageLink)) {
+				event.preventDefault();
+				var nextPage = pageLink.dataset.page || '1';
+				root.dataset.inboxPage = nextPage;
+				fetchInboxRows(root, root.dataset.inboxOrderby || 'date', root.dataset.inboxOrder || 'desc');
+				return;
+			}
+
 			var sortLink = event.target.closest('.edminboost-anm-inbox-sort');
 			if (sortLink) {
 				event.preventDefault();
@@ -824,24 +1152,51 @@
 				} else if ('date' === orderby) {
 					order = 'desc';
 				}
+				root.dataset.inboxPage = '1';
 				fetchInboxRows(root, orderby, order);
 				return;
 			}
 
-			var dropdownToggle = event.target.closest('.edminboost-anm-dropdown__toggle');
+			var dropdownToggle = event.target.closest('.edminboost-anm-inbox-snooze-toggle');
 			if (dropdownToggle) {
+				event.preventDefault();
+				if (dropdownToggle.classList.contains('is-snoozed')) {
+					apiPost('edminboost_anm_inbox_action', {
+						inbox_action: 'unsnooze',
+						id: dropdownToggle.dataset.id
+					}).then(function (result) {
+						if (result.success) {
+							closeInboxDropdowns(root);
+							setInboxSnoozeState(dropdownToggle.closest('tr'), false, '');
+						}
+					});
+					return;
+				}
 				var dropdown = dropdownToggle.closest('.edminboost-anm-dropdown');
 				if (dropdown) {
-					dropdown.classList.toggle('is-open');
+					var willOpen = !dropdown.classList.contains('is-open');
+					closeInboxDropdowns(root);
+					if (willOpen) {
+						dropdown.classList.add('is-open');
+						dropdownToggle.setAttribute('aria-expanded', 'true');
+					}
 				}
 				return;
 			}
 
 			var readBtn = event.target.closest('.edminboost-anm-inbox-read');
 			if (readBtn) {
+				if (readBtn.disabled) {
+					return;
+				}
+				readBtn.disabled = true;
+				readBtn.setAttribute('aria-disabled', 'true');
 				apiPost('edminboost_anm_inbox_action', { inbox_action: 'read', id: readBtn.dataset.id }).then(function (result) {
 					if (result.success) {
-						readBtn.closest('tr').classList.add('is-read');
+						setInboxReadState(readBtn.closest('tr'), true);
+					} else {
+						readBtn.disabled = false;
+						readBtn.removeAttribute('aria-disabled');
 					}
 				});
 				return;
@@ -849,14 +1204,18 @@
 
 			var snoozeBtn = event.target.closest('.edminboost-anm-inbox-snooze');
 			if (snoozeBtn) {
+				var snoozeRow = snoozeBtn.closest('tr');
 				apiPost('edminboost_anm_inbox_action', {
 					inbox_action: 'snooze',
 					id: snoozeBtn.dataset.id,
 					duration: snoozeBtn.dataset.duration
 				}).then(function (result) {
-					if (result.success) {
-						window.location.reload();
+					if (!result.success) {
+						return;
 					}
+					closeInboxDropdowns(root);
+					var payload = result.data || {};
+					setInboxSnoozeState(snoozeRow, !!payload.snoozed, payload.duration || '');
 				});
 				return;
 			}
@@ -1403,6 +1762,9 @@
 
 			var rect = trigger.getBoundingClientRect();
 			var placement = trigger.getAttribute('data-tip-placement') || 'below';
+			if (placement === 'left' && window.innerWidth < 782) {
+				placement = 'below';
+			}
 			var popupRect = popup.getBoundingClientRect();
 			var top;
 			var left;
@@ -1688,6 +2050,7 @@
 
 		var toEl = panel.querySelector('[data-edminboost-anm-digest-preview-to]');
 		var fromEl = panel.querySelector('[data-edminboost-anm-digest-preview-from]');
+		var nextSendEl = panel.querySelector('[data-edminboost-anm-digest-preview-next-send]');
 		var subjectEl = panel.querySelector('[data-edminboost-anm-digest-preview-subject]');
 		var contentEl = panel.querySelector('[data-edminboost-anm-digest-preview-content]');
 		var i18n = data.i18n || {};
@@ -1744,7 +2107,7 @@
 					html += '<p class="edminboost-anm-digest-preview__empty">' + escapeHtml(i18n.digestPreviewNoNotices || 'No intercepted notices in the inbox yet.') + '</p>';
 				} else {
 					html += '<ul class="edminboost-anm-digest-preview__notice-list">';
-					content.recent.items.forEach(function (item) {
+					(content.recent.items || []).forEach(function (item) {
 						html += '<li class="edminboost-anm-digest-preview__notice">';
 						html += '<p class="edminboost-anm-digest-preview__notice-source"><span>' + escapeHtml(item.source) + '</span>';
 						html += '<span class="edminboost-anm-digest-preview__notice-type ' + noticeTypeClass(item.type) + '">' + escapeHtml(item.type || 'info') + '</span></p>';
@@ -1781,6 +2144,9 @@
 			if (fromEl) {
 				fromEl.textContent = '';
 			}
+			if (nextSendEl) {
+				nextSendEl.textContent = '';
+			}
 			if (subjectEl) {
 				subjectEl.textContent = '';
 			}
@@ -1788,6 +2154,19 @@
 				contentEl.className = 'edminboost-anm-digest-preview__content is-loading';
 				contentEl.textContent = loadingText;
 			}
+		}
+
+		function updateNextSendPreview(nextSend) {
+			if (!nextSendEl) {
+				return;
+			}
+			if (nextSend) {
+				nextSendEl.textContent = nextSend;
+				return;
+			}
+			nextSendEl.textContent = fieldChecked('edminboost-anm-digest-enabled')
+				? ''
+				: (i18n.digestPreviewNextSendDisabled || 'Enable the digest to schedule sends.');
 		}
 
 		function loadDigestPreview() {
@@ -1799,6 +2178,7 @@
 			body.append('digest[intro]', fieldValue('edminboost-anm-digest-intro'));
 			body.append('digest[footer]', fieldValue('edminboost-anm-digest-footer'));
 			body.append('digest[recent_notices_count]', fieldValue('edminboost-anm-digest-recent-count'));
+			body.append('digest[send_weekday]', fieldValue('edminboost-anm-digest-send-weekday'));
 
 			if (fieldChecked('edminboost-anm-digest-enabled')) {
 				body.append('digest[enabled]', '1');
@@ -1828,6 +2208,9 @@
 					if (fromEl) {
 						fromEl.textContent = '';
 					}
+					if (nextSendEl) {
+						nextSendEl.textContent = '';
+					}
 					if (subjectEl) {
 						subjectEl.textContent = '';
 					}
@@ -1844,6 +2227,7 @@
 				if (fromEl) {
 					fromEl.textContent = result.data.from || '';
 				}
+				updateNextSendPreview(result.data.next_send || '');
 				if (subjectEl) {
 					subjectEl.textContent = result.data.subject || '';
 				}
@@ -1855,6 +2239,9 @@
 				}
 				if (fromEl) {
 					fromEl.textContent = '';
+				}
+				if (nextSendEl) {
+					nextSendEl.textContent = '';
 				}
 				if (subjectEl) {
 					subjectEl.textContent = '';
@@ -1875,6 +2262,7 @@
 
 		[
 			'edminboost-anm-digest-recipients',
+			'edminboost-anm-digest-send-weekday',
 			'edminboost-anm-digest-subject',
 			'edminboost-anm-digest-intro',
 			'edminboost-anm-digest-footer',
@@ -1897,10 +2285,6 @@
 					loadDigestPreview();
 				}
 			});
-
-			if (settingsRoot.dataset.settingsTab === 'notifications') {
-				loadDigestPreview();
-			}
 		}
 	}
 
@@ -2047,10 +2431,6 @@
 					loadWebhookPreview();
 				}
 			});
-
-			if (settingsRoot.dataset.settingsTab === 'notifications') {
-				loadWebhookPreview();
-			}
 		}
 	}
 
@@ -2384,11 +2764,14 @@
 	document.addEventListener('DOMContentLoaded', function () {
 		initWrap();
 		initHidePluginAdminNotices();
+		initAnmConfirmModal();
 		initQuickStatusToggle();
 		initPresetToggle();
 		initRuleModal();
 		initInboxTable();
 		initDebugTools();
+		initDigestPreview();
+		initWebhookPreview();
 		initSettingsTabs();
 		initSettingsImporter();
 		initHidingNotificationsSettings();
@@ -2398,7 +2781,5 @@
 		initGeneralOptionsPreview();
 		initResetHiddenNotices();
 		initNoticePanelPreview();
-		initDigestPreview();
-		initWebhookPreview();
 	});
 }());

@@ -130,6 +130,7 @@ class EDMINBOOST_ANM_Admin {
 
 		$style_deps = array();
 		if ( false !== strpos( (string) $hook_suffix, self::PAGE_SLUG . '-inbox' )
+			|| false !== strpos( (string) $hook_suffix, self::PAGE_SLUG . '-rules' )
 			|| false !== strpos( (string) $hook_suffix, self::PAGE_SLUG . '-settings' ) ) {
 			wp_enqueue_style( 'list-tables' );
 			$style_deps[] = 'list-tables';
@@ -137,6 +138,9 @@ class EDMINBOOST_ANM_Admin {
 
 		wp_enqueue_style( 'dashicons' );
 		$style_deps[] = 'dashicons';
+
+		wp_enqueue_style( 'wp-components' );
+		$style_deps[] = 'wp-components';
 
 		wp_enqueue_style(
 			'edminboost-anm-admin',
@@ -159,10 +163,12 @@ class EDMINBOOST_ANM_Admin {
 			return;
 		}
 
+		wp_enqueue_script( 'wp-components' );
+
 		wp_enqueue_script(
 			'edminboost-anm-admin',
 			EDMINBOOST_ANM_PLUGIN_URL . 'admin/js/edminboost-anm-admin.js',
-			array(),
+			array( 'wp-components', 'wp-element' ),
 			EDMINBOOST_ANM_VERSION,
 			true
 		);
@@ -192,7 +198,10 @@ class EDMINBOOST_ANM_Admin {
 			'noticePanelPositionLayouts' => $notice_panel_position_layouts,
 			'i18n'     => array(
 				'saved'           => __( 'Settings saved.', EDMINBOOST_ANM_TEXT_DOMAIN ),
-				'confirmDelete'   => __( 'Delete this rule?', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'confirmDelete'       => __( 'Are you sure you want to delete this rule?', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'confirmDeleteTitle'  => __( 'Delete rule', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'confirmDeleteButton' => _x( 'Delete', 'verb', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'cancel'              => __( 'Cancel', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'ruleSaved'       => __( 'Rule saved.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'ruleDeleted'     => __( 'Rule deleted.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'importSuccess'   => __( 'Import completed.', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -201,6 +210,7 @@ class EDMINBOOST_ANM_Admin {
 				'actionError'     => __( 'Action failed.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'createRule'      => __( 'Create New Filter Rule', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'editRule'        => __( 'Edit Filter Rule', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'rulesEmpty'      => __( 'No auto-rules yet. Add a rule or convert an inbox notice to get started.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'statusActive'    => __( 'Active', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'statusInactive'  => __( 'Inactive', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'seedSuccess'     => __( 'Added %1$d test notices to the inbox (%2$d skipped as duplicates).', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -210,6 +220,7 @@ class EDMINBOOST_ANM_Admin {
 				'viewInbox'       => __( 'View Inbox', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'convertedToRule'  => __( 'Converted to rule', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'undoConversion'   => __( 'Converted to rule. Click again to undo.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'undoSnooze'       => __( 'Snoozed. Click again to unsnooze.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'alreadyConverted' => __( 'Already converted to a rule.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'userSearchShort'  => __( 'Type at least 2 characters to search users.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'userSearchEmpty'  => __( 'No users found.', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -224,6 +235,7 @@ class EDMINBOOST_ANM_Admin {
 				'digestPreviewNoNotices'=> __( 'No intercepted notices in the inbox yet.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'digestPreviewBlocked'  => __( 'Blocked this month', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'digestPreviewRules'    => __( 'Active auto-rules', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'digestPreviewNextSendDisabled' => __( 'Enable the digest to schedule sends.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'webhookPreviewLoading' => __( 'Loading preview…', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'webhookPreviewError'   => __( 'Could not load webhook preview.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'webhookPreviewSample'  => __( 'Sample notice', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -337,7 +349,7 @@ class EDMINBOOST_ANM_Admin {
 	public static function parse_inbox_list_args( $source ) {
 		$filter  = sanitize_key( $source['filter'] ?? 'all' );
 		$search  = sanitize_text_field( $source['s'] ?? '' );
-		$page    = max( 1, (int) ( $source['paged'] ?? 1 ) );
+		$page    = max( 1, (int) ( $source['paged'] ?? $source['page'] ?? 1 ) );
 		$orderby = sanitize_key( $source['orderby'] ?? 'date' );
 		$order   = strtolower( sanitize_key( $source['order'] ?? 'desc' ) );
 
@@ -370,23 +382,103 @@ class EDMINBOOST_ANM_Admin {
 			array(
 				'filter'   => $args['filter'],
 				'search'   => $args['search'],
-				'per_page' => 9999,
+				'per_page' => 0,
 				'orderby'  => $args['orderby'],
 				'order'    => $args['order'],
 			)
 		);
 
-		$total  = count( $all_notices );
-		$offset = ( $args['page'] - 1 ) * $per_page;
+		$total       = count( $all_notices );
+		$total_pages = $total > 0 ? (int) ceil( $total / $per_page ) : 1;
+		$page        = min( max( 1, (int) $args['page'] ), $total_pages );
+		$offset      = ( $page - 1 ) * $per_page;
 
 		return array(
-			'notices'  => array_slice( $all_notices, $offset, $per_page ),
-			'total'    => $total,
-			'page'     => $args['page'],
-			'per_page' => $per_page,
-			'start'    => $total > 0 ? $offset + 1 : 0,
-			'end'      => min( $args['page'] * $per_page, $total ),
+			'notices'     => array_slice( $all_notices, $offset, $per_page ),
+			'total'       => $total,
+			'page'        => $page,
+			'per_page'    => $per_page,
+			'total_pages' => $total_pages,
+			'start'       => $total > 0 ? $offset + 1 : 0,
+			'end'         => min( $page * $per_page, $total ),
 		);
+	}
+
+	/**
+	 * Build inbox list URL preserving list state.
+	 *
+	 * @param array $list_args Arguments from parse_inbox_list_args().
+	 * @param array $overrides Query overrides.
+	 * @return string
+	 */
+	public static function get_inbox_list_url( $list_args, $overrides = array() ) {
+		$query = array_merge(
+			array(
+				'page'   => self::PAGE_SLUG . '-inbox',
+				'filter' => $list_args['filter'],
+				's'      => $list_args['search'],
+				'paged'  => $list_args['page'],
+				'orderby' => $list_args['orderby'],
+				'order'  => $list_args['order'],
+			),
+			$overrides
+		);
+
+		if ( 'all' === $query['filter'] ) {
+			unset( $query['filter'] );
+		}
+		if ( '' === $query['s'] ) {
+			unset( $query['s'] );
+		}
+		if ( $query['paged'] <= 1 ) {
+			unset( $query['paged'] );
+		}
+		if ( 'date' === $query['orderby'] && 'desc' === $query['order'] ) {
+			unset( $query['orderby'], $query['order'] );
+		}
+
+		return add_query_arg( $query, admin_url( 'admin.php' ) );
+	}
+
+	/**
+	 * Render inbox pagination controls.
+	 *
+	 * @param array $list_args List arguments.
+	 * @param array $slice     Slice from get_inbox_list_slice().
+	 * @return string
+	 */
+	public static function render_inbox_pager_html( $list_args, $slice ) {
+		$current_page = (int) ( $slice['page'] ?? 1 );
+		$total_pages  = (int) ( $slice['total_pages'] ?? 1 );
+
+		if ( $total_pages <= 1 ) {
+			return '';
+		}
+
+		ob_start();
+		?>
+		<nav class="edminboost-anm-pager" aria-label="<?php esc_attr_e( 'Inbox pagination', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">
+			<?php if ( $current_page > 1 ) : ?>
+				<a class="button edminboost-anm-inbox-page-link" href="<?php echo esc_url( self::get_inbox_list_url( $list_args, array( 'paged' => $current_page - 1 ) ) ); ?>" data-page="<?php echo esc_attr( (string) ( $current_page - 1 ) ); ?>"><?php esc_html_e( 'Previous', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></a>
+			<?php endif; ?>
+			<span class="edminboost-anm-pager__status">
+				<?php
+				echo esc_html(
+					sprintf(
+						/* translators: 1: current page, 2: total pages */
+						__( 'Page %1$d of %2$d', EDMINBOOST_ANM_TEXT_DOMAIN ),
+						$current_page,
+						$total_pages
+					)
+				);
+				?>
+			</span>
+			<?php if ( $current_page < $total_pages ) : ?>
+				<a class="button edminboost-anm-inbox-page-link" href="<?php echo esc_url( self::get_inbox_list_url( $list_args, array( 'paged' => $current_page + 1 ) ) ); ?>" data-page="<?php echo esc_attr( (string) ( $current_page + 1 ) ); ?>"><?php esc_html_e( 'Next', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></a>
+			<?php endif; ?>
+		</nav>
+		<?php
+		return (string) ob_get_clean();
 	}
 
 	/**
@@ -415,16 +507,19 @@ class EDMINBOOST_ANM_Admin {
 		$settings = EDMINBOOST_ANM_Settings::get();
 		$list_args = self::parse_inbox_list_args( wp_unslash( $_GET ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$slice     = self::get_inbox_list_slice( $list_args );
+		$list_args['page'] = $slice['page'];
 
-		$filter   = $list_args['filter'];
-		$search   = $list_args['search'];
-		$page     = $list_args['page'];
-		$orderby  = $list_args['orderby'];
-		$order    = $list_args['order'];
-		$notices  = $slice['notices'];
-		$total    = $slice['total'];
-		$per_page = $slice['per_page'];
-		$counts   = EDMINBOOST_ANM_Inbox::get_counts();
+		$filter      = $list_args['filter'];
+		$search      = $list_args['search'];
+		$page        = $slice['page'];
+		$orderby     = $list_args['orderby'];
+		$order       = $list_args['order'];
+		$inbox_pager = self::render_inbox_pager_html( $list_args, $slice );
+		$notices     = $slice['notices'];
+		$total       = $slice['total'];
+		$per_page    = $slice['per_page'];
+		$total_pages = $slice['total_pages'];
+		$counts      = EDMINBOOST_ANM_Inbox::get_counts();
 
 		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-inbox-page.php';
 	}

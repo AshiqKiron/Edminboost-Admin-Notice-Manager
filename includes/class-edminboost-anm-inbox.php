@@ -227,9 +227,14 @@ class EDMINBOOST_ANM_Inbox {
 		);
 
 		$notices  = array_values( $notices );
-		$page     = max( 1, (int) $args['page'] );
-		$per_page = max( 1, (int) $args['per_page'] );
-		$offset   = ( $page - 1 ) * $per_page;
+		$per_page = (int) $args['per_page'];
+
+		if ( $per_page <= 0 ) {
+			return $notices;
+		}
+
+		$page   = max( 1, (int) $args['page'] );
+		$offset = ( $page - 1 ) * $per_page;
 
 		return array_slice( $notices, $offset, $per_page );
 	}
@@ -322,19 +327,77 @@ class EDMINBOOST_ANM_Inbox {
 	}
 
 	/**
-	 * Snooze a notice.
+	 * Whether the notice is currently snoozed (not expired).
 	 *
-	 * @param string $id       Notice ID.
-	 * @param int    $duration Duration in seconds.
+	 * @param array $notice Notice row.
 	 * @return bool
 	 */
-	public static function snooze( $id, $duration = DAY_IN_SECONDS ) {
+	public static function is_actively_snoozed( $notice ) {
+		if ( 'snoozed' !== ( $notice['status'] ?? '' ) ) {
+			return false;
+		}
+
+		return (int) ( $notice['snoozed_until'] ?? 0 ) > time();
+	}
+
+	/**
+	 * Stored snooze duration key (1d or 7d) when actively snoozed.
+	 *
+	 * @param array $notice Notice row.
+	 * @return string Empty when not actively snoozed.
+	 */
+	public static function get_snooze_duration_key( $notice ) {
+		if ( ! self::is_actively_snoozed( $notice ) ) {
+			return '';
+		}
+
+		$key = sanitize_key( $notice['snooze_duration'] ?? '' );
+		if ( in_array( $key, array( '1d', '7d' ), true ) ) {
+			return $key;
+		}
+
+		return '1d';
+	}
+
+	/**
+	 * Snooze a notice.
+	 *
+	 * @param string $id           Notice ID.
+	 * @param int    $duration     Duration in seconds.
+	 * @param string $duration_key Stored duration slug (1d or 7d).
+	 * @return bool
+	 */
+	public static function snooze( $id, $duration = DAY_IN_SECONDS, $duration_key = '1d' ) {
+		$duration_key = '7d' === sanitize_key( $duration_key ) ? '7d' : '1d';
+		$notices      = self::get_all();
+
+		foreach ( $notices as $index => $notice ) {
+			if ( self::id_matches( $notice['id'] ?? '', $id ) ) {
+				$notices[ $index ]['status']          = 'snoozed';
+				$notices[ $index ]['snoozed_until']   = time() + (int) $duration;
+				$notices[ $index ]['snooze_duration'] = $duration_key;
+				self::save_all( $notices );
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Clear an active snooze and restore notice to new status.
+	 *
+	 * @param string $id Notice ID.
+	 * @return bool
+	 */
+	public static function unsnooze( $id ) {
 		$notices = self::get_all();
 
 		foreach ( $notices as $index => $notice ) {
 			if ( self::id_matches( $notice['id'] ?? '', $id ) ) {
-				$notices[ $index ]['status']        = 'snoozed';
-				$notices[ $index ]['snoozed_until'] = time() + (int) $duration;
+				$notices[ $index ]['status']          = 'new';
+				$notices[ $index ]['snoozed_until']   = 0;
+				$notices[ $index ]['snooze_duration'] = '';
 				self::save_all( $notices );
 				return true;
 			}

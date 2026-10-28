@@ -1,0 +1,2156 @@
+# Copyright (C) 2026 ashiquzzaman
+# This file is distributed under the GPL-3.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Edminboost - Admin Notice Manager 1.1.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/Edminboost - Admin Notice Manager\n"
+"POT-Creation-Date: 2026-10-28T20:25:39+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Bengali (Bangla) (bn_BD)\n"
+"Language: bn_BD\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: WP-CLI 2.12.0\n"
+
+#. Plugin Name of the plugin
+#: edminboost-admin-notice-manager.php
+msgid "Edminboost - Admin Notice Manager"
+msgstr "এডমিনবুস্ট - অ্যাডমিন নোটিশ ম্যানেজার"
+
+#. Plugin URI of the plugin
+#: edminboost-admin-notice-manager.php
+msgid "https://asphaltthemes.com/edminboost/admin-notice-manager"
+msgstr "https://asphaltthemes.com/edminboost/admin-notice-manager"
+
+#. Description of the plugin
+#: edminboost-admin-notice-manager.php
+msgid ""
+"Manage, organize, and control WordPress admin notices from one central "
+"dashboard."
+msgstr ""
+"একটি কেন্দ্রীয় ড্যাশবোর্ড থেকে ওয়ার্ডপ্রেস অ্যাডমিন নোটিশ পরিচালনা, সংগঠিত"
+" এবং নিয়ন্ত্রণ করুন ।"
+
+#. Author of the plugin
+#: edminboost-admin-notice-manager.php
+msgid "ashiquzzaman"
+msgstr "ashiquzzaman"
+
+#. Author URI of the plugin
+#: edminboost-admin-notice-manager.php
+msgid "https://asphaltthemes.com"
+msgstr "https://asphaltthemes.com"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:27
+msgid "Edminboost"
+msgstr "Edminboost"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:31
+msgid "Quick Status:"
+msgstr "দ্রুত অবস্থা:"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:33
+msgid "Toggle notice interception"
+msgstr "নোটিফিকেশন ইন্টারসেপশন টগল করুন"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:39
+#: includes/class-edminboost-anm-admin.php:204
+msgid "Active"
+msgstr "সক্রিয়"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:41
+#: includes/class-edminboost-anm-admin.php:205
+msgid "Inactive"
+msgstr "নিষ্ক্রিয় "
+
+#: admin/partials/edminboost-anm-dashboard-page.php:50
+msgid "Total Notices Blocked (This Month)"
+msgstr "মোট বিজ্ঞপ্তি ব্লক করা হয়েছে (এই মাসে)"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:54
+msgid "Top Spammer Plugin"
+msgstr "শীর্ষ স্প্যামার প্লাগইন"
+
+#. translators: %d: hit count
+#: admin/partials/edminboost-anm-dashboard-page.php:61
+#: admin/partials/edminboost-anm-rules-page.php:48
+#, php-format
+msgid "%d hits"
+msgstr "%d টি হিট"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:69
+msgid "Active Auto-Rules"
+msgstr "অ্যাক্টিভ অটো-রুলস"
+
+#. translators: %d: number of active rules
+#: admin/partials/edminboost-anm-dashboard-page.php:75
+#, php-format
+msgid "%d Active"
+msgstr "%d সক্রিয়"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:87
+msgid "One-Click \"Kill All Upsells\" Preset"
+msgstr "এক-ক্লিক করুন \"সমস্ত আপসেলগুলি হত্যা করুন\" প্রিসেট"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:89
+msgid "Toggle upsell preset"
+msgstr "আপসেল প্রিসেট টগল করুন"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:93
+msgid ""
+"Toggle ON to instantly suppress standard review requests, Black Friday nags,"
+" and promotional upsells."
+msgstr ""
+"অবিলম্বে স্ট্যান্ডার্ড রিভিউ রিকোয়েস্ট, ব্ল্যাক ফ্রাইডে নাগ এবং প্রোমোশনাল "
+"আপসেলগুলি দমন করতে টগল করুন ।"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:95
+msgid "Status:"
+msgstr "স্ট্যাটাস:"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:97
+msgid "ENABLED"
+msgstr "সক্রিয়"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:97
+msgid "DISABLED"
+msgstr "প্রতিবন্ধী"
+
+#. translators: %d: phrase count
+#: admin/partials/edminboost-anm-dashboard-page.php:104
+#, php-format
+msgid "Active blacklist: %d phrases"
+msgstr "সক্রিয় ব্ল্যাকলিস্ট: %d বাক্যাংশ"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:117
+msgid "Debug: Generate Test Notices"
+msgstr "ডিবাগ: পরীক্ষার বিজ্ঞপ্তি তৈরি করুন"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:118
+msgid "WP_DEBUG"
+msgstr "ডিবাগ করুন (_d)"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:120
+msgid ""
+"Create sample notices for each inbox type (critical, warning, success, info,"
+" upsell). This panel is hidden when WP_DEBUG is off."
+msgstr ""
+"প্রতিটি ইনবক্স টাইপের জন্য নমুনা বিজ্ঞপ্তি তৈরি করুন (সমালোচনামূলক, সতর্কতা,"
+" সাফল্য, তথ্য, আপসেল) । WP_DEBUG বন্ধ থাকলে এই প্যানেলটি লুকানো থাকে ।"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:123
+msgid "Error"
+msgstr "ত্রুটি"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:124
+msgid "Warning"
+msgstr "সতর্কতা"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:125
+#: includes/class-edminboost-anm-inbox.php:421
+msgid "Success"
+msgstr "সফল"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:126
+#: includes/class-edminboost-anm-inbox.php:422
+msgid "Info"
+msgstr "তথ্য"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:127
+msgid "Upsell"
+msgstr "আপসেল"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:131
+msgid "Notice levels"
+msgstr "নোটিসের স্তর"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:150
+msgid "Add to Inbox"
+msgstr "ইনবক্সে যোগ করুন"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:153
+msgid "Trigger Live Notices"
+msgstr "ট্রিগার লাইভ নোটিশ"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:157
+msgid ""
+"“Add to Inbox” seeds the Notice Inbox directly. “Trigger Live Notices” "
+"redirects to the Dashboard home, fires real admin_notices output, and "
+"exercises PHP/JS interception (requires Quick Status to be active)."
+msgstr ""
+"\"ইনবক্সে যোগ করুন\" সরাসরি নোটিস ইনবক্সে বীজ বপন করে । \"ট্রিগার লাইভ "
+"নোটিশ\" ড্যাশবোর্ডের বাড়িতে পুনঃনির্দেশ করে, আসল অ্যাডমিন_নোটিশ আউটপুটকে "
+"আগুন দেয় এবং পিএইচপি/জেএস ইন্টারসেপশন অনুশীলন করে (সক্রিয় হওয়ার জন্য "
+"দ্রুত স্থিতি প্রয়োজন) ।"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:165
+msgid "Plugin Spam Score (Top 5)"
+msgstr "প্লাগইন স্প্যাম স্কোর (শীর্ষ 5)"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:172
+#: includes/class-edminboost-anm-inbox.php:98
+#: includes/class-edminboost-anm-interceptor.php:313
+msgid "Unknown"
+msgstr "অজানা"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:184
+msgid "No intercepted notices yet. Stats will appear as notices are captured."
+msgstr ""
+"এখনও কোনও বাধা বিজ্ঞপ্তি নেই । বিজ্ঞপ্তিগুলি ক্যাপচার হওয়ার সাথে সাথে "
+"পরিসংখ্যানগুলি প্রদর্শিত হবে ।"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:193
+msgid "Live Blocked Feed"
+msgstr "লাইভ ব্লক করা ফিড"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:195
+msgid "View more"
+msgstr "আরও দেখুন"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:199
+msgid "Recent blocked notices"
+msgstr "সাম্প্রতিক অবরুদ্ধ বিজ্ঞপ্তি"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:211
+msgid "No recent blocked notices."
+msgstr "কোনও সাম্প্রতিক অবরুদ্ধ বিজ্ঞপ্তি নেই ।"
+
+#: admin/partials/edminboost-anm-inbox-page.php:58
+msgid "All"
+msgstr "সব"
+
+#: admin/partials/edminboost-anm-inbox-page.php:59
+msgid "Critical"
+msgstr "জটিল"
+
+#: admin/partials/edminboost-anm-inbox-page.php:60
+msgid "Snoozed"
+msgstr "স্নুজ করা হয়েছে"
+
+#: admin/partials/edminboost-anm-inbox-page.php:61
+msgid "Upsells"
+msgstr "আপসেল"
+
+#: admin/partials/edminboost-anm-inbox-page.php:81
+msgid "Search notices"
+msgstr "অনুসন্ধান বিজ্ঞপ্তি"
+
+#: admin/partials/edminboost-anm-inbox-page.php:82
+msgid "Search notices…"
+msgstr "অনুসন্ধান বিজ্ঞপ্তি..."
+
+#: admin/partials/edminboost-anm-inbox-page.php:83
+msgid "Search"
+msgstr "অনুসন্ধান করুন"
+
+#: admin/partials/edminboost-anm-inbox-page.php:87
+msgid "Inbox filters"
+msgstr "ইনবক্স ফিল্টার"
+
+#: admin/partials/edminboost-anm-inbox-page.php:113
+#: admin/partials/edminboost-anm-inbox-page.php:127
+msgid "Select all"
+msgstr "সবগুলি নির্বাচন করুন "
+
+#: admin/partials/edminboost-anm-inbox-page.php:115
+#: admin/partials/edminboost-anm-inbox-page.php:129
+#: admin/partials/edminboost-anm-rules-page.php:90
+#: admin/partials/edminboost-anm-rules-page.php:115
+msgid "Source Plugin"
+msgstr "সোর্স প্লাগইন"
+
+#: admin/partials/edminboost-anm-inbox-page.php:116
+#: admin/partials/edminboost-anm-inbox-page.php:130
+#: admin/partials/edminboost-anm-rules-page.php:91
+#: admin/partials/edminboost-anm-rules-page.php:116
+msgid "Notice Message Preview"
+msgstr "নোটিস মেসেজ প্রিভিউ"
+
+#: admin/partials/edminboost-anm-inbox-page.php:117
+#: admin/partials/edminboost-anm-inbox-page.php:131
+#: admin/partials/edminboost-anm-rules-page.php:92
+#: admin/partials/edminboost-anm-rules-page.php:117
+msgid "Type"
+msgstr "ধরন "
+
+#: admin/partials/edminboost-anm-inbox-page.php:119
+#: admin/partials/edminboost-anm-inbox-page.php:133
+#: admin/partials/edminboost-anm-rules-page.php:93
+#: admin/partials/edminboost-anm-rules-page.php:118
+#: admin/partials/edminboost-anm-settings-page.php:784
+#: admin/partials/edminboost-anm-settings-page.php:801
+msgid "Actions"
+msgstr "পদক্ষেপগুলি"
+
+#: admin/partials/edminboost-anm-inbox-page.php:139
+msgid "No notices in the inbox yet. Intercepted notices will appear here."
+msgstr ""
+"ইনবক্সে এখনও কোনও বিজ্ঞপ্তি নেই । ইন্টারসেপ্ট করা বিজ্ঞপ্তিগুলি এখানে দেখা "
+"যাবে ।"
+
+#: admin/partials/edminboost-anm-inbox-page.php:146
+msgid "Bulk actions"
+msgstr "বিপুল কর্ম"
+
+#: admin/partials/edminboost-anm-inbox-page.php:148
+msgid "Bulk Actions"
+msgstr "বিপুল কর্ম"
+
+#: admin/partials/edminboost-anm-inbox-page.php:149
+msgid "Mark as Read"
+msgstr "পঠিত হিসেবে চিহ্নিত করুন"
+
+#: admin/partials/edminboost-anm-inbox-page.php:150
+#: admin/partials/edminboost-anm-inbox-table-rows.php:27
+msgid "Snooze"
+msgstr "সাময়িক ঘুমন্ত"
+
+#: admin/partials/edminboost-anm-inbox-page.php:151
+msgid "Archive"
+msgstr "আর্কাইভ"
+
+#: admin/partials/edminboost-anm-inbox-page.php:153
+msgid "Apply"
+msgstr "আবেদন"
+
+#. translators: 1: start number, 2: end number, 3: total count
+#: admin/partials/edminboost-anm-inbox-page.php:160
+#: includes/class-edminboost-anm-ajax.php:234
+#, php-format
+msgid "Showing %1$d–%2$d of %3$d notices"
+msgstr "%1$d–%2$d এর %3$d নোটিশ দেখানো হচ্ছে"
+
+#: admin/partials/edminboost-anm-inbox-table-rows.php:19
+msgid "Select notice"
+msgstr "বিজ্ঞপ্তি নির্বাচন করুন"
+
+#: admin/partials/edminboost-anm-inbox-table-rows.php:25
+msgid "Read"
+msgstr "পড়া"
+
+#: admin/partials/edminboost-anm-inbox-table-rows.php:29
+msgid "1 Day"
+msgstr "1 দিন"
+
+#: admin/partials/edminboost-anm-inbox-table-rows.php:30
+msgid "7 Days"
+msgstr "7 দিন"
+
+#: admin/partials/edminboost-anm-inbox-table-rows.php:33
+#: admin/partials/edminboost-anm-rules-page.php:106
+#: includes/class-edminboost-anm-admin.php:212
+msgid "Converted to rule. Click again to undo."
+msgstr "শাসনে রূপান্তরিত হয়েছে । আবার পূর্বাবস্থায় ক্লিক করুন ।"
+
+#: admin/partials/edminboost-anm-inbox-table-rows.php:33
+#: admin/partials/edminboost-anm-rules-page.php:107
+msgid "Convert to Rule"
+msgstr "রুলে রূপান্তর করুন"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:26
+msgid "Admin notice inbox"
+msgstr "অ্যাডমিন নোটিফিকেশন ইনবক্স"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:28
+#: includes/class-edminboost-anm-admin.php:232
+msgid "Admin notices"
+msgstr "অ্যাডমিন নোটিশ"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:29
+#: includes/class-edminboost-anm-admin.php:245
+msgid "Close panel"
+msgstr "প্যানেল বন্ধ করুন"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:31
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:34
+msgid "No intercepted notices yet. Browse wp-admin to capture nags here."
+msgstr ""
+"এখনও কোনও বাধা বিজ্ঞপ্তি নেই । এখানে nags ক্যাপচার করতে wp-admin ব্রাউজ করুন"
+" ।"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:83
+#: includes/class-edminboost-anm-admin.php:246
+msgid "Dismiss from panel"
+msgstr "প্যানেল থেকে খারিজ করুন"
+
+#. translators: %s: formatted date/time
+#. translators: %s: sample date/time for panel preview only
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:94
+#: includes/class-edminboost-anm-admin.php:249
+#, php-format
+msgid "First logged: %s"
+msgstr "প্রথমে লগ ইন করা হয়েছে: %s"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:102
+#: includes/class-edminboost-anm-admin.php:252
+msgid "Display notice as normal"
+msgstr "সাধারণ হিসাবে বিজ্ঞপ্তি প্রদর্শন করুন"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:106
+#: includes/class-edminboost-anm-admin.php:253
+#: includes/class-edminboost-anm-notices.php:121
+#: includes/class-edminboost-anm-notices.php:167
+msgid "Hide for me"
+msgstr "আমার কাছ থেকে গোপন রাখুন"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:110
+#: includes/class-edminboost-anm-admin.php:254
+#: includes/class-edminboost-anm-notices.php:122
+#: includes/class-edminboost-anm-notices.php:168
+msgid "Hide for all"
+msgstr "সবার জন্য লুকান"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:119
+#: includes/class-edminboost-anm-admin.php:233
+msgid "See all notifications"
+msgstr "সবগুলি বিজ্ঞপ্তি"
+
+#: admin/partials/edminboost-anm-rules-page.php:20
+msgid "Auto-Rules & Keyword Filtering"
+msgstr "অটো-রুলস এবং কীওয়ার্ড ফিল্টারিং"
+
+#: admin/partials/edminboost-anm-rules-page.php:21
+msgid "+ Add New Rule"
+msgstr "+ নতুন নিয়ম যোগ করুন"
+
+#: admin/partials/edminboost-anm-rules-page.php:29
+msgid "Rule Name / Pattern"
+msgstr "নিয়মের নাম / প্যাটার্ন"
+
+#: admin/partials/edminboost-anm-rules-page.php:30
+msgid "Target Type"
+msgstr "টার্গেটের ধরন"
+
+#: admin/partials/edminboost-anm-rules-page.php:31
+msgid "Hit Count"
+msgstr "হিট কাউন্ট"
+
+#: admin/partials/edminboost-anm-rules-page.php:32
+msgid "Status / Actions"
+msgstr "স্ট্যাটাস / অ্যাকশন"
+
+#: admin/partials/edminboost-anm-rules-page.php:56
+msgid "Toggle rule"
+msgstr "নিয়ম টগল করুন"
+
+#: admin/partials/edminboost-anm-rules-page.php:65
+msgid "Edit"
+msgstr "এডিট করুন"
+
+#: admin/partials/edminboost-anm-rules-page.php:66
+msgid "Delete"
+msgstr "মুছুন"
+
+#: admin/partials/edminboost-anm-rules-page.php:74
+msgid ""
+"No auto-rules yet. Add a rule or convert an inbox notice to get started."
+msgstr ""
+"এখনও কোনও অটো-রুল নেই । শুরু করার জন্য একটি নিয়ম যোগ করুন বা একটি ইনবক্স "
+"বিজ্ঞপ্তি রূপান্তর করুন ।"
+
+#: admin/partials/edminboost-anm-rules-page.php:82
+msgid "Default WordPress Notices"
+msgstr "ডিফল্ট ওয়ার্ডপ্রেস বিজ্ঞপ্তি"
+
+#: admin/partials/edminboost-anm-rules-page.php:83
+msgid ""
+"Common core admin notices you can convert into filter rules with one click."
+msgstr ""
+"সাধারণ কোর অ্যাডমিন নোটিশ আপনি এক ক্লিকে ফিল্টার নিয়মে রূপান্তর করতে পারেন "
+"।"
+
+#: admin/partials/edminboost-anm-rules-page.php:102
+#: includes/class-edminboost-anm-interceptor.php:350
+#: includes/class-edminboost-anm-rules.php:583
+#: includes/class-edminboost-anm-rules.php:591
+#: includes/class-edminboost-anm-rules.php:599
+#: includes/class-edminboost-anm-rules.php:607
+#: includes/class-edminboost-anm-rules.php:615
+#: includes/class-edminboost-anm-rules.php:623
+msgid "WordPress Core"
+msgstr "ওয়ার্ডপ্রেস কোর"
+
+#: admin/partials/edminboost-anm-rules-page.php:128
+#: includes/class-edminboost-anm-admin.php:202
+msgid "Create New Filter Rule"
+msgstr "নতুন ফিল্টার তৈরি করুন"
+
+#: admin/partials/edminboost-anm-rules-page.php:132
+msgid "Rule Name:"
+msgstr "নিয়মের নাম"
+
+#: admin/partials/edminboost-anm-rules-page.php:133
+msgid "e.g., Hide Feedback Nags"
+msgstr "যেমন, ফিডব্যাক নাগগুলি লুকান"
+
+#: admin/partials/edminboost-anm-rules-page.php:136
+msgid "Match Type:"
+msgstr "ম্যাচ টাইপ"
+
+#: admin/partials/edminboost-anm-rules-page.php:137
+msgid "Keyword Match"
+msgstr "কীওয়ার্ড ম্যাচ"
+
+#: admin/partials/edminboost-anm-rules-page.php:138
+msgid "Regex Pattern"
+msgstr "রেজেক্স প্যাটার্ন"
+
+#: admin/partials/edminboost-anm-rules-page.php:139
+#: includes/class-edminboost-anm-rules.php:564
+msgid "CSS Selector"
+msgstr "CSS নির্বাচক"
+
+#: admin/partials/edminboost-anm-rules-page.php:142
+msgid "Match String:"
+msgstr "ম্যাচ স্ট্রিং:"
+
+#: admin/partials/edminboost-anm-rules-page.php:143
+msgid "Please rate our plugin"
+msgstr "অনুগ্রহ করে আমাদের প্লাগইনটি রেট করুন"
+
+#: admin/partials/edminboost-anm-rules-page.php:146
+msgid "Action:"
+msgstr "করণীয়:"
+
+#: admin/partials/edminboost-anm-rules-page.php:148
+msgid "Auto-Dismiss & Route to Inbox Archive"
+msgstr "ইনবক্স আর্কাইভে অটো-ডিজমিস এবং রুট"
+
+#: admin/partials/edminboost-anm-rules-page.php:149
+msgid "Auto-Dismiss Only"
+msgstr "শুধুমাত্র স্বয়ংক্রিয়ভাবে বাতিল করুন"
+
+#: admin/partials/edminboost-anm-rules-page.php:150
+msgid "Route to Inbox Only"
+msgstr "শুধুমাত্র ইনবক্সে যাওয়ার পথ"
+
+#: admin/partials/edminboost-anm-rules-page.php:154
+msgid "Save Rule"
+msgstr "নিয়ম সংরক্ষণ করুন"
+
+#: admin/partials/edminboost-anm-rules-page.php:155
+msgid "Cancel"
+msgstr "বাতিল করুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:18
+msgid "Editor"
+msgstr "সম্পাদক"
+
+#: admin/partials/edminboost-anm-settings-page.php:19
+msgid "Author"
+msgstr "লেখক"
+
+#: admin/partials/edminboost-anm-settings-page.php:20
+msgid "Shop Manager"
+msgstr "দোকান ব্যবস্থাপক"
+
+#: admin/partials/edminboost-anm-settings-page.php:21
+msgid "Administrator"
+msgstr "প্রশাসক"
+
+#: admin/partials/edminboost-anm-settings-page.php:33
+msgid "General"
+msgstr "বিবরণ"
+
+#: admin/partials/edminboost-anm-settings-page.php:34
+#: includes/class-edminboost-anm-admin.php:231
+#: includes/class-edminboost-anm-notices.php:326
+msgid "Notices"
+msgstr "নোটিশ"
+
+#: admin/partials/edminboost-anm-settings-page.php:35
+#: admin/partials/edminboost-anm-settings-page.php:371
+msgid "Access & visibility"
+msgstr "অ্যাক্সেস এবং দৃশ্যমানতা"
+
+#: admin/partials/edminboost-anm-settings-page.php:36
+#: admin/partials/edminboost-anm-settings-page.php:481
+msgid "Admin bar"
+msgstr "অ্যাডমিন বার"
+
+#: admin/partials/edminboost-anm-settings-page.php:37
+msgid "Filtering"
+msgstr "& ফরোয়ার্ড"
+
+#: admin/partials/edminboost-anm-settings-page.php:38
+msgid "Security & Shield"
+msgstr "নিরাপত্তা ও ঢাল"
+
+#: admin/partials/edminboost-anm-settings-page.php:39
+msgid "Notifications"
+msgstr "বিজ্ঞপ্তি"
+
+#: admin/partials/edminboost-anm-settings-page.php:40
+msgid "Migration & Tools"
+msgstr "মাইগ্রেশন এবং টুলস"
+
+#: admin/partials/edminboost-anm-settings-page.php:60
+#: includes/class-edminboost-anm-admin.php:71
+#: includes/class-edminboost-anm-admin.php:72
+#: includes/class-edminboost-anm-admin.php:286
+msgid "Settings"
+msgstr "সেটিংস"
+
+#: admin/partials/edminboost-anm-settings-page.php:63
+msgid "Settings sections"
+msgstr "সেটিংস বিভাগ"
+
+#: admin/partials/edminboost-anm-settings-page.php:97
+msgid ""
+"Choose how notices appear on the dashboard. Per-type rules live on the "
+"Notices tab; who is affected on Access & visibility; how to open the inbox "
+"on Admin bar."
+msgstr ""
+"ড্যাশবোর্ডে বিজ্ঞপ্তিগুলি কীভাবে প্রদর্শিত হয় তা বেছে নিন । প্রতি-টাইপের "
+"নিয়মগুলি নোটিশ ট্যাবে লাইভ; অ্যাক্সেস এবং দৃশ্যমানতায় কে প্রভাবিত হয়; "
+"অ্যাডমিন বারে ইনবক্সটি কীভাবে খুলবেন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:98
+#: admin/partials/edminboost-anm-settings-page.php:109
+msgid "Display experience"
+msgstr "অভিজ্ঞতা প্রদর্শন করুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:136
+msgid "Recommended"
+msgstr "প্রস্তাবিত"
+
+#: admin/partials/edminboost-anm-settings-page.php:145
+msgid "Advanced display options"
+msgstr "অ্যাডভান্সড ডিসপ্লে অপশন"
+
+#: admin/partials/edminboost-anm-settings-page.php:146
+msgid ""
+"Fine-grained modes for power users. Hide all suppresses every notice without"
+" inbox capture unless a rule matches first."
+msgstr ""
+"পাওয়ার ব্যবহারকারীদের জন্য সূক্ষ্ম-খাদ্যযুক্ত মোড । কোনও নিয়ম প্রথমে মেলে "
+"না এমন ইনবক্স ক্যাপচার ছাড়াই সমস্ত নোটিশকে আড়াল করুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:148
+msgid "Advanced notice display mode"
+msgstr "অ্যাডভান্সড নোটিশ ডিসপ্লে মোড"
+
+#: admin/partials/edminboost-anm-settings-page.php:168
+#: admin/partials/edminboost-anm-settings-page.php:242
+msgid "Live preview"
+msgstr "লাইভ প্রিভিউ"
+
+#: admin/partials/edminboost-anm-settings-page.php:183
+msgid ""
+"Control update nags and restore notices hidden with Hide for me or Hide for "
+"all."
+msgstr ""
+"আপডেটের ন্যাগগুলি নিয়ন্ত্রণ করুন এবং আমার জন্য লুকান বা সবার জন্য লুকান সহ "
+"লুকানো বিজ্ঞপ্তিগুলি পুনরুদ্ধার করুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:184
+msgid "Update & hidden notices"
+msgstr "আপডেট এবং লুকানো বিজ্ঞপ্তিগুলি"
+
+#: admin/partials/edminboost-anm-settings-page.php:191
+msgid ""
+"Hides plugin and theme update reminders. Safety Guard can still show urgent "
+"security alerts."
+msgstr ""
+"প্লাগইন এবং থিম আপডেট রিমাইন্ডারগুলি লুকান । সেফটি গার্ড এখনও জরুরি "
+"নিরাপত্তা সতর্কতা দেখাতে পারে ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:192
+msgid "Hide plugin & theme updates"
+msgstr "প্লাগইন এবং থিম আপডেট লুকান"
+
+#: admin/partials/edminboost-anm-settings-page.php:203
+msgid ""
+"Hides the WordPress update banner. Update anytime under Dashboard → Updates."
+msgstr ""
+"ওয়ার্ডপ্রেস আপডেট ব্যানার লুকান । ড্যাশবোর্ড আপডেটের অধীনে যে কোনও সময় → "
+"আপডেট করুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:204
+msgid "Hide WordPress update notice"
+msgstr "ওয়ার্ডপ্রেস আপডেট বিজ্ঞপ্তি লুকান"
+
+#: admin/partials/edminboost-anm-settings-page.php:215
+msgid ""
+"Brings back notices you hid from the toolbar or from actions on each notice."
+msgstr ""
+"আপনাকে টুলবার থেকে বা প্রতিটি নোটিশে অ্যাকশন থেকে লুকিয়ে রাখা বিজ্ঞপ্তিগুলি"
+" ফিরিয়ে আনবে ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:216
+msgid "Reset hidden notices"
+msgstr "লুকানো বিজ্ঞপ্তিগুলি রিসেট করুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:221
+msgid "Reset hidden notices scope"
+msgstr "লুকানো বিজ্ঞপ্তির সুযোগ রিসেট করুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:224
+msgid "Me only"
+msgstr "শুধু আমি"
+
+#: admin/partials/edminboost-anm-settings-page.php:228
+msgid "All users"
+msgstr "সমস্ত টিম ব্যবহারকারী"
+
+#: admin/partials/edminboost-anm-settings-page.php:232
+msgid "Reset"
+msgstr "রিসেট"
+
+#: admin/partials/edminboost-anm-settings-page.php:270
+msgid "Inbox"
+msgstr "ইনবক্স"
+
+#: admin/partials/edminboost-anm-settings-page.php:271
+msgid "Hide"
+msgstr "লুকান"
+
+#: admin/partials/edminboost-anm-settings-page.php:272
+msgid "Default"
+msgstr "ডিফল্ট"
+
+#: admin/partials/edminboost-anm-settings-page.php:275
+msgid "Success level notices"
+msgstr "সাফল্যের স্তরের বিজ্ঞপ্তি"
+
+#: admin/partials/edminboost-anm-settings-page.php:276
+msgid "Error level notices"
+msgstr "ত্রুটি স্তরের বিজ্ঞপ্তি"
+
+#: admin/partials/edminboost-anm-settings-page.php:277
+msgid "Warning level notices"
+msgstr "সতর্কতা স্তর বিজ্ঞপ্তি"
+
+#: admin/partials/edminboost-anm-settings-page.php:278
+msgid "Information level notices"
+msgstr "তথ্য স্তরের বিজ্ঞপ্তি"
+
+#: admin/partials/edminboost-anm-settings-page.php:283
+msgid ""
+"Used for Clean dashboard and Toolbar only experiences (and advanced Hide "
+"selected / Compact panel). Inbox hides on the dashboard and shows in the "
+"plugin panel; Hide removes everywhere; Default keeps normal WordPress "
+"behavior."
+msgstr ""
+"ক্লিন ড্যাশবোর্ড এবং টুলবারের জন্য ব্যবহৃত শুধুমাত্র অভিজ্ঞতা (এবং উন্নত "
+"লুকানো নির্বাচিত / কম্প্যাক্ট প্যানেল) । ইনবক্স ড্যাশবোর্ডে লুকায় এবং "
+"প্লাগইন প্যানেলে দেখায়; সব জায়গায় লুকায়; ডিফল্ট ওয়ার্ডপ্রেসের স্বাভাবিক"
+" আচরণ বজায় রাখে ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:286
+msgid "Notice handling"
+msgstr "নোটিশ হ্যান্ডলিং"
+
+#: admin/partials/edminboost-anm-settings-page.php:287
+msgid ""
+"Applies when General → Display experience is Clean dashboard + inbox / admin"
+" bar or Toolbar only (or matching advanced modes). Choose what happens to "
+"each notice type on the dashboard and in the admin bar panel."
+msgstr ""
+"যখন সাধারণ → প্রদর্শনের অভিজ্ঞতা শুধুমাত্র ক্লিন ড্যাশবোর্ড + ইনবক্স / "
+"অ্যাডমিন বার বা টুলবার (বা উন্নত মোডগুলির সাথে মিলে যায়) তখন প্রয়োগ হয় । "
+"ড্যাশবোর্ডে এবং অ্যাডমিন বার প্যানেলে প্রতিটি নোটিশে কী ঘটে তা চয়ন করুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:288
+msgid "Standard notices (severity levels)"
+msgstr "স্ট্যান্ডার্ড নোটিশ (তীব্রতার স্তর)"
+
+#: admin/partials/edminboost-anm-settings-page.php:310
+msgid "Non-standard notices"
+msgstr "অ-মানক বিজ্ঞপ্তি"
+
+#: admin/partials/edminboost-anm-settings-page.php:311
+msgid ""
+"Notices from plugins and themes without a success, error, warning, or info "
+"class."
+msgstr ""
+"কোনও সাফল্য, ত্রুটি, সতর্কতা বা তথ্য ক্লাস ছাড়াই প্লাগইন এবং থিম থেকে "
+"বিজ্ঞপ্তি ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:316
+msgid "No level notices"
+msgstr "কোনও স্তরের বিজ্ঞপ্তি নেই"
+
+#: admin/partials/edminboost-anm-settings-page.php:328
+msgid ""
+"Skip interception for notices matching these jQuery-compatible selectors "
+"(comma-separated)."
+msgstr ""
+"এই jQuery- সামঞ্জস্যপূর্ণ নির্বাচকদের (কমা-বিচ্ছিন্ন) সাথে মিলে যাওয়া "
+"নোটিশের জন্য ইন্টারসেপশন এড়িয়ে যান ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:329
+msgid "CSS ignore selectors"
+msgstr "CSS নির্বাচকদের উপেক্ষা করে"
+
+#: admin/partials/edminboost-anm-settings-page.php:364
+msgid "Hide notifications from all users"
+msgstr "সমস্ত ব্যবহারকারীর কাছ থেকে বিজ্ঞপ্তিগুলি লুকান"
+
+#: admin/partials/edminboost-anm-settings-page.php:365
+msgid "Hide notifications only from these users"
+msgstr "শুধুমাত্র এই ব্যবহারকারীদের কাছ থেকে বিজ্ঞপ্তিগুলি লুকান"
+
+#: admin/partials/edminboost-anm-settings-page.php:366
+msgid "Hide notifications to all users but not these"
+msgstr "সমস্ত ব্যবহারকারীর কাছে বিজ্ঞপ্তিগুলি লুকান কিন্তু এগুলি নয়"
+
+#: admin/partials/edminboost-anm-settings-page.php:368
+msgid ""
+"Whether users with this role still see intercepted notices on the dashboard."
+msgstr ""
+"এই ভূমিকার ব্যবহারকারীরা এখনও ড্যাশবোর্ডে বাধা বিজ্ঞপ্তিগুলি দেখতে পান কিনা "
+"।"
+
+#: admin/partials/edminboost-anm-settings-page.php:372
+msgid ""
+"Control which roles and individual accounts are affected by notice hiding. "
+"Role rules apply first; user rules refine who still gets interception."
+msgstr ""
+"কোন ভূমিকা এবং পৃথক অ্যাকাউন্টগুলি নোটিশ লুকানোর দ্বারা প্রভাবিত হয় তা "
+"নিয়ন্ত্রণ করুন । ভূমিকার নিয়মগুলি প্রথমে প্রয়োগ করা হয়; ব্যবহারকারীর "
+"নিয়মগুলি সংশোধন করে যে এখনও বাধা পায় ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:373
+msgid "By role (ACL)"
+msgstr "ভূমিকা অনুযায়ী (ACL)"
+
+#: admin/partials/edminboost-anm-settings-page.php:388
+msgid "Display notifications"
+msgstr "বিজ্ঞপ্তি প্রদর্শন"
+
+#: admin/partials/edminboost-anm-settings-page.php:389
+msgid "Do not display notifications"
+msgstr "বিজ্ঞপ্তি প্রদর্শন করবেন না"
+
+#: admin/partials/edminboost-anm-settings-page.php:395
+msgid "By user account"
+msgstr "ব্যবহারকারীর অ্যাকাউন্ট"
+
+#: admin/partials/edminboost-anm-settings-page.php:399
+msgid ""
+"Refine notice hiding per user account. Role ACL applies first; these options"
+" limit which accounts are affected."
+msgstr ""
+"ইউজার অ্যাকাউন্ট অনুযায়ী নোটিস লুকানোর পরিমার্জন করুন । ভূমিকা এসিএল প্রথমে"
+" প্রযোজ্য; এই বিকল্পগুলির সীমা যা অ্যাকাউন্টগুলি প্রভাবিত হয় ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:400
+#: admin/partials/edminboost-anm-settings-page.php:404
+msgid "Visibility"
+msgstr "দৃশ্যমানতা"
+
+#: admin/partials/edminboost-anm-settings-page.php:433
+#: includes/class-edminboost-anm-admin.php:216
+msgid "Remove user"
+msgstr "ব্যবহারকারীকে সরান"
+
+#: admin/partials/edminboost-anm-settings-page.php:446
+msgid "select user(s)"
+msgstr "ব্যবহারকারী(দের) নির্বাচন করুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:448
+msgid "Search users"
+msgstr "ব্যবহারকারীদের অনুসন্ধান করুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:484
+msgid "Admin bar panel"
+msgstr "অ্যাডমিন বার প্যানেল"
+
+#: admin/partials/edminboost-anm-settings-page.php:486
+msgid ""
+"Adds a WordPress admin bar entry so users can open captured notices without "
+"visiting the Inbox."
+msgstr ""
+"একটি ওয়ার্ডপ্রেস অ্যাডমিন বার এন্ট্রি যোগ করুন যাতে ব্যবহারকারীরা ইনবক্সে "
+"না গিয়ে ক্যাপচার করা বিজ্ঞপ্তিগুলি খুলতে পারেন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:487
+msgid "Configure how captured notices appear in the WordPress admin bar."
+msgstr ""
+"কীভাবে ক্যাপচার করা বিজ্ঞপ্তিগুলি ওয়ার্ডপ্রেস অ্যাডমিন বারে প্রদর্শিত হয় "
+"তা কনফিগার করুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:492
+msgid ""
+"Choose how the admin bar entry looks: text link, bell icon, or a dropdown "
+"panel with recent inbox notices."
+msgstr ""
+"অ্যাডমিন বার এন্ট্রি দেখতে কেমন হবে তা বেছে নিন: টেক্সট লিঙ্ক, বেল আইকন, বা "
+"সাম্প্রতিক ইনবক্স বিজ্ঞপ্তি সহ একটি ড্রপডাউন প্যানেল ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:493
+msgid "Panel style"
+msgstr "প্যানেলের স্টাইল"
+
+#: admin/partials/edminboost-anm-settings-page.php:505
+msgid ""
+"How unread notices appear on the bell icon for bell and dropdown panel "
+"styles."
+msgstr ""
+"ঘণ্টা এবং ড্রপডাউন প্যানেল শৈলীর জন্য ঘণ্টা আইকনে কীভাবে অপঠিত বিজ্ঞপ্তি "
+"প্রদর্শিত হয় ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:506
+msgid "Unread indicator"
+msgstr "অপঠিত ইন্ডিকেটর"
+
+#: admin/partials/edminboost-anm-settings-page.php:518
+msgid ""
+"Colors apply to the bell badge, Howdy dot, dropdown count pill, and footer "
+"links."
+msgstr ""
+"বেল ব্যাজ, হাউডি ডট, ড্রপডাউন কাউন্ট পিল এবং ফুটার লিঙ্কগুলিতে রঙ প্রযোজ্য ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:519
+#: admin/partials/edminboost-anm-settings-page.php:523
+msgid "Panel colors"
+msgstr "প্যানেলের রং"
+
+#: admin/partials/edminboost-anm-settings-page.php:525
+msgid "Dot / badge"
+msgstr "বিন্দু / ব্যাজ"
+
+#: admin/partials/edminboost-anm-settings-page.php:529
+msgid "Badge number text"
+msgstr "ব্যাজ নম্বর টেক্সট"
+
+#: admin/partials/edminboost-anm-settings-page.php:533
+msgid "Accent (count pill & links)"
+msgstr "অ্যাকসেন্ট (কাউন্ট পিল এবং লিঙ্ক)"
+
+#: admin/partials/edminboost-anm-settings-page.php:537
+msgid "Link hover"
+msgstr "লিঙ্ক হোভার"
+
+#: admin/partials/edminboost-anm-settings-page.php:541
+msgid "Open bell highlight"
+msgstr "বেল হাইলাইট খুলুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:549
+msgid ""
+"Choose where the panel appears in the WordPress admin bar — left cluster, "
+"top-right area, or beside the profile menu."
+msgstr ""
+"প্যানেলটি ওয়ার্ডপ্রেস অ্যাডমিন বারে — বাম ক্লাস্টার, উপরের-ডান অঞ্চল বা "
+"প্রোফাইল মেনুর পাশে কোথায় দেখা যাবে তা বেছে নিন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:550
+msgid "Panel position"
+msgstr "প্যানেলের অবস্থান"
+
+#: admin/partials/edminboost-anm-settings-page.php:564
+msgid "Panel preview"
+msgstr "প্যানেলের পূর্বরূপ"
+
+#: admin/partials/edminboost-anm-settings-page.php:565
+msgid ""
+"Updates as you change style, position, badge, and colors. Sample notices "
+"shown for layout only."
+msgstr ""
+"আপনি স্টাইল, অবস্থান, ব্যাজ এবং রঙ পরিবর্তন করার সাথে সাথে আপডেটগুলি । নমুনা"
+" বিজ্ঞপ্তি শুধুমাত্র লেআউটের জন্য দেখানো হয়েছে ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:582
+msgid "Upsell blacklist"
+msgstr "আপসেল ব্ল্যাকলিস্ট"
+
+#: admin/partials/edminboost-anm-settings-page.php:583
+msgid ""
+"Suppress review requests, promotional nags, and upsell notices that match "
+"these phrases."
+msgstr ""
+"রিভিউ রিকোয়েস্ট, প্রমোশনাল ন্যাগ এবং আপসেল নোটিশগুলি দমন করুন যা এই "
+"বাক্যাংশগুলির সাথে মেলে ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:587
+msgid ""
+"Suppress review requests, promotional nags, and upsell notices that match "
+"built-in and custom phrases."
+msgstr ""
+"রিভিউ রিকোয়েস্ট, প্রোমোশনাল ন্যাগ এবং বিল্ট-ইন এবং কাস্টম বাক্যাংশের সাথে "
+"মেলে এমন আপসেল নোটিশ দমন করুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:588
+msgid "Upsell preset"
+msgstr "আপসেল প্রিসেট"
+
+#: admin/partials/edminboost-anm-settings-page.php:593
+msgid "Enable \"Kill All Upsells\" preset"
+msgstr "\"সমস্ত আপসেলগুলি হত্যা করুন\" প্রিসেট সক্ষম করুন"
+
+#. translators: %d: built-in phrase count
+#: admin/partials/edminboost-anm-settings-page.php:603
+#, php-format
+msgid ""
+"One phrase per line. %d built-in phrases are always active; duplicates are "
+"ignored."
+msgstr ""
+"প্রতি লাইনে একটি বাক্যাংশ । %d অন্তর্নির্মিত বাক্যাংশ সবসময় সক্রিয়; সদৃশ "
+"উপেক্ষা করা হয় ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:608
+msgid "Custom phrases"
+msgstr "কাস্টম বাক্যাংশ"
+
+#: admin/partials/edminboost-anm-settings-page.php:611
+msgid "One phrase per line, e.g.&#10;try our pro version&#10;limited offer"
+msgstr ""
+"প্রতি লাইনে একটি বাক্যাংশ, যেমন&#10;আমাদের প্রো সংস্করণ সীমিত অফারটি ব্যবহার"
+" করে দেখুন&#10;"
+
+#. translators: %d: custom phrase count
+#: admin/partials/edminboost-anm-settings-page.php:618
+#, php-format
+msgid "You have %d custom phrase(s)."
+msgstr "আপনার কাছে %d টি কাস্টম ফ্রেজ(গুলি) রয়েছে ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:631
+msgid "Spam words & whitelist"
+msgstr "স্প্যাম শব্দ এবং হোয়াইটলিস্ট"
+
+#: admin/partials/edminboost-anm-settings-page.php:635
+msgid ""
+"Notices containing any of these words (comma-separated) will not be shown on"
+" the dashboard."
+msgstr ""
+"এই শব্দগুলির মধ্যে যে কোনও একটি (কমা-বিচ্ছিন্ন) থাকা বিজ্ঞপ্তিগুলি "
+"ড্যাশবোর্ডে প্রদর্শিত হবে না ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:636
+#: admin/partials/edminboost-anm-settings-page.php:639
+msgid "Spam words"
+msgstr "স্প্যাম শব্দ"
+
+#: admin/partials/edminboost-anm-settings-page.php:645
+msgid "e.g. limited offer, buy now, rate us"
+msgstr "যেমন সীমিত অফার, এখনই কিনুন, আমাদের রেট দিন"
+
+#: admin/partials/edminboost-anm-settings-page.php:647
+#: admin/partials/edminboost-anm-settings-page.php:664
+msgid "Enter words separated by commas."
+msgstr "কমা দ্বারা পৃথক শব্দ লিখুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:652
+msgid ""
+"Notices with any whitelist word stay on screen and are not intercepted by "
+"this plugin."
+msgstr ""
+"যে কোনও হোয়াইটলিস্ট শব্দযুক্ত বিজ্ঞপ্তিগুলি স্ক্রিনে থাকে এবং এই প্লাগইন "
+"দ্বারা বাধা দেওয়া হয় না ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:653
+#: admin/partials/edminboost-anm-settings-page.php:656
+msgid "Whitelist"
+msgstr "পরিচ্ছন্ন তলিকা"
+
+#: admin/partials/edminboost-anm-settings-page.php:662
+msgid "e.g. security update, action required"
+msgstr "যেমন নিরাপত্তা আপডেট, প্রয়োজনীয় পদক্ষেপ"
+
+#: admin/partials/edminboost-anm-settings-page.php:680
+msgid "Core Safety & Client Shield"
+msgstr "কোর সেফটি এবং ক্লায়েন্ট শিল্ড"
+
+#: admin/partials/edminboost-anm-settings-page.php:685
+msgid "Critical Safety Guard"
+msgstr "ক্রিটিক্যাল সেফটি গার্ড"
+
+#: admin/partials/edminboost-anm-settings-page.php:687
+#: admin/partials/edminboost-anm-settings-page.php:691
+msgid ""
+"Protect WordPress core security alerts, PHP fatal errors, and SSL warnings "
+"from accidental filtering."
+msgstr ""
+"দুর্ঘটনাক্রমে ফিল্টারিং থেকে ওয়ার্ডপ্রেসের মূল সুরক্ষা সতর্কতা, পিএইচপি "
+"মারাত্মক ত্রুটি এবং এসএসএল সতর্কতা রক্ষা করুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:692
+msgid "Safety guard"
+msgstr "নিরাপত্তা প্রহরী"
+
+#: admin/partials/edminboost-anm-settings-page.php:697
+msgid "Enable strict protection"
+msgstr "কঠোর সুরক্ষা সক্ষম করুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:701
+msgid "ENABLED (Strict Protection)"
+msgstr "সক্রিয় (কঠোর সুরক্ষা)"
+
+#: admin/partials/edminboost-anm-settings-page.php:711
+msgid "Client Shield Mode"
+msgstr "ক্লায়েন্ট শিল্ড মোড"
+
+#: admin/partials/edminboost-anm-settings-page.php:713
+msgid ""
+"Hide all plugin/theme update notices and promotional nags from non-admin "
+"roles (Editors, Authors, Managers)."
+msgstr ""
+"নন-অ্যাডমিন ভূমিকা (সম্পাদক, লেখক, ম্যানেজার) থেকে সমস্ত প্লাগইন/থিম আপডেট "
+"বিজ্ঞপ্তি এবং প্রচারমূলক nags লুকান ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:717
+msgid ""
+"Hide plugin and theme update notices and promotional nags from selected non-"
+"admin roles."
+msgstr ""
+"নির্বাচিত অ অ্যাডমিন ভূমিকা থেকে প্লাগইন এবং থিম আপডেট বিজ্ঞপ্তি এবং "
+"প্রচারমূলক nags লুকান ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:718
+msgid "Client shield"
+msgstr "ক্লায়েন্ট শিল্ড"
+
+#: admin/partials/edminboost-anm-settings-page.php:723
+msgid "Enable Client Shield Mode"
+msgstr "ক্লায়েন্ট শিল্ড মোড সক্ষম করুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:729
+msgid ""
+"Which roles receive the Client Shield experience when shield mode is "
+"enabled."
+msgstr ""
+"ঢাল মোড সক্ষম করার সময় কোন ভূমিকাগুলি ক্লায়েন্ট শিল্ডের অভিজ্ঞতা পায় ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:730
+msgid "Roles to shield"
+msgstr "ঢালু করার ভূমিকা"
+
+#: admin/partials/edminboost-anm-settings-page.php:757
+#: admin/partials/edminboost-anm-settings-page.php:763
+msgid "Block ad redirects"
+msgstr "বিজ্ঞাপন পুনঃনির্দেশগুলি ব্লক করুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:762
+msgid ""
+"Block admin URLs that plugins open automatically after install or update "
+"(announcements, promotions, etc.)."
+msgstr ""
+"ইনস্টল বা আপডেটের পরে প্লাগইনগুলি স্বয়ংক্রিয়ভাবে খোলার জন্য অ্যাডমিন "
+"URLগুলি ব্লক করুন (ঘোষণা, প্রচার, ইত্যাদি) ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:768
+msgid "Prevent listed admin URLs from loading automatically"
+msgstr ""
+"তালিকাভুক্ত অ্যাডমিন ইউআরএলগুলি স্বয়ংক্রিয়ভাবে লোড হওয়া থেকে রোধ করুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:774
+msgid "Blocked URLs"
+msgstr "ব্লক করা ইউআরএল"
+
+#: admin/partials/edminboost-anm-settings-page.php:778
+msgid ""
+"Some plugins open a page automatically after installation or update to show "
+"announcements, promotions, or other information. Enter the URLs of those "
+"pages here to prevent them from opening automatically."
+msgstr ""
+"কিছু প্লাগইন ঘোষণা, প্রচার বা অন্যান্য তথ্য দেখানোর জন্য ইনস্টলেশন বা "
+"আপডেটের পরে স্বয়ংক্রিয়ভাবে একটি পৃষ্ঠা খোলে । স্বয়ংক্রিয়ভাবে খুলতে বাধা "
+"দিতে এই পৃষ্ঠাগুলির ইউআরএলগুলি এখানে লিখুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:783
+#: admin/partials/edminboost-anm-settings-page.php:790
+#: admin/partials/edminboost-anm-settings-page.php:791
+#: admin/partials/edminboost-anm-settings-page.php:808
+msgid "URL to block"
+msgstr "ব্লক করার জন্য URL"
+
+#: admin/partials/edminboost-anm-settings-page.php:798
+#: admin/partials/edminboost-anm-settings-page.php:814
+msgid "e.g. admin.php?page=my-plugin-welcome"
+msgstr "যেমন admin.php?page=my-plugin-welcome"
+
+#: admin/partials/edminboost-anm-settings-page.php:802
+#: admin/partials/edminboost-anm-settings-page.php:820
+msgid "Remove"
+msgstr "সরান"
+
+#: admin/partials/edminboost-anm-settings-page.php:826
+msgid "Add URL"
+msgstr "URL যোগ করুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:844
+msgid "Notifications & Digests"
+msgstr "বিজ্ঞপ্তি এবং ডাইজেস্ট"
+
+#: admin/partials/edminboost-anm-settings-page.php:849
+msgid "Weekly \"Notice Diet\" Email Digest"
+msgstr "সাপ্তাহিক \"নোটিস ডায়েট\" ইমেল ডাইজেস্ট"
+
+#: admin/partials/edminboost-anm-settings-page.php:856
+msgid ""
+"Sends a weekly plain-text email summary of silenced notices via WordPress "
+"wp_mail()."
+msgstr ""
+"ওয়ার্ডপ্রেস wp_mail() এর মাধ্যমে নীরব নোটিশের একটি সাপ্তাহিক প্লেইন-টেক্সট "
+"ইমেল সারাংশ প্রেরণ করে ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:857
+msgid "Email digest"
+msgstr "ইমেইল ডাইজেস্ট"
+
+#: admin/partials/edminboost-anm-settings-page.php:862
+msgid ""
+"Send a weekly summary report to site admins detailing silenced notices."
+msgstr ""
+"নীরব বিজ্ঞপ্তির বিশদ বিবরণ সহ সাইট প্রশাসকদের কাছে একটি সাপ্তাহিক সারসংক্ষেপ"
+" প্রতিবেদন পাঠান ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:868
+msgid "Comma-separated email addresses that receive the weekly digest."
+msgstr "কমা-বিচ্ছিন্ন ইমেল ঠিকানা যা সাপ্তাহিক ডাইজেস্ট পায় ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:869
+msgid "Recipients"
+msgstr "প্রাপক তালিকা"
+
+#: admin/partials/edminboost-anm-settings-page.php:877
+msgid "Leave blank to use the default subject line for the digest email."
+msgstr ""
+"ডাইজেস্ট ইমেলের জন্য ডিফল্ট সাবজেক্ট লাইনটি ব্যবহার করতে ফাঁকা রাখুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:878
+msgid "Email subject"
+msgstr "ইমেলের বিষয়"
+
+#. translators: %s: placeholder token
+#: admin/partials/edminboost-anm-settings-page.php:886
+#, php-format
+msgid "Leave blank for the default subject. Use %s for the site name."
+msgstr ""
+"ডিফল্ট বিষয়বস্তুর জন্য ফাঁকা রাখুন । সাইটের নামের জন্য %s ব্যবহার করুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:895
+msgid ""
+"Opening paragraph at the top of the digest. Leave blank for the default "
+"text."
+msgstr "ডাইজেস্টের শীর্ষে অনুচ্ছেদ খোলা । ডিফল্ট টেক্সটের জন্য ফাঁকা রাখুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:896
+msgid "Opening message"
+msgstr "মেসেজ খোলা হচ্ছে"
+
+#. translators: %s: placeholder token
+#: admin/partials/edminboost-anm-settings-page.php:904
+#, php-format
+msgid "Leave blank for the default opening line. Use %s for the site name."
+msgstr ""
+"ডিফল্ট ওপেনিং লাইনের জন্য ফাঁকা রাখুন । সাইটের নামের জন্য %s ব্যবহার করুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:913
+msgid ""
+"Choose whether the email includes stats, recent inbox notices, or both."
+msgstr ""
+"ইমেলটিতে পরিসংখ্যান, সাম্প্রতিক ইনবক্স বিজ্ঞপ্তি বা উভয়ই অন্তর্ভুক্ত রয়েছে"
+" কিনা তা চয়ন করুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:914
+#: admin/partials/edminboost-anm-settings-page.php:918
+msgid "Email sections"
+msgstr "ইমেল বিভাগ"
+
+#: admin/partials/edminboost-anm-settings-page.php:921
+msgid "Include monthly blocked count and active auto-rules"
+msgstr "মাসিক অবরুদ্ধ গণনা এবং সক্রিয় অটো-রুল অন্তর্ভুক্ত করুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:926
+msgid "Include recent intercepted notices from the inbox"
+msgstr "ইনবক্স থেকে সাম্প্রতিক ইন্টারসেপ্ট করা বিজ্ঞপ্তিগুলি অন্তর্ভুক্ত করুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:933
+msgid ""
+"How many inbox notices to list when the recent notices section is enabled "
+"(1–25)."
+msgstr ""
+"সাম্প্রতিক বিজ্ঞপ্তি বিভাগটি সক্ষম হলে তালিকার জন্য কতগুলি ইনবক্স নোটিশ "
+"(1–25) ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:934
+msgid "Recent notices limit"
+msgstr "সাম্প্রতিক বিজ্ঞপ্তির সীমা"
+
+#: admin/partials/edminboost-anm-settings-page.php:942
+msgid "Optional closing paragraph appended to the digest email."
+msgstr "ডাইজেস্ট ইমেলে ঐচ্ছিক ক্লোজিং অনুচ্ছেদ যুক্ত করা হয়েছে ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:943
+msgid "Closing message"
+msgstr "ক্লোজিং মেসেজ"
+
+#. translators: %s: placeholder token
+#: admin/partials/edminboost-anm-settings-page.php:951
+#, php-format
+msgid "Optional text appended to the email. Use %s for the site name."
+msgstr ""
+"ইমেলে ঐচ্ছিক টেক্সট যোগ করা হয়েছে । সাইটের নামের জন্য %s ব্যবহার করুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:963
+msgid "Email preview"
+msgstr "ইমেল প্রিভিউ"
+
+#: admin/partials/edminboost-anm-settings-page.php:964
+#: admin/partials/edminboost-anm-settings-page.php:1028
+msgid "Refresh"
+msgstr "রিফ্রেশ করুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:966
+msgid ""
+"Updates as you edit. Matches the plain-text email WordPress sends each week."
+msgstr ""
+"আপনি সম্পাদনা করার সাথে সাথে আপডেটগুলি । প্রতি সপ্তাহে ওয়ার্ডপ্রেস পাঠানো "
+"প্লেইন-টেক্সট ইমেলের সাথে মেলে ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:970
+msgid "To"
+msgstr "প্রতি"
+
+#: admin/partials/edminboost-anm-settings-page.php:974
+msgid "From"
+msgstr "থেকে"
+
+#: admin/partials/edminboost-anm-settings-page.php:990
+msgid ""
+"Opt-in: POST notice summaries to your URL when notices are captured. "
+"Disabled by default; no data is sent until enabled."
+msgstr ""
+"অপ্ট-ইন: বিজ্ঞপ্তিগুলি ক্যাপচার করা হলে আপনার URL-এ নোটিশের সারসংক্ষেপ পোস্ট"
+" করুন । ডিফল্টরূপে অক্ষম; সক্রিয় না হওয়া পর্যন্ত কোনও ডেটা প্রেরণ করা হয় "
+"না ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:991
+msgid "Webhook alerts"
+msgstr "ওয়েবহুক সতর্কতা"
+
+#: admin/partials/edminboost-anm-settings-page.php:996
+msgid "Enable webhook alert integration (opt-in external transmission)"
+msgstr ""
+"ওয়েবহুক অ্যালার্ট ইন্টিগ্রেশন সক্ষম করুন (অপ্ট-ইন এক্সটার্নাল ট্রান্সমিশন)"
+
+#: admin/partials/edminboost-anm-settings-page.php:1002
+msgid ""
+"HTTPS endpoint for JSON payloads (Slack, Discord, custom integrations)."
+msgstr ""
+"JSON পেলোডগুলির জন্য HTTPS এন্ডপয়েন্ট (স্ল্যাক, ডিসকর্ড, কাস্টম "
+"ইন্টিগ্রেশন) ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:1003
+msgid "Webhook URL"
+msgstr "ওয়েবহুক URL"
+
+#: admin/partials/edminboost-anm-settings-page.php:1011
+msgid ""
+"Plain-text alert for the JSON text field. Leave blank for the default; "
+"placeholders are listed below."
+msgstr ""
+"JSON টেক্সট ফিল্ডের জন্য প্লেইন-টেক্সট সতর্কতা । ডিফল্টের জন্য ফাঁকা রাখুন; "
+"প্লেসহোল্ডারদের নীচে তালিকাভুক্ত করা হয়েছে ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:1012
+msgid "Alert message"
+msgstr "সতর্কতা বার্তা"
+
+#: admin/partials/edminboost-anm-settings-page.php:1017
+msgid ""
+"Plain-text alert shown in the JSON `text` field (Slack/Discord). Leave blank"
+" for the default. Placeholders:"
+msgstr ""
+"JSON `টেক্সট` ক্ষেত্রে প্রদর্শিত প্লেইন-টেক্সট সতর্কতা (স্ল্যাক/ডিসকর্ড) । "
+"ডিফল্টের জন্য ফাঁকা রাখুন । প্লেসহোল্ডার:"
+
+#: admin/partials/edminboost-anm-settings-page.php:1027
+msgid "Alert preview"
+msgstr "অ্যালার্ট প্রিভিউ"
+
+#: admin/partials/edminboost-anm-settings-page.php:1030
+msgid ""
+"Updates as you edit. Placeholders are filled using your latest inbox notice "
+"or sample data."
+msgstr ""
+"আপনি সম্পাদনা করার সাথে সাথে আপডেটগুলি । প্লেস হোল্ডাররা আপনার সর্বশেষ "
+"ইনবক্স নোটিশ বা নমুনা ডেটা ব্যবহার করে পূরণ করা হয় ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:1033
+msgid "Alert text (`text` field)"
+msgstr "অ্যালার্ট টেক্সট (`টেক্সট` ফিল্ড)"
+
+#: admin/partials/edminboost-anm-settings-page.php:1035
+msgid "JSON payload"
+msgstr "JSON পেলোড"
+
+#: admin/partials/edminboost-anm-settings-page.php:1058
+msgid "Competitor Importer"
+msgstr "প্রতিযোগী আমদানিকারক"
+
+#: admin/partials/edminboost-anm-settings-page.php:1062
+msgid ""
+"Import rules from legacy Admin Notices Manager–compatible plugins detected "
+"on this site."
+msgstr ""
+"লিগ্যাসি থেকে নিয়ম আমদানি করুন অ্যাডমিন নোটিশ ম্যানেজার-সামঞ্জস্যপূর্ণ "
+"প্লাগইন এই সাইটে সনাক্ত করা হয়েছে ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:1063
+msgid "Legacy import"
+msgstr "লিগ্যাসি আমদানি"
+
+#: admin/partials/edminboost-anm-settings-page.php:1067
+msgid "Detected legacy plugin data. Click to import existing rules instantly."
+msgstr ""
+"উত্তরাধিকার প্লাগইন ডেটা সনাক্ত করা হয়েছে । অবিলম্বে বিদ্যমান নিয়মগুলি "
+"আমদানি করতে ক্লিক করুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:1070
+msgid ""
+"No legacy Admin Notices Manager data detected. You can still run the "
+"importer to seed default rules."
+msgstr ""
+"কোনও উত্তরাধিকার অ্যাডমিন নোটিশ ম্যানেজারের ডেটা সনাক্ত করা যায়নি । আপনি "
+"এখনও আমদানিকারককে বীজ ডিফল্ট নিয়মগুলিতে চালাতে পারেন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:1073
+msgid "Run One-Click Importer"
+msgstr "এক-ক্লিক আমদানিকারক চালান"
+
+#: admin/partials/edminboost-anm-settings-page.php:1079
+msgid "Agency JSON Configuration"
+msgstr "এজেন্সি JSON কনফিগারেশন"
+
+#: admin/partials/edminboost-anm-settings-page.php:1083
+msgid "Download your rules as JSON for backup or deployment to client sites."
+msgstr ""
+"ক্লায়েন্ট সাইটগুলিতে ব্যাকআপ বা স্থাপনার জন্য JSON হিসাবে আপনার নিয়মগুলি "
+"ডাউনলোড করুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:1084
+msgid "Export"
+msgstr "রপ্তানি "
+
+#: admin/partials/edminboost-anm-settings-page.php:1088
+msgid "Export Rules (JSON)"
+msgstr "এক্সপোর্ট রুলস (JSON)"
+
+#: admin/partials/edminboost-anm-settings-page.php:1094
+msgid "Upload a JSON rules file exported from this plugin or another site."
+msgstr ""
+"এই প্লাগইন বা অন্য সাইট থেকে এক্সপোর্ট করা একটি JSON নিয়ম ফাইল আপলোড করুন ।"
+
+#: admin/partials/edminboost-anm-settings-page.php:1095
+msgid "Import"
+msgstr "ইম্পোর্ট করুন"
+
+#: admin/partials/edminboost-anm-settings-page.php:1100
+msgid "Import Rules"
+msgstr "আমদানির নিয়মাবলী"
+
+#: includes/class-edminboost-anm-admin.php:33
+#: includes/class-edminboost-anm-admin.php:34
+msgid "Notice Manager"
+msgstr "নোটিশ ম্যানেজার"
+
+#: includes/class-edminboost-anm-admin.php:44
+#: includes/class-edminboost-anm-admin.php:45
+#: includes/class-edminboost-anm-admin.php:258
+msgid "Dashboard"
+msgstr "ড্যাশবোর্ড"
+
+#: includes/class-edminboost-anm-admin.php:53
+#: includes/class-edminboost-anm-admin.php:54
+msgid "Notice Inbox"
+msgstr "নোটিফিকেশন ইনবক্স"
+
+#: includes/class-edminboost-anm-admin.php:62
+#: includes/class-edminboost-anm-admin.php:63
+msgid "Auto-Rules"
+msgstr "অটো-রুলস"
+
+#: includes/class-edminboost-anm-admin.php:194
+msgid "Settings saved."
+msgstr "dssd"
+
+#: includes/class-edminboost-anm-admin.php:195
+msgid "Delete this rule?"
+msgstr "এই নিয়মটি মুছবেন?"
+
+#: includes/class-edminboost-anm-admin.php:196
+msgid "Rule saved."
+msgstr "নিয়ম সেভ করা হয়েছে ।"
+
+#: includes/class-edminboost-anm-admin.php:197
+msgid "Rule deleted."
+msgstr "নিয়ম মুছে ফেলা হয়েছে ।"
+
+#: includes/class-edminboost-anm-admin.php:198
+msgid "Import completed."
+msgstr "ইম্পোর্ট সম্পন্ন হয়েছে ।"
+
+#: includes/class-edminboost-anm-admin.php:199
+msgid "Import failed."
+msgstr "অপারেশন ব্যর্থ"
+
+#: includes/class-edminboost-anm-admin.php:200
+msgid "Action completed."
+msgstr "অ্যাকশন সম্পন্ন হয়েছে ।"
+
+#: includes/class-edminboost-anm-admin.php:201
+msgid "Action failed."
+msgstr "অ্যাকশন ব্যর্থ হয়েছে ।"
+
+#: includes/class-edminboost-anm-admin.php:203
+msgid "Edit Filter Rule"
+msgstr "ফিল্টার সম্পাদনা করুন"
+
+#: includes/class-edminboost-anm-admin.php:206
+#, php-format
+msgid "Added %1$d test notices to the inbox (%2$d skipped as duplicates)."
+msgstr ""
+"ইনবক্সে %1$d পরীক্ষার বিজ্ঞপ্তি যোগ করা হয়েছে (%2$d সদৃশ হিসাবে বাদ দেওয়া "
+"হয়েছে) ।"
+
+#: includes/class-edminboost-anm-admin.php:207
+msgid "Could not seed test notices."
+msgstr "বীজ পরীক্ষার বিজ্ঞপ্তিগুলি করা যায়নি ।"
+
+#: includes/class-edminboost-anm-admin.php:208
+msgid "Could not trigger live test notices."
+msgstr "লাইভ পরীক্ষার বিজ্ঞপ্তি ট্রিগার করা যায়নি ।"
+
+#: includes/class-edminboost-anm-admin.php:209
+msgid "Select at least one notice level."
+msgstr "কমপক্ষে একটি নোটিফিকেশন লেভেল নির্বাচন করুন ।"
+
+#: includes/class-edminboost-anm-admin.php:210
+msgid "View Inbox"
+msgstr "ইনবক্স দেখুন"
+
+#: includes/class-edminboost-anm-admin.php:211
+msgid "Converted to rule"
+msgstr "নিয়মে রূপান্তরিত হয়েছে"
+
+#: includes/class-edminboost-anm-admin.php:213
+msgid "Already converted to a rule."
+msgstr "ইতিমধ্যে একটি নিয়মে রূপান্তরিত হয়েছে ।"
+
+#: includes/class-edminboost-anm-admin.php:214
+msgid "Type at least 2 characters to search users."
+msgstr "ব্যবহারকারীদের অনুসন্ধান করতে কমপক্ষে 2টি অক্ষর টাইপ করুন ।"
+
+#: includes/class-edminboost-anm-admin.php:215
+msgid "No users found."
+msgstr "কোনও ব্যবহারকারী পাওয়া যায়নি।"
+
+#: includes/class-edminboost-anm-admin.php:217
+msgid "Hidden notices were reset."
+msgstr "লুকানো বিজ্ঞপ্তিগুলি রিসেট করা হয়েছিল ।"
+
+#: includes/class-edminboost-anm-admin.php:218
+msgid "Could not reset hidden notices."
+msgstr "লুকানো বিজ্ঞপ্তিগুলি রিসেট করা যায়নি ।"
+
+#: includes/class-edminboost-anm-admin.php:219
+msgid "Reset hidden notice preferences for every user on this site?"
+msgstr ""
+"এই সাইটের প্রতিটি ব্যবহারকারীর জন্য গোপন বিজ্ঞপ্তি পছন্দগুলি রিসেট করবেন?"
+
+#: includes/class-edminboost-anm-admin.php:220
+#: includes/class-edminboost-anm-admin.php:227
+msgid "Loading preview…"
+msgstr "প্রাকদর্শন লোড করা হচ্ছে@ interface/ rich"
+
+#: includes/class-edminboost-anm-admin.php:221
+msgid "Could not load digest preview."
+msgstr "ডাইজেস্ট প্রিভিউ লোড করা যায়নি ।"
+
+#: includes/class-edminboost-anm-admin.php:222
+#: includes/class-edminboost-anm-digest.php:198
+msgid "At a glance"
+msgstr "এক নজরে পরিকল্পনা করুন&#10;"
+
+#: includes/class-edminboost-anm-admin.php:223
+#: includes/class-edminboost-anm-digest.php:213
+msgid "Recent intercepted notices"
+msgstr "সাম্প্রতিক ইন্টারসেপ্ট করা বিজ্ঞপ্তি"
+
+#: includes/class-edminboost-anm-admin.php:224
+#: includes/class-edminboost-anm-digest.php:216
+msgid "No intercepted notices in the inbox yet."
+msgstr "ইনবক্সে এখনও কোনও বাধা বিজ্ঞপ্তি নেই ।"
+
+#: includes/class-edminboost-anm-admin.php:225
+msgid "Blocked this month"
+msgstr "এই মাসে ব্লক করা হয়েছে"
+
+#: includes/class-edminboost-anm-admin.php:226
+msgid "Active auto-rules"
+msgstr "অ্যাক্টিভ অটো-রুলস"
+
+#: includes/class-edminboost-anm-admin.php:228
+msgid "Could not load webhook preview."
+msgstr "ওয়েবহুক প্রিভিউ লোড করা যায়নি ।"
+
+#: includes/class-edminboost-anm-admin.php:229
+msgid "Sample notice"
+msgstr "নমুনা বিজ্ঞপ্তি"
+
+#: includes/class-edminboost-anm-admin.php:230
+msgid "Based on your latest inbox notice"
+msgstr "আপনার সর্বশেষ ইনবক্স বিজ্ঞপ্তির উপর ভিত্তি করে"
+
+#: includes/class-edminboost-anm-admin.php:234
+msgid "Howdy, Admin"
+msgstr "Howdy, Admin"
+
+#: includes/class-edminboost-anm-admin.php:235
+msgid "My Site"
+msgstr "আমার সাইট"
+
+#: includes/class-edminboost-anm-admin.php:236
+msgid ""
+"There is a new version of Akismet Anti-spam available. View version 5.3.3 "
+"details or update now."
+msgstr ""
+"Akismet অ্যান্টি-স্প্যামের একটি নতুন সংস্করণ পাওয়া যাচ্ছে । সংস্করণ 5.3.3 "
+"বিবরণ দেখুন বা এখনই আপডেট করুন ।"
+
+#: includes/class-edminboost-anm-admin.php:237
+msgid "Akismet Anti-spam"
+msgstr "আকিসমেট অ্যান্টি-স্প্যাম"
+
+#: includes/class-edminboost-anm-admin.php:238
+msgid ""
+"Enjoying WPForms? Please leave us a review on WordPress.org — it only takes "
+"a minute."
+msgstr ""
+"WPForms উপভোগ করছেন? দয়া করে আমাদের একটি পর্যালোচনা ছেড়ে দিন WordPress.org"
+" — এটি মাত্র এক মিনিট সময় নেয় ।"
+
+#: includes/class-edminboost-anm-admin.php:239
+msgid "WPForms"
+msgstr "WPForms"
+
+#: includes/class-edminboost-anm-admin.php:240
+msgid ""
+"Your license key expires in 14 days. Renew now to keep receiving updates and"
+" support."
+msgstr ""
+"আপনার লাইসেন্স কী-এর মেয়াদ ১৪ দিনের মধ্যে শেষ হয়ে যাবে । আপডেট এবং সহায়তা"
+" পেতে এখনই রিনিউ করুন ।"
+
+#: includes/class-edminboost-anm-admin.php:241
+msgid "Advanced Custom Fields"
+msgstr "অ্যাডভান্সড কাস্টম ফিল্ড"
+
+#: includes/class-edminboost-anm-admin.php:242
+#: includes/class-edminboost-anm-webhook.php:165
+msgid ""
+"Your license will expire in 3 days. Renew now to keep receiving updates and "
+"support."
+msgstr ""
+"আপনার লাইসেন্সের মেয়াদ 3 দিনের মধ্যে শেষ হবে । আপডেট এবং সহায়তা পেতে এখনই "
+"রিনিউ করুন ।"
+
+#: includes/class-edminboost-anm-admin.php:243
+msgid ""
+"Thanks for using Yoast SEO! Could you take a moment to leave a five-star "
+"review on WordPress.org?"
+msgstr ""
+"Yoast SEO ব্যবহারের জন্য ধন্যবাদ! আপনি কি একটু সময় নিয়ে WordPress.org-এ "
+"ফাইভ-স্টার রিভিউ দিতে পারেন?"
+
+#: includes/class-edminboost-anm-admin.php:244
+msgid "Yoast SEO"
+msgstr "Yoast SEO"
+
+#: includes/class-edminboost-anm-admin.php:250
+msgid "Mar 15, 2024 10:30 am"
+msgstr "15 মার্চ, 2024 সকাল 10:30 টা"
+
+#: includes/class-edminboost-anm-admin.php:255
+msgid ""
+"Notices stay on the dashboard. Inbox and admin bar stay available for "
+"optional use."
+msgstr ""
+"বিজ্ঞপ্তিগুলি ড্যাশবোর্ডে থাকবে । ইনবক্স এবং অ্যাডমিন বার ঐচ্ছিক ব্যবহারের "
+"জন্য উপলব্ধ থাকবে ।"
+
+#: includes/class-edminboost-anm-admin.php:256
+msgid ""
+"Matching notices leave the dashboard and appear in the inbox and admin bar "
+"panel."
+msgstr ""
+"ম্যাচিং নোটিশ ড্যাশবোর্ড ছেড়ে যায় এবং ইনবক্স এবং অ্যাডমিন বার প্যানেলে "
+"উপস্থিত হয় ।"
+
+#: includes/class-edminboost-anm-admin.php:257
+msgid ""
+"Every notice is suppressed on the dashboard unless a rule allows it through."
+msgstr "কোনও নিয়ম অনুমতি না দিলে ড্যাশবোর্ডে প্রতিটি নোটিশ দমন করা হয় ।"
+
+#: includes/class-edminboost-anm-admin.php:259
+msgid "Dashboard notice area is clear."
+msgstr "ড্যাশবোর্ডের নোটিফিকেশন এরিয়া পরিষ্কার ।"
+
+#: includes/class-edminboost-anm-admin.php:260
+msgid "No notices shown on the dashboard."
+msgstr "ড্যাশবোর্ডে কোনও বিজ্ঞপ্তি দেখানো হয়নি ।"
+
+#: includes/class-edminboost-anm-admin.php:261
+msgid "Matching notices appear in the inbox and admin bar panel above."
+msgstr ""
+"ম্যাচিং বিজ্ঞপ্তিগুলি উপরের ইনবক্স এবং অ্যাডমিন বার প্যানেলে উপস্থিত হয় ।"
+
+#: includes/class-edminboost-anm-admin.php:262
+msgid "WordPress 6.7 is available. Please update now."
+msgstr "WordPress 6.7 পাওয়া যাচ্ছে । অনুগ্রহ করে এখনই আপডেট করুন ।"
+
+#: includes/class-edminboost-anm-admin.php:263
+msgid "Please activate your SEO plugin license to receive updates."
+msgstr "আপডেট পেতে অনুগ্রহ করে আপনার এসইও প্লাগইন লাইসেন্স সক্রিয় করুন ।"
+
+#: includes/class-edminboost-anm-admin.php:264
+msgid "You have a new form submission waiting in your inbox."
+msgstr "আপনার ইনবক্সে একটি নতুন ফর্ম জমা দেওয়ার জন্য অপেক্ষা করছেন ।"
+
+#: includes/class-edminboost-anm-admin.php:265
+msgid "There are updates available for 3 plugins. View details or update now."
+msgstr ""
+"3টি প্লাগইনের জন্য আপডেট পাওয়া যায় । বিস্তারিত দেখুন বা এখনই আপডেট করুন ।"
+
+#: includes/class-edminboost-anm-admin.php:266
+msgid ""
+"Thanks for using Contact Form 7! Please leave us a review on WordPress.org."
+msgstr ""
+"যোগাযোগের ফর্ম 7 ব্যবহার করার জন্য ধন্যবাদ! অনুগ্রহ করে আমাদের একটি "
+"পর্যালোচনা ছেড়ে দিন WordPress.org ।"
+
+#: includes/class-edminboost-anm-admin.php:267
+msgid "Hidden for you"
+msgstr "আপনার জন্য লুকানো"
+
+#: includes/class-edminboost-anm-admin.php:268
+msgid "The WordPress core update nag is hidden from the dashboard."
+msgstr "ড্যাশবোর্ড থেকে ওয়ার্ডপ্রেস কোর আপডেট নাগ লুকানো আছে ।"
+
+#: includes/class-edminboost-anm-admin.php:269
+msgid "Plugin and theme update nags are hidden from the dashboard."
+msgstr "প্লাগইন এবং থিম আপডেট ন্যাগগুলি ড্যাশবোর্ড থেকে লুকানো আছে ।"
+
+#: includes/class-edminboost-anm-admin.php:270
+msgid "Core and plugin or theme update nags are hidden from the dashboard."
+msgstr "ড্যাশবোর্ড থেকে কোর এবং প্লাগইন বা থিম আপডেট ন্যাগ লুকানো থাকে ।"
+
+#: includes/class-edminboost-anm-admin.php:271
+msgid "Reset clears hidden-notice preferences for every user on this site."
+msgstr ""
+"রিসেটটি এই সাইটের প্রতিটি ব্যবহারকারীর জন্য লুকানো-বিজ্ঞপ্তির পছন্দগুলি সাফ "
+"করে ।"
+
+#: includes/class-edminboost-anm-admin.php:309
+msgid "Docs"
+msgstr "নথিসমূহ"
+
+#: includes/class-edminboost-anm-admin.php:322
+#: includes/class-edminboost-anm-admin.php:412
+#: includes/class-edminboost-anm-admin.php:439
+#: includes/class-edminboost-anm-admin.php:463
+msgid "You do not have permission to access this page."
+msgstr "আপনার সেই পৃষ্ঠাটি অ্যাক্সেস করার অনুমতি নেই।"
+
+#: includes/class-edminboost-anm-ajax.php:60
+#: includes/class-edminboost-anm-ajax.php:639
+msgid "Permission denied."
+msgstr "অনুমতি পাওয়া যায়নি"
+
+#: includes/class-edminboost-anm-ajax.php:73
+msgid "Debug tools are unavailable."
+msgstr "ডিবাগ সরঞ্জামগুলি উপলভ্য নয় ।"
+
+#: includes/class-edminboost-anm-ajax.php:133
+#: includes/class-edminboost-anm-ajax.php:176
+msgid "Rule not found."
+msgstr "নিয়ম পাওয়া যায় নি ।"
+
+#: includes/class-edminboost-anm-ajax.php:305
+#: includes/class-edminboost-anm-ajax.php:404
+#: includes/class-edminboost-anm-inbox.php:717
+#: includes/class-edminboost-anm-inbox.php:803
+msgid "Invalid action."
+msgstr "অবৈধ কর্ম"
+
+#. translators: 1: display name, 2: login
+#. translators: 1: action label, 2: notice count phrase
+#: includes/class-edminboost-anm-ajax.php:348
+#: includes/class-edminboost-anm-notices.php:359
+#: includes/class-edminboost-anm-settings.php:930
+#, php-format
+msgid "%1$s (%2$s)"
+msgstr "%1$s, %2$s"
+
+#: includes/class-edminboost-anm-ajax.php:374
+msgid "You do not have permission to reset hidden notices for all users."
+msgstr ""
+"আপনার কাছে সমস্ত ব্যবহারকারীর জন্য লুকানো বিজ্ঞপ্তিগুলি পুনরায় সেট করার "
+"অনুমতি নেই ।"
+
+#: includes/class-edminboost-anm-ajax.php:384
+msgid "Hidden notice preferences were reset for all users."
+msgstr ""
+"সমস্ত ব্যবহারকারীর জন্য লুকানো বিজ্ঞপ্তি পছন্দগুলি রিসেট করা হয়েছিল ।"
+
+#: includes/class-edminboost-anm-ajax.php:385
+msgid "Hidden notice preferences were reset for your account."
+msgstr ""
+"আপনার অ্যাকাউন্টের জন্য লুকানো বিজ্ঞপ্তি পছন্দগুলি রিসেট করা হয়েছিল ।"
+
+#: includes/class-edminboost-anm-ajax.php:399
+#: includes/class-edminboost-anm-ajax.php:431
+msgid "Plugin disabled."
+msgstr "প্লাগইন অক্ষম"
+
+#: includes/class-edminboost-anm-ajax.php:475
+msgid "No file uploaded."
+msgstr "কোনও ফাইল আপলোড করা হয়নি"
+
+#: includes/class-edminboost-anm-ajax.php:525
+msgid "Enable notice interception first using Quick Status on the Dashboard."
+msgstr ""
+"ড্যাশবোর্ডে দ্রুত স্থিতি ব্যবহার করে প্রথমে নোটিশ ইন্টারসেপশন সক্ষম করুন ।"
+
+#: includes/class-edminboost-anm-ajax.php:583
+msgid ""
+"Select at least one notice level (error, warning, success, and others)."
+msgstr ""
+"কমপক্ষে একটি নোটিশ স্তর (ত্রুটি, সতর্কতা, সাফল্য এবং অন্যান্য) নির্বাচন করুন"
+" ।"
+
+#: includes/class-edminboost-anm-debug.php:149
+#: includes/class-edminboost-anm-debug.php:155
+#: includes/class-edminboost-anm-debug.php:161
+#: includes/class-edminboost-anm-debug.php:167
+#: includes/class-edminboost-anm-debug.php:173
+#: includes/class-edminboost-anm-debug.php:179
+msgid "ANM Test Notices"
+msgstr "ANM পরীক্ষার বিজ্ঞপ্তি"
+
+#: includes/class-edminboost-anm-debug.php:204
+msgid "Debug: ANM Test Notices"
+msgstr "ডিবাগ: ANM পরীক্ষার বিজ্ঞপ্তি"
+
+#. translators: %s: short random token
+#: includes/class-edminboost-anm-debug.php:222
+#, php-format
+msgid "(run %s)"
+msgstr "(রান %s)"
+
+#. translators: %s: short random token
+#: includes/class-edminboost-anm-debug.php:309
+#, php-format
+msgid "(live %s)"
+msgstr "(লাইভ %s)"
+
+#: includes/class-edminboost-anm-debug.php:319
+msgid "Test Notice:"
+msgstr "পরীক্ষার বিজ্ঞপ্তি:"
+
+#. translators: %s: site name
+#: includes/class-edminboost-anm-digest.php:81
+#, php-format
+msgid "[%s] Weekly Notice Diet Digest"
+msgstr "[%s] সাপ্তাহিক বিজ্ঞপ্তি ডায়েট ডাইজেস্ট"
+
+#. translators: %s: site name
+#: includes/class-edminboost-anm-digest.php:95
+#, php-format
+msgid "Weekly summary of silenced admin notices for %s."
+msgstr "%s এর জন্য নীরব প্রশাসনের বিজ্ঞপ্তির সাপ্তাহিক সারসংক্ষেপ ।"
+
+#. translators: %d: number of blocked notices
+#: includes/class-edminboost-anm-digest.php:201
+#, php-format
+msgid "Notices blocked this month: %d"
+msgstr "এই মাসে নোটিশ ব্লক করা হয়েছে: %d"
+
+#. translators: %d: number of active rules
+#: includes/class-edminboost-anm-digest.php:206
+#, php-format
+msgid "Active auto-rules: %d"
+msgstr "সক্রিয় অটো-রুল: %d"
+
+#. translators: 1: list number, 2: notice source
+#: includes/class-edminboost-anm-digest.php:223
+#, php-format
+msgid "%1$d. %2$s"
+msgstr "%1$d. %2$s"
+
+#: includes/class-edminboost-anm-importer.php:61
+msgid "No legacy plugin data detected."
+msgstr "কোনও লিগ্যাসি প্লাগইন ডেটা সনাক্ত করা যায়নি ।"
+
+#: includes/class-edminboost-anm-importer.php:176
+msgid "Invalid JSON file."
+msgstr "অবৈধ JSON ফাইল ।"
+
+#: includes/class-edminboost-anm-inbox.php:418
+#: includes/class-edminboost-anm-inbox.php:419
+msgid "Warning (Critical)"
+msgstr "সতর্কতা (সমালোচনামূলক)"
+
+#: includes/class-edminboost-anm-inbox.php:420
+msgid "Promotion (Upsell)"
+msgstr "প্রমোশন (আপসেল)"
+
+#: includes/class-edminboost-anm-inbox.php:694
+msgid "Could not identify this notice."
+msgstr "এই বিজ্ঞপ্তিটি সনাক্ত করা যায়নি ।"
+
+#: includes/class-edminboost-anm-inbox.php:730
+#: includes/class-edminboost-anm-inbox.php:777
+#: includes/class-edminboost-anm-rules.php:722
+#: includes/class-edminboost-anm-rules.php:764
+msgid "Notice not found."
+msgstr "বিজ্ঞপ্তি পাওয়া যায়নি ।"
+
+#: includes/class-edminboost-anm-inbox.php:734
+msgid "This notice cannot be hidden."
+msgstr "এই বিজ্ঞপ্তিটি লুকানো যাবে না ।"
+
+#: includes/class-edminboost-anm-notices.php:120
+#: includes/class-edminboost-anm-notices.php:166
+msgid "Could not update this notice. Please try again."
+msgstr "এই বিজ্ঞপ্তিটি আপডেট করা যায়নি । অনুগ্রহ করে আবার চেষ্টা করুন ।"
+
+#: includes/class-edminboost-anm-notices.php:353
+msgid "Open notifications"
+msgstr "বিজ্ঞপ্তিগুলি খুলুন"
+
+#: includes/class-edminboost-anm-notices.php:354
+msgid "View notice inbox"
+msgstr "নোটিফিকেশন ইনবক্স দেখুন"
+
+#. translators: %d: notice count
+#: includes/class-edminboost-anm-notices.php:363
+#: includes/class-edminboost-anm-notices.php:395
+#, php-format
+msgid "%d notice"
+msgid_plural "%d notices"
+msgstr[0] "%d টি বিজ্ঞপ্তি"
+msgstr[1] "%d টি বিজ্ঞপ্তি"
+
+#: includes/class-edminboost-anm-rules.php:178
+msgid "Rule name and match string are required."
+msgstr "নিয়মের নাম এবং ম্যাচ স্ট্রিং আবশ্যক ।"
+
+#: includes/class-edminboost-anm-rules.php:317
+msgid "Upsell Preset"
+msgstr "আপসেল প্রিসেট"
+
+#: includes/class-edminboost-anm-rules.php:562
+msgid "Keyword (String Match)"
+msgstr "কীওয়ার্ড (স্ট্রিং ম্যাচ)"
+
+#: includes/class-edminboost-anm-rules.php:563
+msgid "Wildcard / Regex"
+msgstr "ওয়াইল্ডকার্ড / রেজেক্স"
+
+#: includes/class-edminboost-anm-rules.php:579
+msgid "WordPress update available"
+msgstr "ওয়ার্ডপ্রেস আপডেট উপলব্ধ"
+
+#: includes/class-edminboost-anm-rules.php:580
+msgid "WordPress 6.7 is available! Please update now."
+msgstr "WordPress 6.7 পাওয়া যাচ্ছে! অনুগ্রহ করে এখনই আপডেট করুন ।"
+
+#: includes/class-edminboost-anm-rules.php:587
+msgid "Outdated PHP version"
+msgstr "পুরানো পিএইচপি সংস্করণ"
+
+#: includes/class-edminboost-anm-rules.php:588
+msgid "Your site is running an outdated version of PHP."
+msgstr "আপনার সাইটটি PHP-এর একটি পুরানো সংস্করণ চালাচ্ছে ।"
+
+#: includes/class-edminboost-anm-rules.php:595
+msgid "Site Health critical issues"
+msgstr "সাইটের স্বাস্থ্য সংক্রান্ত জটিল সমস্যা"
+
+#: includes/class-edminboost-anm-rules.php:596
+msgid ""
+"Your site has critical issues that should be addressed as soon as possible."
+msgstr ""
+"আপনার সাইটে গুরুত্বপূর্ণ সমস্যা রয়েছে যা যত তাড়াতাড়ি সম্ভব সমাধান করা "
+"উচিত ।"
+
+#: includes/class-edminboost-anm-rules.php:603
+msgid "Automatic update failed"
+msgstr "স্বয়ংক্রিয় আপডেট ব্যর্থ হয়েছে"
+
+#: includes/class-edminboost-anm-rules.php:604
+msgid "An automated WordPress update has failed to complete."
+msgstr "একটি স্বয়ংক্রিয় ওয়ার্ডপ্রেস আপডেট সম্পূর্ণ করতে ব্যর্থ হয়েছে ।"
+
+#: includes/class-edminboost-anm-rules.php:611
+msgid "Database upgrade required"
+msgstr "ডেটাবেস আপগ্রেড প্রয়োজন"
+
+#: includes/class-edminboost-anm-rules.php:612
+msgid "WordPress database upgrade required."
+msgstr "ওয়ার্ডপ্রেস ডাটাবেস আপগ্রেড করা প্রয়োজন ।"
+
+#: includes/class-edminboost-anm-rules.php:619
+msgid "Cookies blocked notice"
+msgstr "কুকিগুলি বিজ্ঞপ্তি ব্লক করেছে"
+
+#: includes/class-edminboost-anm-rules.php:620
+msgid "Cookies are blocked or not supported by your browser."
+msgstr "কুকিগুলি আপনার ব্রাউজার দ্বারা অবরুদ্ধ বা সমর্থিত নয় ।"
+
+#: includes/class-edminboost-anm-rules.php:693
+msgid "Unknown notice preset."
+msgstr "অজানা নোটিফিকেশন প্রিসেট ।"
+
+#: includes/class-edminboost-anm-rules.php:697
+#: includes/class-edminboost-anm-rules.php:726
+msgid "This notice is already converted to a rule."
+msgstr "এই বিজ্ঞপ্তিটি ইতিমধ্যে একটি নিয়মে রূপান্তরিত হয়েছে ।"
+
+#. translators: %s: notice source plugin name
+#: includes/class-edminboost-anm-rules.php:735
+#, php-format
+msgid "Rule from %s"
+msgstr "%s থেকে নিয়ম"
+
+#: includes/class-edminboost-anm-rules.php:789
+msgid "No rule exists for this notice preset."
+msgstr "এই বিজ্ঞপ্তির প্রিসেটের জন্য কোনও নিয়ম নেই ।"
+
+#: includes/class-edminboost-anm-settings.php:771
+msgid "Show all"
+msgstr "সবগুলি দেখান"
+
+#: includes/class-edminboost-anm-settings.php:772
+msgid "Hide all"
+msgstr "সব লুকান"
+
+#: includes/class-edminboost-anm-settings.php:773
+msgid "Hide selected"
+msgstr "নির্বাচিত লুকান"
+
+#: includes/class-edminboost-anm-settings.php:774
+msgid "Compact panel"
+msgstr "কম্প্যাক্ট প্যানেল"
+
+#: includes/class-edminboost-anm-settings.php:786
+msgid "Leave notices on the dashboard"
+msgstr "ড্যাশবোর্ডে বিজ্ঞপ্তিগুলি ছেড়ে দিন"
+
+#: includes/class-edminboost-anm-settings.php:787
+msgid ""
+"WordPress behaves as usual. The plugin stays available for inbox, rules, and"
+" reports without changing how notices appear on screen."
+msgstr ""
+"WordPress যথারীতি আচরণ করে । প্লাগইনটি কীভাবে স্ক্রিনে বিজ্ঞপ্তিগুলি "
+"প্রদর্শিত হয় তা পরিবর্তন না করে ইনবক্স, নিয়ম এবং রিপোর্টের জন্য উপলব্ধ "
+"থাকে ।"
+
+#: includes/class-edminboost-anm-settings.php:791
+msgid "Clean dashboard + inbox / admin bar"
+msgstr "ড্যাশবোর্ড + ইনবক্স / অ্যাডমিন বার পরিষ্কার করুন"
+
+#: includes/class-edminboost-anm-settings.php:792
+msgid ""
+"Recommended. Hides the notices you configure under Notices, Access & "
+"visibility, and Auto-Rules, then collects them in the inbox and admin bar "
+"panel."
+msgstr ""
+"প্রস্তাবিত । নোটিশ, অ্যাক্সেস এবং দৃশ্যমানতা এবং অটো-রুলগুলির অধীনে আপনি যে "
+"বিজ্ঞপ্তিগুলি কনফিগার করেছেন তা গোপন করে, তারপরে সেগুলি ইনবক্স এবং অ্যাডমিন "
+"বার প্যানেলে সংগ্রহ করে ।"
+
+#: includes/class-edminboost-anm-settings.php:796
+msgid "Toolbar only"
+msgstr "শুধুমাত্র টুলবার"
+
+#: includes/class-edminboost-anm-settings.php:797
+msgid ""
+"Hides the dashboard notice area entirely. Open captured notices from the "
+"admin bar panel or the plugin inbox."
+msgstr ""
+"ড্যাশবোর্ডের নোটিফিকেশন এলাকা সম্পূর্ণভাবে লুকিয়ে রাখে । অ্যাডমিন বার "
+"প্যানেল বা প্লাগইন ইনবক্স থেকে ক্যাপচার করা বিজ্ঞপ্তিগুলি খুলুন ।"
+
+#: includes/class-edminboost-anm-settings.php:981
+msgid "Text link with count"
+msgstr "COUNT সহ টেক্সট লিঙ্ক"
+
+#: includes/class-edminboost-anm-settings.php:982
+msgid "Bell icon (opens inbox)"
+msgstr "বেল আইকন (ইনবক্স খোলে)"
+
+#: includes/class-edminboost-anm-settings.php:983
+msgid "Notification dropdown — detailed cards"
+msgstr "নোটিফিকেশন ড্রপডাউন — বিস্তারিত কার্ড"
+
+#: includes/class-edminboost-anm-settings.php:984
+msgid "Notification dropdown — compact list"
+msgstr "নোটিফিকেশন ড্রপডাউন — কমপ্যাক্ট লিস্ট"
+
+#: includes/class-edminboost-anm-settings.php:1004
+msgid "Default admin bar slot"
+msgstr "ডিফল্ট অ্যাডমিন বার স্লট"
+
+#: includes/class-edminboost-anm-settings.php:1005
+msgid "Left bar, after site name"
+msgstr "বাম বার, সাইটের নামের পরে"
+
+#: includes/class-edminboost-anm-settings.php:1006
+msgid "Left bar, after updates"
+msgstr "বাম বার, আপডেটের পরে"
+
+#: includes/class-edminboost-anm-settings.php:1007
+msgid "Top-right area, first item"
+msgstr "উপরের ডান দিকের এলাকা, প্রথম আইটেম"
+
+#: includes/class-edminboost-anm-settings.php:1008
+msgid "Top right, before “Howdy” profile menu"
+msgstr "উপরে ডানদিকে, \"Howdy\" প্রোফাইল মেনুর আগে"
+
+#: includes/class-edminboost-anm-settings.php:1009
+msgid "Top right, after “Howdy” profile menu"
+msgstr "উপরে ডানদিকে, \"Howdy\" প্রোফাইল মেনুর পরে"
+
+#: includes/class-edminboost-anm-settings.php:1113
+msgid "Number badge"
+msgstr "নম্বর ব্যাজ"
+
+#: includes/class-edminboost-anm-settings.php:1114
+msgid "Number badge (9+ cap)"
+msgstr "ব্যাজ নম্বর (9+ ক্যাপ)"
+
+#: includes/class-edminboost-anm-settings.php:1115
+msgid "Number badge (99+ cap)"
+msgstr "ব্যাজ নম্বর (99+ ক্যাপ)"
+
+#: includes/class-edminboost-anm-settings.php:1116
+msgid "Dot only (no count)"
+msgstr "শুধুমাত্র বিন্দু (কোনও গণনা নেই)"
+
+#: includes/class-edminboost-anm-settings.php:1117
+msgid "Pulsing dot (no count)"
+msgstr "স্পন্দনশীল বিন্দু (কোন গণনা নেই)"
+
+#: includes/class-edminboost-anm-settings.php:1118
+msgid "Hidden (no visual indicator)"
+msgstr "লুকানো (কোনও ভিজ্যুয়াল ইন্ডিকেটর নেই)"
+
+#: includes/class-edminboost-anm-stats.php:137
+msgid "None yet"
+msgstr "এখনও একটিও নয়"
+
+#: includes/class-edminboost-anm-webhook.php:61
+msgid "[Edminboost ANM] Intercepted notice from {source}: {message_excerpt}"
+msgstr "[Edminboost ANM] {source} থেকে আটকানো নোটিশ: {message_excerpt}"
+
+#: includes/class-edminboost-anm-webhook.php:164
+msgid "Example Plugin"
+msgstr "উদাহরণ প্লাগইন"

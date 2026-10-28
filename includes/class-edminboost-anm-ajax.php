@@ -170,13 +170,24 @@ class EDMINBOOST_ANM_Ajax {
 	public function handle_delete_rule() {
 		$this->verify_request();
 
-		$id = sanitize_key( wp_unslash( $_POST['id'] ?? '' ) );
+		$id   = sanitize_key( wp_unslash( $_POST['id'] ?? '' ) );
+		$rule = EDMINBOOST_ANM_Rules::get( $id );
+
+		if ( ! $rule ) {
+			wp_send_json_error( array( 'message' => __( 'Rule not found.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
+		}
+
+		$wp_notice_preset = sanitize_key( $rule['wp_notice_preset'] ?? '' );
 
 		if ( ! EDMINBOOST_ANM_Rules::delete( $id ) ) {
 			wp_send_json_error( array( 'message' => __( 'Rule not found.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
 		}
 
-		wp_send_json_success();
+		wp_send_json_success(
+			array(
+				'wp_notice_preset' => $wp_notice_preset,
+			)
+		);
 	}
 
 	/**
@@ -223,13 +234,17 @@ class EDMINBOOST_ANM_Ajax {
 
 		$list_args = EDMINBOOST_ANM_Admin::parse_inbox_list_args( wp_unslash( $_POST ) );
 		$slice     = EDMINBOOST_ANM_Admin::get_inbox_list_slice( $list_args );
+		$list_args['page'] = $slice['page'];
 
 		wp_send_json_success(
 			array(
-				'rows'    => EDMINBOOST_ANM_Admin::render_inbox_table_rows_html( $slice['notices'] ),
-				'orderby' => $list_args['orderby'],
-				'order'   => $list_args['order'],
-				'showing' => sprintf(
+				'rows'        => EDMINBOOST_ANM_Admin::render_inbox_table_rows_html( $slice['notices'] ),
+				'orderby'     => $list_args['orderby'],
+				'order'       => $list_args['order'],
+				'page'        => $slice['page'],
+				'total_pages' => $slice['total_pages'],
+				'pager'       => EDMINBOOST_ANM_Admin::render_inbox_pager_html( $list_args, $slice ),
+				'showing'     => sprintf(
 					/* translators: 1: start number, 2: end number, 3: total count */
 					__( 'Showing %1$d–%2$d of %3$d notices', EDMINBOOST_ANM_TEXT_DOMAIN ),
 					$slice['start'],
@@ -257,10 +272,38 @@ class EDMINBOOST_ANM_Ajax {
 				EDMINBOOST_ANM_Inbox::mark_read( $id );
 				break;
 			case 'snooze':
-				$duration = sanitize_key( wp_unslash( $_POST['duration'] ?? '1d' ) );
-				$seconds  = '7d' === $duration ? WEEK_IN_SECONDS : DAY_IN_SECONDS;
-				EDMINBOOST_ANM_Inbox::snooze( $id, $seconds );
-				break;
+				$duration_key = sanitize_key( wp_unslash( $_POST['duration'] ?? '1d' ) );
+				$duration_key = '7d' === $duration_key ? '7d' : '1d';
+				$seconds      = '7d' === $duration_key ? WEEK_IN_SECONDS : DAY_IN_SECONDS;
+				$notice       = EDMINBOOST_ANM_Inbox::get( $id );
+				if ( $notice && EDMINBOOST_ANM_Inbox::is_actively_snoozed( $notice )
+					&& EDMINBOOST_ANM_Inbox::get_snooze_duration_key( $notice ) === $duration_key ) {
+					EDMINBOOST_ANM_Inbox::unsnooze( $id );
+					wp_send_json_success(
+						array(
+							'snoozed'  => false,
+							'duration' => '',
+						)
+					);
+					return;
+				}
+				EDMINBOOST_ANM_Inbox::snooze( $id, $seconds, $duration_key );
+				wp_send_json_success(
+					array(
+						'snoozed'  => true,
+						'duration' => $duration_key,
+					)
+				);
+				return;
+			case 'unsnooze':
+				EDMINBOOST_ANM_Inbox::unsnooze( $id );
+				wp_send_json_success(
+					array(
+						'snoozed'  => false,
+						'duration' => '',
+					)
+				);
+				return;
 			case 'convert':
 				$result = EDMINBOOST_ANM_Rules::create_from_inbox( $id );
 				if ( is_wp_error( $result ) ) {

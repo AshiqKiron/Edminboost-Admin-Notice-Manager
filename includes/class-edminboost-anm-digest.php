@@ -22,6 +22,27 @@ class EDMINBOOST_ANM_Digest {
 	const CRON_HOOK = 'edminboost_anm_weekly_digest';
 
 	/**
+	 * Cron recurrence slug (registered via cron_schedules — not in WordPress core).
+	 *
+	 * @var string
+	 */
+	const CRON_SCHEDULE = 'weekly';
+
+	/**
+	 * Local hour (0–23) when the weekly digest cron should run.
+	 *
+	 * @var int
+	 */
+	const SEND_HOUR = 9;
+
+	/**
+	 * Default weekday slug when none is saved.
+	 *
+	 * @var string
+	 */
+	const DEFAULT_SEND_WEEKDAY = 'monday';
+
+	/**
 	 * Placeholder token for the site name in customizable subject/intro/footer.
 	 *
 	 * @var string
@@ -34,7 +55,178 @@ class EDMINBOOST_ANM_Digest {
 	 * @return void
 	 */
 	public function register_hooks() {
+		add_filter( 'cron_schedules', array( __CLASS__, 'add_cron_schedules' ) );
 		add_action( self::CRON_HOOK, array( $this, 'send_digest' ) );
+		add_action( 'init', array( __CLASS__, 'ensure_schedule_if_needed' ), 20 );
+	}
+
+	/**
+	 * Schedule digest cron when enabled but missing (e.g. after fixing weekly interval registration).
+	 *
+	 * @return void
+	 */
+	public static function ensure_schedule_if_needed() {
+		$settings = EDMINBOOST_ANM_Settings::get();
+
+		if ( empty( $settings['digest']['enabled'] ) ) {
+			return;
+		}
+
+		$next = wp_next_scheduled( self::CRON_HOOK );
+		if ( ! $next || ! self::scheduled_timestamp_matches_settings( $next, $settings ) ) {
+			self::sync_schedule( $settings );
+		}
+	}
+
+	/**
+	 * Weekday slug => label for digest send day (site timezone).
+	 *
+	 * @return array<string, string>
+	 */
+	public static function get_send_weekday_choices() {
+		return array(
+			'sunday'    => __( 'Sunday', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'monday'    => __( 'Monday', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'tuesday'   => __( 'Tuesday', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'wednesday' => __( 'Wednesday', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'thursday'  => __( 'Thursday', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'friday'    => __( 'Friday', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'saturday'  => __( 'Saturday', EDMINBOOST_ANM_TEXT_DOMAIN ),
+		);
+	}
+
+	/**
+	 * Sanitize stored digest send weekday slug.
+	 *
+	 * @param string $value Raw weekday slug.
+	 * @return string
+	 */
+	public static function sanitize_send_weekday( $value ) {
+		$value   = sanitize_key( (string) $value );
+		$choices = self::get_send_weekday_choices();
+
+		if ( isset( $choices[ $value ] ) ) {
+			return $value;
+		}
+
+		return self::DEFAULT_SEND_WEEKDAY;
+	}
+
+	/**
+	 * Map weekday slug to PHP date( 'w' ) value (0 = Sunday … 6 = Saturday).
+	 *
+	 * @param string $weekday_slug Weekday slug.
+	 * @return int
+	 */
+	public static function weekday_slug_to_php_w( $weekday_slug ) {
+		$map = array(
+			'sunday'    => 0,
+			'monday'    => 1,
+			'tuesday'   => 2,
+			'wednesday' => 3,
+			'thursday'  => 4,
+			'friday'    => 5,
+			'saturday'  => 6,
+		);
+
+		$weekday_slug = self::sanitize_send_weekday( $weekday_slug );
+
+		return $map[ $weekday_slug ];
+	}
+
+	/**
+	 * Next Unix timestamp for the configured weekday at SEND_HOUR in the site timezone.
+	 *
+	 * @param string $weekday_slug Weekday slug.
+	 * @return int
+	 */
+	public static function get_next_send_timestamp( $weekday_slug ) {
+		$target_w = self::weekday_slug_to_php_w( $weekday_slug );
+		$tz       = wp_timezone();
+		$now      = new DateTimeImmutable( 'now', $tz );
+		$send     = $now->setTime( self::SEND_HOUR, 0, 0 );
+
+		$current_w  = (int) $send->format( 'w' );
+		$days_ahead = ( $target_w - $current_w + 7 ) % 7;
+
+		if ( 0 === $days_ahead && $send <= $now ) {
+			$days_ahead = 7;
+		}
+
+		if ( $days_ahead > 0 ) {
+			$send = $send->modify( '+' . $days_ahead . ' days' );
+		}
+
+		return $send->getTimestamp();
+	}
+
+	/**
+	 * Whether a scheduled cron timestamp matches the digest weekday setting.
+	 *
+	 * @param int   $timestamp Scheduled event time.
+	 * @param array $settings  Full plugin settings.
+	 * @return bool
+	 */
+	public static function scheduled_timestamp_matches_settings( $timestamp, $settings ) {
+		$digest = isset( $settings['digest'] ) && is_array( $settings['digest'] )
+			? $settings['digest']
+			: array();
+
+		$expected_w = self::weekday_slug_to_php_w( $digest['send_weekday'] ?? self::DEFAULT_SEND_WEEKDAY );
+		$actual_w   = (int) wp_date( 'w', (int) $timestamp );
+
+		return $expected_w === $actual_w;
+	}
+
+	/**
+	 * Human-readable next send datetime for settings preview (site timezone).
+	 *
+	 * @param array|null $settings Optional full settings array.
+	 * @return string Empty when digest is disabled.
+	 */
+	public static function get_next_send_label( $settings = null ) {
+		if ( null === $settings ) {
+			$settings = EDMINBOOST_ANM_Settings::get();
+		}
+
+		$digest = isset( $settings['digest'] ) && is_array( $settings['digest'] )
+			? $settings['digest']
+			: array();
+
+		if ( empty( $digest['enabled'] ) ) {
+			return '';
+		}
+
+		$weekday_slug = self::sanitize_send_weekday( $digest['send_weekday'] ?? self::DEFAULT_SEND_WEEKDAY );
+		$timestamp    = self::get_next_send_timestamp( $weekday_slug );
+		$date_format  = get_option( 'date_format' );
+		$time_format  = get_option( 'time_format' );
+
+		return wp_date(
+			trim( $date_format . ' ' . $time_format ),
+			$timestamp
+		);
+	}
+
+	/**
+	 * Register weekly interval for digest cron (WordPress core has no "weekly" schedule).
+	 *
+	 * @param array<string, array{interval:int,display:string}> $schedules Existing schedules.
+	 * @return array<string, array{interval:int,display:string}>
+	 */
+	public static function add_cron_schedules( $schedules ) {
+		if ( ! is_array( $schedules ) ) {
+			$schedules = array();
+		}
+
+		if ( ! isset( $schedules[ self::CRON_SCHEDULE ] ) ) {
+			$schedules[ self::CRON_SCHEDULE ] = array(
+				'interval' => WEEK_IN_SECONDS,
+				'display'  => __( 'Once Weekly', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			);
+		}
+
+		return $schedules;
 	}
 
 	/**
@@ -48,12 +240,25 @@ class EDMINBOOST_ANM_Digest {
 			$settings = EDMINBOOST_ANM_Settings::get();
 		}
 
-		if ( ! empty( $settings['digest']['enabled'] ) ) {
-			if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
-				wp_schedule_event( time() + WEEK_IN_SECONDS, 'weekly', self::CRON_HOOK );
-			}
-		} else {
+		if ( empty( $settings['digest']['enabled'] ) ) {
 			self::clear_schedule();
+			return;
+		}
+
+		$digest = isset( $settings['digest'] ) && is_array( $settings['digest'] )
+			? $settings['digest']
+			: array();
+
+		$weekday_slug = self::sanitize_send_weekday( $digest['send_weekday'] ?? self::DEFAULT_SEND_WEEKDAY );
+		$next         = wp_next_scheduled( self::CRON_HOOK );
+
+		if ( ! $next || ! self::scheduled_timestamp_matches_settings( $next, $settings ) ) {
+			self::clear_schedule();
+			wp_schedule_event(
+				self::get_next_send_timestamp( $weekday_slug ),
+				self::CRON_SCHEDULE,
+				self::CRON_HOOK
+			);
 		}
 	}
 
@@ -63,8 +268,7 @@ class EDMINBOOST_ANM_Digest {
 	 * @return void
 	 */
 	public static function clear_schedule() {
-		$timestamp = wp_next_scheduled( self::CRON_HOOK );
-		if ( $timestamp ) {
+		while ( $timestamp = wp_next_scheduled( self::CRON_HOOK ) ) {
 			wp_unschedule_event( $timestamp, self::CRON_HOOK );
 		}
 	}
@@ -342,7 +546,7 @@ class EDMINBOOST_ANM_Digest {
 	 * Full plain-text digest preview (matches weekly wp_mail() content).
 	 *
 	 * @param array|null $settings Optional full settings array.
-	 * @return array{to:string,from:string,subject:string,body:string,content:array}
+	 * @return array{to:string,from:string,subject:string,body:string,content:array,next_send:string}
 	 */
 	public static function get_preview( $settings = null ) {
 		if ( null === $settings ) {
@@ -354,11 +558,12 @@ class EDMINBOOST_ANM_Digest {
 		$content = self::build_email_content( $settings );
 
 		return array(
-			'to'      => implode( ', ', self::get_recipients( $settings ) ),
-			'from'    => $from['formatted'],
-			'subject' => $email['subject'],
-			'body'    => $email['body'],
-			'content' => $content,
+			'to'        => implode( ', ', self::get_recipients( $settings ) ),
+			'from'      => $from['formatted'],
+			'subject'   => $email['subject'],
+			'body'      => $email['body'],
+			'content'   => $content,
+			'next_send' => self::get_next_send_label( $settings ),
 		);
 	}
 

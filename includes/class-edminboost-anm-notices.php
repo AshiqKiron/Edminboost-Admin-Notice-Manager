@@ -279,6 +279,10 @@ class EDMINBOOST_ANM_Notices {
 			$meta_class .= ' edminboost-anm-notices--before-profile edminboost-anm-notices--facebook';
 		}
 
+		if ( EDMINBOOST_ANM_Settings::notice_panel_position_uses_left_admin_bar( $position ) ) {
+			$meta_class .= ' edminboost-anm-notices--slot-left';
+		}
+
 		$node = array(
 			'id'    => 'edminboost-anm-notices',
 			'title' => $this->build_admin_bar_title( $panel, $count_all ),

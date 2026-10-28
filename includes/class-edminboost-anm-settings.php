@@ -158,14 +158,15 @@ class EDMINBOOST_ANM_Settings {
 				'roles'   => array( 'editor', 'author', 'shop_manager' ),
 			),
 			'digest'            => array(
-				'enabled'               => false,
-				'recipients'            => get_option( 'admin_email' ),
-				'subject'               => '',
-				'intro'                 => '',
-				'include_stats'         => true,
+				'enabled'                => false,
+				'recipients'             => get_option( 'admin_email' ),
+				'send_weekday'           => EDMINBOOST_ANM_Digest::DEFAULT_SEND_WEEKDAY,
+				'subject'                => '',
+				'intro'                  => '',
+				'include_stats'          => true,
 				'include_recent_notices' => true,
-				'recent_notices_count'  => 10,
-				'footer'                => '',
+				'recent_notices_count'   => 10,
+				'footer'                 => '',
 			),
 			'webhook'           => array(
 				'enabled' => false,
@@ -401,23 +402,23 @@ class EDMINBOOST_ANM_Settings {
 			'colors'      => self::sanitize_notice_panel_colors( $colors_input ),
 		);
 
-		$upsell_input = isset( $input['upsell_preset'] ) && is_array( $input['upsell_preset'] )
-			? $input['upsell_preset']
-			: array();
+		if ( isset( $input['upsell_preset'] ) && is_array( $input['upsell_preset'] ) ) {
+			$upsell_input = $input['upsell_preset'];
 
-		$output['upsell_preset'] = array(
-			'enabled'        => ! empty( $upsell_input['enabled'] ),
-			'custom_phrases' => self::sanitize_custom_phrases( $upsell_input['custom_phrases'] ?? '' ),
-		);
+			$output['upsell_preset'] = array(
+				'enabled'        => ! empty( $upsell_input['enabled'] ),
+				'custom_phrases' => self::sanitize_custom_phrases( $upsell_input['custom_phrases'] ?? '' ),
+			);
+		}
 
-		$word_filters_input = isset( $input['word_filters'] ) && is_array( $input['word_filters'] )
-			? $input['word_filters']
-			: array();
+		if ( isset( $input['word_filters'] ) && is_array( $input['word_filters'] ) ) {
+			$word_filters_input = $input['word_filters'];
 
-		$output['word_filters'] = array(
-			'spam_words'      => self::sanitize_word_list( $word_filters_input['spam_words'] ?? '' ),
-			'whitelist_words' => self::sanitize_word_list( $word_filters_input['whitelist_words'] ?? '' ),
-		);
+			$output['word_filters'] = array(
+				'spam_words'      => self::sanitize_word_list( $word_filters_input['spam_words'] ?? '' ),
+				'whitelist_words' => self::sanitize_word_list( $word_filters_input['whitelist_words'] ?? '' ),
+			);
+		}
 
 		$safety_input = isset( $input['safety_guard'] ) && is_array( $input['safety_guard'] )
 			? $input['safety_guard']
@@ -1070,7 +1071,7 @@ class EDMINBOOST_ANM_Settings {
 	public static function get_notice_panel_preview_layout( $position ) {
 		$position = sanitize_key( $position );
 		$layouts  = array(
-			'default'             => 'right',
+			'default'             => 'left',
 			'after_site_name'     => 'left',
 			'after_updates'       => 'left',
 			'top_secondary_start' => 'right',
@@ -1089,6 +1090,18 @@ class EDMINBOOST_ANM_Settings {
 	 */
 	public static function notice_panel_position_uses_facebook_slot( $position ) {
 		return 'before_profile' === sanitize_key( $position );
+	}
+
+	/**
+	 * Whether the panel node is placed on the left (primary) admin bar group.
+	 *
+	 * @param string $position Panel position slug.
+	 * @return bool
+	 */
+	public static function notice_panel_position_uses_left_admin_bar( $position ) {
+		$position = sanitize_key( $position );
+
+		return in_array( $position, array( 'default', 'after_site_name', 'after_updates' ), true );
 	}
 
 	/**
@@ -1281,9 +1294,7 @@ class EDMINBOOST_ANM_Settings {
 	public static function sanitize_webhook_settings( array $input, array $defaults ) {
 		return array(
 			'enabled' => ! empty( $input['enabled'] ),
-			'url'     => ! empty( $input['enabled'] )
-				? esc_url_raw( $input['url'] ?? '' )
-				: '',
+			'url'     => esc_url_raw( $input['url'] ?? '' ),
 			'message' => sanitize_textarea_field( $input['message'] ?? '' ),
 		);
 	}
@@ -1303,6 +1314,7 @@ class EDMINBOOST_ANM_Settings {
 		return array(
 			'enabled'                => ! empty( $input['enabled'] ),
 			'recipients'             => sanitize_text_field( $input['recipients'] ?? $defaults['recipients'] ),
+			'send_weekday'           => EDMINBOOST_ANM_Digest::sanitize_send_weekday( $input['send_weekday'] ?? $defaults['send_weekday'] ),
 			'subject'                => sanitize_text_field( $input['subject'] ?? '' ),
 			'intro'                  => sanitize_textarea_field( $input['intro'] ?? '' ),
 			'include_stats'          => ! empty( $input['include_stats'] ),
