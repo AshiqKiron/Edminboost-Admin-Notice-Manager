@@ -144,6 +144,8 @@ class EDMINBOOST_ANM_Admin {
 			$style_deps,
 			EDMINBOOST_ANM_VERSION
 		);
+
+		wp_add_inline_style( 'edminboost-anm-admin', EDMINBOOST_ANM_Notices::get_plugin_screen_notice_hide_css() );
 	}
 
 	/**
@@ -482,18 +484,23 @@ class EDMINBOOST_ANM_Admin {
 	 * @return bool
 	 */
 	public static function is_plugin_screen( $hook_suffix = null ) {
-		if ( null === $hook_suffix && function_exists( 'get_current_screen' ) ) {
-			$screen = get_current_screen();
-
-			if ( ! $screen ) {
-				return false;
-			}
-
-			return false !== strpos( $screen->id, self::PAGE_SLUG );
-		}
-
 		if ( is_string( $hook_suffix ) && '' !== $hook_suffix ) {
 			return false !== strpos( $hook_suffix, self::PAGE_SLUG );
+		}
+
+		if ( function_exists( 'get_current_screen' ) ) {
+			$screen = get_current_screen();
+
+			if ( $screen && false !== strpos( $screen->id, self::PAGE_SLUG ) ) {
+				return true;
+			}
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing check.
+		if ( isset( $_GET['page'] ) ) {
+			$page = sanitize_key( wp_unslash( $_GET['page'] ) );
+
+			return false !== strpos( $page, self::PAGE_SLUG );
 		}
 
 		return false;

@@ -49,14 +49,15 @@ languages/  uninstall.php  readme.txt  composer.json
 
 - Bootstrap defines constants and calls `edminboost_anm_run_plugin()`.
 - `EDMINBOOST_ANM_Plugin::run()` wires i18n, admin menu/settings/assets, and on `init`: notices, interceptor, AJAX, digest, ad redirects.
-- Settings: primary option via `EDMINBOOST_ANM_Settings` (Settings API group `edminboost_anm_settings_group`). Rules and inbox stored in separate options. Tabbed settings UI (General, Notices & access, Admin bar, Filtering, Security, Notifications, Migration & Tools).
+- Settings: primary option via `EDMINBOOST_ANM_Settings` (Settings API group `edminboost_anm_settings_group`). Rules and inbox stored in separate options. Tabbed settings UI (General, Notices, Access & visibility, Admin bar, Filtering, Security, Notifications, Migration & Tools).
 - Options API only — no custom tables. No REST API.
 - AJAX for dashboard/rules/inbox (including `edminboost_anm_inbox_list` sort), importer, capture, WP preset conversion, user search, notice hide/reset hidden; weekly digest via WP-Cron; optional webhook (user URL, off by default).
 - **Ad redirects**: optional `block_ad_redirects` URL blocklist — admin-only redirect filtering via `EDMINBOOST_ANM_Ad_Redirects`.
 - **Inline notice controls**: `edminboost-anm-notice-inline.js` on non–plugin-screen wp-admin for “Hide for me” / “Hide for all”.
 - **Notifications previews**: Settings Notifications tab — two-column digest form + sticky structured email preview; live webhook text/JSON preview (no send on preview).
 - **Admin bar panel**: Styles `link`, `bell_link`, `dropdown`, `dropdown_compact`; six position slots; badge caps and dot/pulse/none; compact vs detailed dropdown markup. Assets on wp-admin and front-end admin bar when panel active (`EDMINBOOST_ANM_Notices`, `dashicons` for bell). Shared CSS overrides `#wpadminbar` global resets for panel/badges; settings preview mock matches live dropdown styling. Settings Admin bar tab: unified `initNoticePanelPreview()` (bell row sync, CSS var colors, realistic sample notices). Dropdown JS via `enqueue_admin_bar_dropdown_script()`.
-- **Settings UX**: `EDMINBOOST_ANM_Admin::help_tip()` on most fields; segmented notice-display control (General); hiding visibility fieldset with inline user pickers per mode (`initHidingNotificationsSettings`); redirect blocklist as list table (Security). Enqueues `list-tables` and `dashicons` on inbox and settings screens.
+- **Settings UX**: `EDMINBOOST_ANM_Admin::help_tip()` on most fields; General **Display experience** preset cards + advanced `manage_notices_mode` (`initDisplayExperience`); **Access & visibility** tab (ACL + `initHidingNotificationsSettings` user pickers); Notices tab for per-type handling; redirect blocklist as list table (Security). Enqueues `list-tables` and `dashicons` on inbox and settings screens.
+- **Plugin screens**: `hide_notices_on_plugin_screens()` suppresses WP notices on plugin admin pages; debug live-test queue cleared when visiting those screens.
 - **Dashboard**: Quick Status enable toggle reloads the page after successful AJAX save.
 
 ## Admin Pages

@@ -53,21 +53,24 @@ Yes. When uninstalled, all plugin options are removed from the database.
 == Changelog ==
 
 = 1.1.1 =
+* Plugin admin screens: hide WordPress admin notices (including debug test banners) so dashboard and settings layouts stay clean; live test notices still fire on the main Dashboard home as documented.
+* Settings (General): Display experience presets — leave notices on the dashboard, clean dashboard with inbox/admin bar (recommended), or toolbar-only; advanced section retains raw hide/show modes.
+* Settings: Access & visibility is its own tab (role ACL and per-user hiding); the Notices tab covers notice handling only.
 * Settings (Admin bar): Additional panel positions — left bar (after site name or updates), top-right first slot, and before or after the Howdy profile menu.
 * Settings (Admin bar): Live panel preview on the right — updates as you change style, position, badge, and colors.
 * Settings (Admin bar): Additional panel styles — bell icon link to inbox, detailed dropdown, and compact list dropdown.
 * Settings (Notifications): Weekly Notice Diet digest — customize subject, opening/closing text, stats and inbox sections, and preview the email before saving.
 * Settings (Notifications): Webhook alerts — customize the alert message text with placeholders for source, notice body, type, and site; live preview of alert text and JSON payload below the message field.
-* Settings (Notices & access): ACL and per-user visibility — role-based display/hide plus hide from all, only selected users, or all except selected (user search picker).
+* Settings (Access & visibility): ACL and per-user visibility — role-based display/hide plus hide from all, only selected users, or all except selected (user search picker).
 * Settings (General): Spam words and whitelist — comma-separated word lists to hide matching notices entirely or always show them on screen.
 * Settings (General): Block ad redirects — list admin URLs to block automatic post-install or promotional page loads (optional enable toggle).
 * Settings (General): manage admin notices mode (show all, hide all, hide selected, compact panel), disable plugin/core update notifications, show hidden notices in the admin toolbar, and reset hidden notice preferences per user or site-wide.
 * Visible admin notices: inline “Hide for me” and “Hide for all” actions (per-user or site-wide hash preferences; “Hide for all” can auto-create a rule).
 * Admin bar notification dropdown: full notice preview with “First logged”, “Display notice as normal”, “Hide for me”, and “Hide for all” actions.
 * Admin bar beside Howdy: Facebook-style bell icon with red count badge (replaces text “Admin notices” look); notification dropdown uses FB-like panel styling.
-* Settings (Notices & access): Notice handling — standard levels (success, error, warning, info), non-standard no-level notices, and CSS ignore selectors (combined UI with shared mode legend).
+* Settings (Notices): Notice handling — standard levels (success, error, warning, info), non-standard no-level notices, and CSS ignore selectors (combined UI with shared mode legend).
 * Debug tools: choose notice levels (error, warning, success, info, upsell) before Add to Inbox or Trigger Live Notices.
-* Organize Settings into tabbed sections (General, Notices & access, Admin bar, Filtering, Security, Notifications, Migration & Tools).
+* Organize Settings into tabbed sections (General, Notices, Access & visibility, Admin bar, Filtering, Security, Notifications, Migration & Tools).
 * Add admin bar panel style and position options: notification dropdown (bell icon) and placement beside the Howdy profile menu.
 * Add unread indicator options for the bell: number badge, 9+ / 99+ caps, dot, pulsing dot, or hidden (count still available to screen readers).
 * Add customizable panel colors (dot/badge, badge text, accent, link hover, open bell highlight).

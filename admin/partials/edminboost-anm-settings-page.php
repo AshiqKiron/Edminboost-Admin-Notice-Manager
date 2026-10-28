@@ -31,20 +31,19 @@ $edminboost_anm_spam_words       = $edminboost_anm_word_filters['spam_words'] ??
 $edminboost_anm_whitelist_words  = $edminboost_anm_word_filters['whitelist_words'] ?? array();
 $edminboost_anm_settings_tabs  = array(
 	'general'       => __( 'General', EDMINBOOST_ANM_TEXT_DOMAIN ),
-	'notices'       => __( 'Notices & access', EDMINBOOST_ANM_TEXT_DOMAIN ),
+	'notices'       => __( 'Notices', EDMINBOOST_ANM_TEXT_DOMAIN ),
+	'access'        => __( 'Access & visibility', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'admin_bar'     => __( 'Admin bar', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'filtering'     => __( 'Filtering', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'security'      => __( 'Security & Shield', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'notifications' => __( 'Notifications', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'tools'         => __( 'Migration & Tools', EDMINBOOST_ANM_TEXT_DOMAIN ),
 );
-$edminboost_anm_manage_mode    = EDMINBOOST_ANM_Settings::get_manage_notices_mode();
-$edminboost_anm_manage_modes   = array(
-	'show_all'       => __( 'Show all', EDMINBOOST_ANM_TEXT_DOMAIN ),
-	'hide_all'       => __( 'Hide all', EDMINBOOST_ANM_TEXT_DOMAIN ),
-	'hide_selected'  => __( 'Hide selected', EDMINBOOST_ANM_TEXT_DOMAIN ),
-	'compact_panel'  => __( 'Compact panel', EDMINBOOST_ANM_TEXT_DOMAIN ),
-);
+$edminboost_anm_manage_mode              = EDMINBOOST_ANM_Settings::get_manage_notices_mode();
+$edminboost_anm_display_presets          = EDMINBOOST_ANM_Settings::get_display_experience_presets();
+$edminboost_anm_active_display_preset    = EDMINBOOST_ANM_Settings::get_display_experience_preset_for_mode( $edminboost_anm_manage_mode );
+$edminboost_anm_manage_mode_labels       = EDMINBOOST_ANM_Settings::get_manage_notices_mode_labels();
+$edminboost_anm_display_experience_open  = '' === $edminboost_anm_active_display_preset;
 $edminboost_anm_active_tab     = 'general';
 if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Tab UI only; no privileged action.
 	$edminboost_anm_tab_candidate = sanitize_key( wp_unslash( $_GET['tab'] ) );
@@ -107,29 +106,73 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 				</tr>
 				<tr>
 					<th scope="row">
-						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'How notices appear in the dashboard. “Hide selected” uses your Notices & access and Auto-Rules settings.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
-						<?php esc_html_e( 'Notice display', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Choose how notices appear on the dashboard. Per-type rules live on the Notices tab; who is affected on Access & visibility; how to open the inbox on Admin bar.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<?php esc_html_e( 'Display experience', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
 					</th>
 					<td>
-						<fieldset class="edminboost-anm-segmented" data-edminboost-anm-manage-mode>
-							<legend class="screen-reader-text"><?php esc_html_e( 'Notice display', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></legend>
-							<?php foreach ( $edminboost_anm_manage_modes as $edminboost_anm_mode_slug => $edminboost_anm_mode_label ) : ?>
+						<input
+							type="hidden"
+							id="edminboost-anm-manage-notices-mode"
+							name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[manage_notices_mode]"
+							value="<?php echo esc_attr( $edminboost_anm_manage_mode ); ?>"
+						/>
+						<fieldset class="edminboost-anm-display-experience" data-edminboost-anm-display-experience>
+							<legend class="screen-reader-text"><?php esc_html_e( 'Display experience', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></legend>
+							<?php foreach ( $edminboost_anm_display_presets as $edminboost_anm_preset_slug => $edminboost_anm_preset ) : ?>
 								<?php
-								$edminboost_anm_mode_id = 'edminboost-anm-manage-' . $edminboost_anm_mode_slug;
+								$edminboost_anm_preset_id    = 'edminboost-anm-display-' . $edminboost_anm_preset_slug;
+								$edminboost_anm_preset_mode  = $edminboost_anm_preset['mode'] ?? '';
+								$edminboost_anm_preset_class = 'edminboost-anm-display-experience__option';
+								if ( $edminboost_anm_active_display_preset === $edminboost_anm_preset_slug ) {
+									$edminboost_anm_preset_class .= ' is-selected';
+								}
+								if ( 'clean_inbox' === $edminboost_anm_preset_slug ) {
+									$edminboost_anm_preset_class .= ' is-recommended';
+								}
 								?>
-								<input
-									type="radio"
-									name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[manage_notices_mode]"
-									id="<?php echo esc_attr( $edminboost_anm_mode_id ); ?>"
-									value="<?php echo esc_attr( $edminboost_anm_mode_slug ); ?>"
-									<?php checked( $edminboost_anm_manage_mode, $edminboost_anm_mode_slug ); ?>
-								/>
-								<label for="<?php echo esc_attr( $edminboost_anm_mode_id ); ?>"><?php echo esc_html( $edminboost_anm_mode_label ); ?></label>
+								<div class="<?php echo esc_attr( $edminboost_anm_preset_class ); ?>">
+									<label class="edminboost-anm-display-experience__label" for="<?php echo esc_attr( $edminboost_anm_preset_id ); ?>">
+										<input
+											type="radio"
+											class="edminboost-anm-display-experience__input"
+											id="<?php echo esc_attr( $edminboost_anm_preset_id ); ?>"
+											name="edminboost_anm_display_experience_preset"
+											value="<?php echo esc_attr( $edminboost_anm_preset_slug ); ?>"
+											data-manage-mode="<?php echo esc_attr( $edminboost_anm_preset_mode ); ?>"
+											<?php checked( $edminboost_anm_active_display_preset, $edminboost_anm_preset_slug ); ?>
+										/>
+										<span class="edminboost-anm-display-experience__title">
+											<?php echo esc_html( $edminboost_anm_preset['label'] ?? '' ); ?>
+											<?php if ( 'clean_inbox' === $edminboost_anm_preset_slug ) : ?>
+												<span class="edminboost-anm-display-experience__badge"><?php esc_html_e( 'Recommended', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></span>
+											<?php endif; ?>
+										</span>
+										<span class="edminboost-anm-display-experience__description description"><?php echo esc_html( $edminboost_anm_preset['description'] ?? '' ); ?></span>
+									</label>
+								</div>
 							<?php endforeach; ?>
 						</fieldset>
-						<p class="edminboost-anm-inline-notice" data-edminboost-anm-compact-panel-tip <?php echo 'compact_panel' === $edminboost_anm_manage_mode ? '' : 'hidden'; ?>>
-							<?php esc_html_e( 'Puts all notices in one panel with counts. Click the panel to expand them.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
-						</p>
+						<details class="edminboost-anm-display-experience-advanced" data-edminboost-anm-display-experience-advanced <?php echo $edminboost_anm_display_experience_open ? ' open' : ''; ?>>
+							<summary><?php esc_html_e( 'Advanced display options', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></summary>
+							<p class="description"><?php esc_html_e( 'Fine-grained modes for power users. Hide all suppresses every notice without inbox capture unless a rule matches first.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+							<fieldset class="edminboost-anm-display-experience-advanced__modes">
+								<legend class="screen-reader-text"><?php esc_html_e( 'Advanced notice display mode', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></legend>
+								<?php foreach ( $edminboost_anm_manage_mode_labels as $edminboost_anm_mode_slug => $edminboost_anm_mode_label ) : ?>
+									<?php $edminboost_anm_advanced_id = 'edminboost-anm-manage-advanced-' . $edminboost_anm_mode_slug; ?>
+									<label class="edminboost-anm-display-experience-advanced__mode" for="<?php echo esc_attr( $edminboost_anm_advanced_id ); ?>">
+										<input
+											type="radio"
+											class="edminboost-anm-display-experience-advanced__input"
+											id="<?php echo esc_attr( $edminboost_anm_advanced_id ); ?>"
+											name="edminboost_anm_display_experience_advanced_mode"
+											value="<?php echo esc_attr( $edminboost_anm_mode_slug ); ?>"
+											<?php checked( $edminboost_anm_manage_mode === $edminboost_anm_mode_slug && '' === $edminboost_anm_active_display_preset ); ?>
+										/>
+										<?php echo esc_html( $edminboost_anm_mode_label ); ?>
+									</label>
+								<?php endforeach; ?>
+							</fieldset>
+						</details>
 					</td>
 				</tr>
 				<tr>
@@ -156,7 +199,7 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 						<input type="checkbox" id="edminboost-anm-disable-core-updates" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[disable_core_update_notifications]" value="1" <?php checked( $edminboost_anm_disable_core_updates ); ?> />
 					</td>
 				</tr>
-				<tr>
+				<tr data-edminboost-anm-toolbar-option-row <?php echo 'show_all' === $edminboost_anm_manage_mode ? ' hidden' : ''; ?>>
 					<th scope="row">
 						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Keeps hidden notices in the admin bar so you can still open them.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
 						<label for="edminboost-anm-show-hidden-toolbar"><?php esc_html_e( 'Hidden notices in toolbar', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
@@ -225,11 +268,11 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 		$edminboost_anm_standard_modes    = $settings['standard_admin_notices'] ?? EDMINBOOST_ANM_Settings::get_standard_admin_notice_defaults();
 		$edminboost_anm_non_standard      = $settings['non_standard_admin_notices'] ?? array();
 		$edminboost_anm_no_level_mode     = $edminboost_anm_non_standard['no_level'] ?? 'inbox';
-		$edminboost_anm_notice_handling_tip = __( 'Used when Notice display (General tab) is Hide selected. Inbox hides on the dashboard and shows in the plugin panel; Hide removes everywhere; Default keeps normal WordPress behavior.', EDMINBOOST_ANM_TEXT_DOMAIN );
+		$edminboost_anm_notice_handling_tip = __( 'Used for Clean dashboard and Toolbar only experiences (and advanced Hide selected / Compact panel). Inbox hides on the dashboard and shows in the plugin panel; Hide removes everywhere; Default keeps normal WordPress behavior.', EDMINBOOST_ANM_TEXT_DOMAIN );
 		?>
 		<div class="edminboost-anm-card">
 			<h2><?php esc_html_e( 'Notice handling', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
-			<p class="description"><?php esc_html_e( 'Used when Notice display (General tab) is set to Hide selected. Choose what happens to each notice type on the dashboard and in the admin bar panel.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+			<p class="description"><?php esc_html_e( 'Applies when General → Display experience is Clean dashboard + inbox / admin bar or Toolbar only (or matching advanced modes). Choose what happens to each notice type on the dashboard and in the admin bar panel.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 			<ul class="edminboost-anm-notice-mode-legend description">
 				<?php foreach ( $edminboost_anm_notice_modes as $edminboost_anm_mode_slug => $edminboost_anm_mode_label ) : ?>
 					<li><strong><?php echo esc_html( $edminboost_anm_notice_mode_labels[ $edminboost_anm_mode_slug ] ?? $edminboost_anm_mode_slug ); ?>:</strong> <?php echo esc_html( $edminboost_anm_mode_label ); ?></li>
@@ -290,7 +333,16 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 				</tr>
 			</table>
 		</div>
+		</div>
 
+		<div
+			id="<?php echo esc_attr( 'edminboost-anm-settings-panel-access' ); ?>"
+			class="edminboost-anm-tab-panel"
+			role="tabpanel"
+			data-tab="access"
+			aria-labelledby="<?php echo esc_attr( 'edminboost-anm-settings-tab-access' ); ?>"
+			<?php echo 'access' !== $edminboost_anm_active_tab ? ' hidden' : ''; ?>
+		>
 		<?php
 		$edminboost_anm_acl_roles   = $settings['acl']['roles'] ?? array();
 		$edminboost_anm_acl_choices = EDMINBOOST_ANM_Settings::get_acl_role_choices();
@@ -309,7 +361,7 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 		$edminboost_anm_acl_role_tip    = __( 'Whether users with this role still see intercepted notices on the dashboard.', EDMINBOOST_ANM_TEXT_DOMAIN );
 		?>
 		<div class="edminboost-anm-card">
-			<h2><?php esc_html_e( 'Access & visibility', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+			<h2 class="screen-reader-text"><?php esc_html_e( 'Access & visibility', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
 			<p class="description"><?php esc_html_e( 'Control which roles and individual accounts are affected by notice hiding. Role rules apply first; user rules refine who still gets interception.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 			<h3 class="edminboost-anm-settings-subheading"><?php esc_html_e( 'By role (ACL)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h3>
 			<table class="form-table edminboost-anm-acl-table" role="presentation">

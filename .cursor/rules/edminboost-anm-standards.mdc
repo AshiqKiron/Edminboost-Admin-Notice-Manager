@@ -13,7 +13,7 @@ Cross-cutting quality standards. See also: `edminboost-anm-project.mdc`, `edminb
 - **JS**: IIFE with `'use strict'`; guard on DOM presence; no jQuery unless WordPress already loads it.
 - **CSS**: Prefix all selectors with `.edminboost-anm-` to avoid wp-admin conflicts. Admin bar dropdown styles need `#wpadminbar`-scoped selectors to beat core toolbar globals; mirror critical rules on the settings preview mock.
 - **HTML**: Semantic markup, accessible labels, buttons, headings.
-- Never output inline CSS/JS unless there is a good reason (current exception: `hide_core_notices()` admin_head style tag).
+- Never output inline CSS/JS unless there is a good reason (current exceptions: `hide_core_notices()` and `hide_notices_on_plugin_screens()` admin_head style tags).
 - Keep lines and functions readable rather than clever.
 
 ## I18N

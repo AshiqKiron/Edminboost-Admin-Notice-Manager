@@ -40,6 +40,8 @@ class EDMINBOOST_ANM_Notices {
 		$placement = EDMINBOOST_ANM_Settings::get_notice_panel_admin_bar_placement( $panel['position'] ?? 'default' );
 		add_action( 'admin_bar_menu', array( $this, 'register_admin_bar_node' ), $placement['hook_priority'] );
 
+		add_action( 'admin_head', array( $this, 'hide_notices_on_plugin_screens' ), 1 );
+
 		if ( ! EDMINBOOST_ANM_Settings::is_enabled() ) {
 			return;
 		}
@@ -177,6 +179,38 @@ class EDMINBOOST_ANM_Notices {
 		);
 
 		wp_localize_script( 'edminboost-anm-notices', 'edminboostAnmNotices', $localized );
+	}
+
+	/**
+	 * CSS that hides WordPress admin notices on plugin screens (restores panel preview mocks).
+	 *
+	 * @return string
+	 */
+	public static function get_plugin_screen_notice_hide_css() {
+		return '#wpbody-content > .notice,#wpbody-content > .update-nag,#wpbody-content > div.error,#wpbody-content > div.updated,'
+			. '.edminboost-anm-wrap .notice,.edminboost-anm-wrap .update-nag,.edminboost-anm-wrap div.error,.edminboost-anm-wrap div.updated{'
+			. 'display:none!important;}'
+			. '.edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__notice-body .notice,'
+			. '.edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__notice-body .update-nag{'
+			. 'display:block!important;}';
+	}
+
+	/**
+	 * Hide WordPress admin notices on this plugin's admin screens (keeps panel preview mocks visible).
+	 *
+	 * @return void
+	 */
+	public function hide_notices_on_plugin_screens() {
+		if ( ! EDMINBOOST_ANM_Admin::is_plugin_screen() ) {
+			return;
+		}
+
+		if ( ! current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static plugin-authored CSS.
+		echo '<style>' . self::get_plugin_screen_notice_hide_css() . '</style>';
 	}
 
 	/**

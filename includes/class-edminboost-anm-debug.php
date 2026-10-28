@@ -57,6 +57,25 @@ class EDMINBOOST_ANM_Debug {
 		}
 
 		add_action( 'admin_notices', array( __CLASS__, 'render_live_test_notices' ) );
+		add_action( 'admin_init', array( __CLASS__, 'unhook_live_notices_on_plugin_screen' ), 999 );
+	}
+
+	/**
+	 * Prevent debug live notices from printing on Notice Manager admin pages.
+	 *
+	 * @return void
+	 */
+	public static function unhook_live_notices_on_plugin_screen() {
+		if ( ! EDMINBOOST_ANM_Admin::is_plugin_screen() ) {
+			return;
+		}
+
+		remove_action( 'admin_notices', array( __CLASS__, 'render_live_test_notices' ) );
+
+		$key = self::TRANSIENT_PREFIX . get_current_user_id();
+		if ( false !== get_transient( $key ) ) {
+			delete_transient( $key );
+		}
 	}
 
 	/**
@@ -256,12 +275,15 @@ class EDMINBOOST_ANM_Debug {
 			return;
 		}
 
-		if ( EDMINBOOST_ANM_Admin::is_plugin_screen() ) {
-			return;
-		}
-
 		$user_id = get_current_user_id();
 		$key     = self::TRANSIENT_PREFIX . $user_id;
+
+		if ( EDMINBOOST_ANM_Admin::is_plugin_screen() ) {
+			if ( false !== get_transient( $key ) ) {
+				delete_transient( $key );
+			}
+			return;
+		}
 
 		$queued_types = get_transient( $key );
 

@@ -108,6 +108,13 @@ class EDMINBOOST_ANM_Settings {
 	const MANAGE_NOTICES_MODES = array( 'show_all', 'hide_all', 'hide_selected', 'compact_panel' );
 
 	/**
+	 * Display experience preset slugs (General settings UI).
+	 *
+	 * @var string[]
+	 */
+	const DISPLAY_EXPERIENCE_PRESETS = array( 'dashboard', 'clean_inbox', 'toolbar_only' );
+
+	/**
 	 * Default settings.
 	 *
 	 * @return array
@@ -466,7 +473,10 @@ class EDMINBOOST_ANM_Settings {
 
 		$output['notice_panel'] = wp_parse_args( $output['notice_panel'], $defaults['notice_panel'] );
 
-		if ( 'compact_panel' === $manage_mode || ! empty( $output['show_hidden_notices_in_toolbar'] ) ) {
+		if (
+			in_array( $manage_mode, array( 'hide_selected', 'compact_panel', 'hide_all' ), true )
+			|| ! empty( $output['show_hidden_notices_in_toolbar'] )
+		) {
 			$output['notice_panel']['enabled'] = true;
 		}
 
@@ -755,6 +765,63 @@ class EDMINBOOST_ANM_Settings {
 		}
 
 		return self::get_defaults()['manage_notices_mode'];
+	}
+
+	/**
+	 * Labels for raw manage_notices_mode values (advanced General settings).
+	 *
+	 * @return array<string, string>
+	 */
+	public static function get_manage_notices_mode_labels() {
+		return array(
+			'show_all'      => __( 'Show all', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'hide_all'      => __( 'Hide all', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'hide_selected' => __( 'Hide selected', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'compact_panel' => __( 'Compact panel', EDMINBOOST_ANM_TEXT_DOMAIN ),
+		);
+	}
+
+	/**
+	 * User-facing display experience presets mapped to manage_notices_mode.
+	 *
+	 * @return array<string, array{label: string, description: string, mode: string}>
+	 */
+	public static function get_display_experience_presets() {
+		return array(
+			'dashboard'    => array(
+				'label'       => __( 'Leave notices on the dashboard', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'description' => __( 'WordPress behaves as usual. The plugin stays available for inbox, rules, and reports without changing how notices appear on screen.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'mode'        => 'show_all',
+			),
+			'clean_inbox'  => array(
+				'label'       => __( 'Clean dashboard + inbox / admin bar', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'description' => __( 'Recommended. Hides the notices you configure under Notices, Access & visibility, and Auto-Rules, then collects them in the inbox and admin bar panel.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'mode'        => 'hide_selected',
+			),
+			'toolbar_only' => array(
+				'label'       => __( 'Toolbar only', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'description' => __( 'Hides the dashboard notice area entirely. Open captured notices from the admin bar panel or the plugin inbox.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'mode'        => 'compact_panel',
+			),
+		);
+	}
+
+	/**
+	 * Preset slug for a stored manage_notices_mode, or empty when using a custom/advanced mode.
+	 *
+	 * @param string $mode Manage notices mode slug.
+	 * @return string Preset slug or empty string.
+	 */
+	public static function get_display_experience_preset_for_mode( $mode ) {
+		$mode = sanitize_key( $mode );
+
+		foreach ( self::get_display_experience_presets() as $preset => $data ) {
+			if ( isset( $data['mode'] ) && $mode === $data['mode'] ) {
+				return $preset;
+			}
+		}
+
+		return '';
 	}
 
 	/**

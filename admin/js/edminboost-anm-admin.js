@@ -42,6 +42,56 @@
 		}
 	}
 
+	function initHidePluginAdminNotices() {
+		if (!document.querySelector('.edminboost-anm-wrap')) {
+			return;
+		}
+
+		var selector = '.notice, .update-nag, div.error, div.updated';
+
+		function shouldHide(node) {
+			if (!node || !node.matches || !node.matches(selector)) {
+				return false;
+			}
+			if (node.closest('.edminboost-anm-notice-panel-preview, #wpadminbar')) {
+				return false;
+			}
+			return true;
+		}
+
+		function hideNotices(root) {
+			if (!root || !root.querySelectorAll) {
+				return;
+			}
+			root.querySelectorAll(selector).forEach(function (node) {
+				if (shouldHide(node)) {
+					node.classList.add('edminboost-anm-notice-hidden');
+				}
+			});
+		}
+
+		hideNotices(document.getElementById('wpbody-content'));
+
+		var wpbody = document.getElementById('wpbody-content');
+		if (wpbody && typeof MutationObserver !== 'undefined') {
+			var observer = new MutationObserver(function (mutations) {
+				mutations.forEach(function (mutation) {
+					mutation.addedNodes.forEach(function (node) {
+						if (node.nodeType !== 1) {
+							return;
+						}
+						if (shouldHide(node)) {
+							node.classList.add('edminboost-anm-notice-hidden');
+						} else if (node.querySelectorAll) {
+							hideNotices(node);
+						}
+					});
+				});
+			});
+			observer.observe(wpbody, { childList: true, subtree: true });
+		}
+	}
+
 	function initQuickStatusToggle() {
 		var toggle = document.querySelector('.edminboost-anm-enabled-toggle');
 		if (!toggle) {
@@ -985,20 +1035,70 @@
 		window.addEventListener('resize', hideTip);
 	}
 
-	function initManageNoticesMode() {
-		var fieldset = document.querySelector('[data-edminboost-anm-manage-mode]');
-		var tip = document.querySelector('[data-edminboost-anm-compact-panel-tip]');
-		if (!fieldset) {
+	function initDisplayExperience() {
+		var hidden = document.getElementById('edminboost-anm-manage-notices-mode');
+		var root = document.querySelector('[data-edminboost-anm-display-experience]');
+		if (!hidden || !root) {
 			return;
 		}
 
-		fieldset.querySelectorAll('input[type="radio"]').forEach(function (radio) {
-			radio.addEventListener('change', function () {
-				if (tip) {
-					tip.hidden = radio.value !== 'compact_panel' || !radio.checked;
+		var presetInputs = root.querySelectorAll('.edminboost-anm-display-experience__input');
+		var presetOptions = root.querySelectorAll('.edminboost-anm-display-experience__option');
+		var advancedInputs = document.querySelectorAll('.edminboost-anm-display-experience-advanced__input');
+		var toolbarRow = document.querySelector('[data-edminboost-anm-toolbar-option-row]');
+
+		function presetSelectedForMode(mode) {
+			var selected = null;
+			presetInputs.forEach(function (radio) {
+				if (radio.checked && radio.dataset.manageMode === mode) {
+					selected = radio;
 				}
 			});
+			return selected;
+		}
+
+		function syncUi(mode) {
+			presetOptions.forEach(function (option) {
+				var input = option.querySelector('.edminboost-anm-display-experience__input');
+				option.classList.toggle('is-selected', !!(input && input.checked));
+			});
+
+			advancedInputs.forEach(function (radio) {
+				radio.checked = radio.value === mode && !presetSelectedForMode(mode);
+			});
+
+			if (toolbarRow) {
+				toolbarRow.hidden = mode === 'show_all';
+			}
+		}
+
+		function setMode(mode) {
+			hidden.value = mode;
+			syncUi(mode);
+		}
+
+		presetInputs.forEach(function (radio) {
+			radio.addEventListener('change', function () {
+				if (!radio.checked) {
+					return;
+				}
+				setMode(radio.dataset.manageMode || '');
+			});
 		});
+
+		advancedInputs.forEach(function (radio) {
+			radio.addEventListener('change', function () {
+				if (!radio.checked) {
+					return;
+				}
+				presetInputs.forEach(function (preset) {
+					preset.checked = false;
+				});
+				setMode(radio.value);
+			});
+		});
+
+		syncUi(hidden.value || '');
 	}
 
 	function initResetHiddenNotices() {
@@ -1665,16 +1765,18 @@
 			var html = '<li class="edminboost-anm-notices-panel__card">';
 			html += '<div class="edminboost-anm-notices-panel__notice-wrap">';
 			html += '<button type="button" class="edminboost-anm-notices-panel__dismiss" aria-label="' + dismissLabel + '" tabindex="-1">&times;</button>';
-			html += '<div class="edminboost-anm-notices-panel__notice-body"><div class="notice ' + noticeClass + '"><p>' + escapeHtml(message) + '</p></div></div>';
+			html += '<div class="edminboost-anm-notices-panel__notice-body"><div class="' + noticeClass + '"><p>' + escapeHtml(message) + '</p></div></div>';
 			html += '</div>';
 			html += '<div class="edminboost-anm-notices-panel__options">';
 			html += '<span class="edminboost-anm-notices-panel__logged">' + logged + '</span>';
 			html += '<span class="edminboost-anm-notices-panel__actions">';
 			html += '<button type="button" class="edminboost-anm-notices-panel__action" tabindex="-1">' + escapeHtml(i18n.noticePanelPreviewDisplayNormal || 'Display notice as normal') + '</button>';
 			html += '<button type="button" class="edminboost-anm-notices-panel__action edminboost-anm-notices-panel__action--hide" tabindex="-1">';
-			html += '<span class="dashicons dashicons-hidden" aria-hidden="true"></span>' + escapeHtml(i18n.noticePanelPreviewHideForMe || 'Hide for me') + '</button>';
+			html += '<span class="dashicons dashicons-hidden" aria-hidden="true"></span>';
+			html += '<span class="edminboost-anm-notices-panel__action-label">' + escapeHtml(i18n.noticePanelPreviewHideForMe || 'Hide for me') + '</span></button>';
 			html += '<button type="button" class="edminboost-anm-notices-panel__action edminboost-anm-notices-panel__action--hide" tabindex="-1">';
-			html += '<span class="dashicons dashicons-hidden" aria-hidden="true"></span>' + escapeHtml(i18n.noticePanelPreviewHideForAll || 'Hide for all') + '</button>';
+			html += '<span class="dashicons dashicons-hidden" aria-hidden="true"></span>';
+			html += '<span class="edminboost-anm-notices-panel__action-label">' + escapeHtml(i18n.noticePanelPreviewHideForAll || 'Hide for all') + '</span></button>';
 			html += '</span></div></li>';
 			return html;
 		}
@@ -1836,6 +1938,7 @@
 
 	document.addEventListener('DOMContentLoaded', function () {
 		initWrap();
+		initHidePluginAdminNotices();
 		initQuickStatusToggle();
 		initPresetToggle();
 		initRuleModal();
@@ -1846,7 +1949,7 @@
 		initHidingNotificationsSettings();
 		initBlockAdRedirectsSettings();
 		initSettingsHelpTips();
-		initManageNoticesMode();
+		initDisplayExperience();
 		initResetHiddenNotices();
 		initNoticePanelPreview();
 		initDigestPreview();

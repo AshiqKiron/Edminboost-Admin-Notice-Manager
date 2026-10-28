@@ -169,6 +169,90 @@
 	color: #1d2327;
 }
 
+.edminboost-anm-display-experience {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	max-width: 640px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.edminboost-anm-display-experience__option {
+	margin: 0;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.edminboost-anm-display-experience__option.is-selected {
+	border-color: #2271b1;
+	box-shadow: inset 0 0 0 1px #2271b1;
+}
+
+.edminboost-anm-display-experience__option.is-recommended.is-selected {
+	border-color: #2271b1;
+}
+
+.edminboost-anm-display-experience__label {
+	display: block;
+	margin: 0;
+	padding: 12px 14px;
+	cursor: pointer;
+}
+
+.edminboost-anm-display-experience__input {
+	margin: 0 8px 0 0;
+	vertical-align: top;
+}
+
+.edminboost-anm-display-experience__title {
+	display: block;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.4;
+	color: #1d2327;
+}
+
+.edminboost-anm-display-experience__badge {
+	display: inline-block;
+	margin-left: 6px;
+	padding: 1px 6px;
+	border-radius: 3px;
+	background: #2271b1;
+	color: #fff;
+	font-size: 11px;
+	font-weight: 600;
+	vertical-align: middle;
+}
+
+.edminboost-anm-display-experience__description {
+	display: block;
+	margin: 6px 0 0 22px;
+	max-width: none;
+}
+
+.edminboost-anm-display-experience-advanced {
+	max-width: 640px;
+	margin-top: 12px;
+}
+
+.edminboost-anm-display-experience-advanced__modes {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin: 8px 0 0;
+	padding: 0;
+	border: 0;
+}
+
+.edminboost-anm-display-experience-advanced__mode {
+	display: block;
+	font-size: 13px;
+}
+
 .edminboost-anm-reset-hidden fieldset {
 	margin: 0;
 	padding: 0;
@@ -553,14 +637,21 @@ button.edminboost-anm-tabs__tab:focus-visible {
 .edminboost-anm-toggle-card__header {
 	display: flex;
 	align-items: center;
+	flex-wrap: wrap;
 	gap: 10px;
 	margin-bottom: 8px;
 }
 
 .edminboost-anm-toggle-card__header h2 {
 	margin: 0;
-	flex: 1;
+	flex: 1 1 200px;
+	min-width: 0;
 	font-size: 15px;
+}
+
+.edminboost-anm-toggle-card__header > .edminboost-anm-switch {
+	flex-shrink: 0;
+	margin-left: auto;
 }
 
 .edminboost-anm-toggle-card__header .dashicons {
@@ -1629,32 +1720,6 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	border-color: #b32d2e;
 }
 
-#wpadminbar .edminboost-anm-notices-panel__action--hide {
-	display: inline-flex;
-	align-items: center;
-	gap: 4px;
-	border: 1px solid #d63638;
-	border-radius: 4px;
-	padding: 2px 8px;
-	color: #d63638;
-	text-decoration: none;
-	white-space: nowrap;
-}
-
-#wpadminbar .edminboost-anm-notices-panel__action--hide .dashicons {
-	flex-shrink: 0;
-	width: 14px;
-	height: 14px;
-	font-size: 14px;
-}
-
-#wpadminbar .edminboost-anm-notices-panel__action--hide:hover,
-#wpadminbar .edminboost-anm-notices-panel__action--hide:focus {
-	color: #b32d2e;
-	border-color: #b32d2e;
-	background: #fcf0f1;
-}
-
 /* Admin bar notice panel — Facebook-style bell (dropdown + beside Howdy link) */
 #wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--dropdown,
 #wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--bell,
@@ -2021,6 +2086,26 @@ button.edminboost-anm-tabs__tab:focus-visible {
 #wpadminbar .edminboost-anm-notices-panel__action:hover,
 #wpadminbar .edminboost-anm-notices-panel__action:focus {
 	color: var(--edminboost-anm-notice-accent-hover, #135e96);
+}
+
+#wpadminbar .edminboost-anm-notices-panel__action--hide {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	white-space: nowrap;
+	text-decoration: none;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__action--hide .edminboost-anm-notices-panel__action-label {
+	text-decoration: underline;
+}
+
+#wpadminbar .edminboost-anm-notices-panel__action--hide .dashicons {
+	flex-shrink: 0;
+	width: 14px;
+	height: 14px;
+	font-size: 14px;
+	text-decoration: none;
 }
 
 #wpadminbar .edminboost-anm-notices-panel__item,
@@ -2412,8 +2497,12 @@ button.edminboost-anm-tabs__tab:focus-visible {
 
 .edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__notice-body .notice,
 .edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__notice-body .update-nag {
+	display: block;
+	width: 100%;
+	max-width: 100%;
 	margin: 0;
 	box-shadow: none;
+	box-sizing: border-box;
 }
 
 .edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__options {
@@ -2441,7 +2530,7 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	gap: 6px 10px;
 }
 
-#edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__action:not(.edminboost-anm-notices-panel__action--hide) {
+#edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__action {
 	border: 0;
 	background: transparent;
 	color: var(--edminboost-anm-notice-accent, #2271b1);
@@ -2451,8 +2540,8 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	text-decoration: underline;
 }
 
-#edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__action:not(.edminboost-anm-notices-panel__action--hide):hover,
-#edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__action:not(.edminboost-anm-notices-panel__action--hide):focus {
+#edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__action:hover,
+#edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__action:focus {
 	color: var(--edminboost-anm-notice-accent-hover, #135e96);
 }
 
@@ -2460,12 +2549,12 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	display: inline-flex;
 	align-items: center;
 	gap: 4px;
-	border: 1px solid #d63638;
-	border-radius: 4px;
-	padding: 2px 8px;
-	color: #d63638;
-	text-decoration: none;
 	white-space: nowrap;
+	text-decoration: none;
+}
+
+.edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__action--hide .edminboost-anm-notices-panel__action-label {
+	text-decoration: underline;
 }
 
 .edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__action .dashicons {
@@ -2475,6 +2564,7 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	font-size: 14px;
 	line-height: 1;
 	vertical-align: middle;
+	text-decoration: none;
 }
 
 .edminboost-anm-notice-panel-preview .edminboost-anm-notices-panel__item {

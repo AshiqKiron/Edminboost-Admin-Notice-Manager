@@ -103,11 +103,11 @@ $edminboost_anm_panel_modifier = 'compact' === $edminboost_anm_panel_layout
 							</button>
 							<button type="button" class="edminboost-anm-notices-panel__action edminboost-anm-notices-panel__action--hide" data-action="hide_for_me" data-id="<?php echo esc_attr( $edminboost_anm_id ); ?>">
 								<span class="dashicons dashicons-hidden" aria-hidden="true"></span>
-								<?php esc_html_e( 'Hide for me', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+								<span class="edminboost-anm-notices-panel__action-label"><?php esc_html_e( 'Hide for me', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></span>
 							</button>
 							<button type="button" class="edminboost-anm-notices-panel__action edminboost-anm-notices-panel__action--hide" data-action="hide_for_all" data-id="<?php echo esc_attr( $edminboost_anm_id ); ?>">
 								<span class="dashicons dashicons-hidden" aria-hidden="true"></span>
-								<?php esc_html_e( 'Hide for all', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+								<span class="edminboost-anm-notices-panel__action-label"><?php esc_html_e( 'Hide for all', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></span>
 							</button>
 						</span>
 					</div>
