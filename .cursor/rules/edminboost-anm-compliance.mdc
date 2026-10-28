@@ -13,9 +13,9 @@ See `edminboost-anm-project.mdc`, `edminboost-anm-standards.mdc`, `edminboost-an
 
 - Sanitize on input, escape on output, authorize before action, verify nonce before write.
 - Never trust browser or request input.
-- Use `EDMINBOOST_ANM_Settings::CAPABILITY` on admin pages and privileged handlers.
-- Settings API: `sanitize_callback` via `EDMINBOOST_ANM_Settings::sanitize()`, `show_in_rest => false`.
-- AJAX: `EDMINBOOST_ANM_Ajax::verify_request()` — `check_ajax_referer( 'edminboost_anm_admin', 'nonce' )` + capability check. Mirror pattern for new actions.
+- Use `EDMINBOOST_ANM_Settings::CAPABILITY` on site admin pages and privileged handlers; network admin screens and `context=network` AJAX use `EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY` (`manage_network_options`).
+- Settings API: `sanitize_callback` via `EDMINBOOST_ANM_Settings::sanitize()`, `show_in_rest => false`. Network default settings use `sanitize_network_settings()`; network policy uses `EDMINBOOST_ANM_Multisite::sanitize_policy()`. Site `sanitize()` returns stored raw unchanged when multisite policy forbids site edits (non–network-admin save).
+- AJAX: `EDMINBOOST_ANM_Ajax::verify_request()` — `check_ajax_referer( 'edminboost_anm_admin', 'nonce' )` + capability check (`manage_options` for site context, `manage_network_options` when posted `context` is `network`). Site settings mutations (e.g. Quick Status toggle) use `verify_site_settings_mutation()` — also blocks when `EDMINBOOST_ANM_Multisite::site_can_edit_settings()` is false. Mirror pattern for new actions.
 - Inbox sort/filter AJAX (`edminboost_anm_inbox_list`): same verification; returned row HTML must escape all notice fields in the partial.
 - Debug seed/trigger AJAX: `verify_debug_request()` — requires `EDMINBOOST_ANM_Debug::is_available()`.
 - Rule export: `admin_post_edminboost_anm_export_rules` — nonce + capability before download.
@@ -42,7 +42,7 @@ See `edminboost-anm-project.mdc`, `edminboost-anm-standards.mdc`, `edminboost-an
 - Prefer WordPress core APIs over custom hacks.
 - Keep code human-readable for directory review.
 - Follow WPCS across PHP, CSS, JS, and HTML.
-- Admin-only unless explicitly requested; enqueue plugin-screen assets via `is_plugin_screen()`.
+- Admin-only unless explicitly requested; enqueue plugin-screen assets via `is_plugin_screen()` (and `EDMINBOOST_ANM_Multisite::is_network_plugin_screen()` on multisite).
 - Interceptor script loads on wp-admin when plugin is enabled — keep payload minimal; no external script URLs.
 - Use `edminboost_anm` / `EDMINBOOST_ANM_` prefix consistently.
 
@@ -57,7 +57,7 @@ See `edminboost-anm-project.mdc`, `edminboost-anm-standards.mdc`, `edminboost-an
 - [ ] SQL prepared (if any)
 - [ ] Assets scoped; admin notices minimal and dismissible
 - [ ] Webhook/digest behavior documented; webhook off by default
-- [ ] Uninstall path removes plugin data and clears digest cron
+- [ ] Uninstall path removes plugin data (per-site options; multisite sitemeta via `EDMINBOOST_ANM_Multisite::uninstall_all_sites()`) and clears digest cron
 - [ ] Unique `EDMINBOOST_ANM_` / `edminboost_anm_` prefix; maintainable structure
 - [ ] Would survive WordPress.org review
 

@@ -29,9 +29,11 @@ class EDMINBOOST_ANM_Admin {
 	 * @return void
 	 */
 	public function register_menu() {
+		$menu_title = EDMINBOOST_ANM_Settings::get_admin_menu_title();
+
 		add_menu_page(
-			__( 'Notice Manager', EDMINBOOST_ANM_TEXT_DOMAIN ),
-			__( 'Notice Manager', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			$menu_title,
+			$menu_title,
 			EDMINBOOST_ANM_Settings::CAPABILITY,
 			self::PAGE_SLUG,
 			array( $this, 'render_dashboard_page' ),
@@ -94,6 +96,89 @@ class EDMINBOOST_ANM_Admin {
 	}
 
 	/**
+	 * Register network admin menus (multisite).
+	 *
+	 * @return void
+	 */
+	public function register_network_menu() {
+		if ( ! EDMINBOOST_ANM_Multisite::is_active() ) {
+			return;
+		}
+
+		add_menu_page(
+			__( 'Notice Manager', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			__( 'Notice Manager', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY,
+			EDMINBOOST_ANM_Multisite::NETWORK_PAGE_SLUG,
+			array( $this, 'render_network_policy_page' ),
+			'dashicons-megaphone',
+			73
+		);
+
+		add_submenu_page(
+			EDMINBOOST_ANM_Multisite::NETWORK_PAGE_SLUG,
+			__( 'Multisite policy', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			__( 'Multisite policy', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY,
+			EDMINBOOST_ANM_Multisite::NETWORK_PAGE_SLUG,
+			array( $this, 'render_network_policy_page' )
+		);
+
+		add_submenu_page(
+			EDMINBOOST_ANM_Multisite::NETWORK_PAGE_SLUG,
+			__( 'Network defaults', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			__( 'Network defaults', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY,
+			EDMINBOOST_ANM_Multisite::NETWORK_SETTINGS_PAGE_SLUG,
+			array( $this, 'render_network_defaults_page' )
+		);
+
+		add_submenu_page(
+			EDMINBOOST_ANM_Multisite::NETWORK_PAGE_SLUG,
+			__( 'Network Auto-Rules', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			__( 'Network Auto-Rules', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY,
+			EDMINBOOST_ANM_Multisite::NETWORK_PAGE_SLUG . '-rules',
+			array( $this, 'render_network_rules_page' )
+		);
+	}
+
+	/**
+	 * Register network Settings API options.
+	 *
+	 * @return void
+	 */
+	public function register_network_settings() {
+		if ( ! EDMINBOOST_ANM_Multisite::is_active() ) {
+			return;
+		}
+
+		EDMINBOOST_ANM_Multisite::seed_network_options();
+
+		register_setting(
+			EDMINBOOST_ANM_Multisite::NETWORK_POLICY_GROUP,
+			EDMINBOOST_ANM_Multisite::NETWORK_OPTION,
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( 'EDMINBOOST_ANM_Multisite', 'sanitize_policy' ),
+				'default'           => EDMINBOOST_ANM_Multisite::get_policy_defaults(),
+				'show_in_rest'      => false,
+			)
+		);
+
+		register_setting(
+			EDMINBOOST_ANM_Multisite::NETWORK_SETTINGS_GROUP,
+			EDMINBOOST_ANM_Multisite::NETWORK_SETTINGS_OPTION,
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( 'EDMINBOOST_ANM_Settings', 'sanitize_network_settings' ),
+				'default'           => EDMINBOOST_ANM_Settings::get_defaults(),
+				'show_in_rest'      => false,
+			)
+		);
+	}
+
+	/**
 	 * Redirect to the dashboard after activation.
 	 *
 	 * @return void
@@ -124,7 +209,7 @@ class EDMINBOOST_ANM_Admin {
 	 * @return void
 	 */
 	public function enqueue_styles( $hook_suffix ) {
-		if ( ! self::is_plugin_screen( $hook_suffix ) ) {
+		if ( ! self::is_plugin_screen( $hook_suffix ) && ! EDMINBOOST_ANM_Multisite::is_network_plugin_screen( $hook_suffix ) ) {
 			return;
 		}
 
@@ -159,7 +244,7 @@ class EDMINBOOST_ANM_Admin {
 	 * @return void
 	 */
 	public function enqueue_scripts( $hook_suffix ) {
-		if ( ! self::is_plugin_screen( $hook_suffix ) ) {
+		if ( ! self::is_plugin_screen( $hook_suffix ) && ! EDMINBOOST_ANM_Multisite::is_network_plugin_screen( $hook_suffix ) ) {
 			return;
 		}
 
@@ -191,10 +276,26 @@ class EDMINBOOST_ANM_Admin {
 			$notice_panel_position_layouts[ $position_slug ] = EDMINBOOST_ANM_Settings::get_notice_panel_preview_layout( $position_slug );
 		}
 
+		$rules_context = 'site';
+		if ( EDMINBOOST_ANM_Multisite::is_network_plugin_screen() ) {
+			$hook = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+			if ( $hook && false !== strpos( $hook->id, EDMINBOOST_ANM_Multisite::NETWORK_PAGE_SLUG . '-rules' ) ) {
+				$rules_context = 'network';
+			}
+		}
+
 		return array(
 			'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( 'edminboost_anm_admin' ),
 			'pageSlug' => self::PAGE_SLUG,
+			'rulesContext' => $rules_context,
+			'multisite'    => array(
+				'isMultisite'          => EDMINBOOST_ANM_Multisite::is_active(),
+				'policy'               => EDMINBOOST_ANM_Multisite::get_policy(),
+				'siteCanEditSettings'  => EDMINBOOST_ANM_Multisite::site_can_edit_settings(),
+				'siteCanEditRules'     => EDMINBOOST_ANM_Multisite::site_can_edit_rules(),
+				'networkSettingsUrl'   => EDMINBOOST_ANM_Multisite::is_active() ? EDMINBOOST_ANM_Multisite::get_network_admin_url() : '',
+			),
 			'noticePanelPositionLayouts' => $notice_panel_position_layouts,
 			'i18n'     => array(
 				'saved'           => __( 'Settings saved.', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -213,6 +314,7 @@ class EDMINBOOST_ANM_Admin {
 				'rulesEmpty'      => __( 'No auto-rules yet. Add a rule or convert an inbox notice to get started.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'statusActive'    => __( 'Active', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'statusInactive'  => __( 'Inactive', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'presetActiveBlacklist' => __( 'Active blacklist: %d phrases', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'seedSuccess'     => __( 'Added %1$d test notices to the inbox (%2$d skipped as duplicates).', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'seedError'       => __( 'Could not seed test notices.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'triggerError'    => __( 'Could not trigger live test notices.', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -281,6 +383,20 @@ class EDMINBOOST_ANM_Admin {
 				'generalOptionsPreviewCaptionHidePlugin'       => __( 'Plugin and theme update nags are hidden from the dashboard.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'generalOptionsPreviewCaptionHideBoth'         => __( 'Core and plugin or theme update nags are hidden from the dashboard.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'generalOptionsPreviewCaptionResetAll'         => __( 'Reset clears hidden-notice preferences for every user on this site.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'whiteLabelPreviewDefaultMenuTitle'            => __( 'Notice Manager', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'whiteLabelPreviewDefaultBrand'                => __( 'Edminboost', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'whiteLabelPreviewPluginName'                  => __( 'Edminboost - Admin Notice Manager', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'whiteLabelPreviewMenuSection'                 => __( 'Admin menu', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'whiteLabelPreviewDashboardSection'            => __( 'Dashboard top bar', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'whiteLabelPreviewPluginsSection'              => __( 'Plugins screen', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'whiteLabelPreviewQuickStatus'                 => __( 'Quick Status:', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'whiteLabelPreviewSettingsLink'                => __( 'Settings', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'whiteLabelPreviewDocsLink'                    => __( 'Docs', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'whiteLabelPreviewCaptionDisabled'             => __( 'Default menu title and Edminboost dashboard branding apply when white label is off.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'whiteLabelPreviewCaptionBrandHidden'          => __( 'Dashboard brand area is hidden on plugin screens.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'whiteLabelPreviewCaptionNoBrand'              => __( 'Leave a brand name or logo URL to show the dashboard brand area.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'whiteLabelPreviewCaptionDocsHidden'           => __( 'Docs link is hidden on the Plugins screen row.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'whiteLabelPreviewCaptionCustomDocs'           => __( 'Plugins screen Docs link uses your custom URL.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			),
 		);
 	}
@@ -292,9 +408,14 @@ class EDMINBOOST_ANM_Admin {
 	 * @return array
 	 */
 	public function add_settings_link( $links ) {
+		$settings_url = admin_url( 'admin.php?page=' . self::PAGE_SLUG . '-settings' );
+		if ( is_network_admin() && EDMINBOOST_ANM_Multisite::is_active() ) {
+			$settings_url = EDMINBOOST_ANM_Multisite::get_network_admin_url();
+		}
+
 		$settings_link = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url( admin_url( 'admin.php?page=' . self::PAGE_SLUG . '-settings' ) ),
+			esc_url( $settings_url ),
 			esc_html__( 'Settings', EDMINBOOST_ANM_TEXT_DOMAIN )
 		);
 
@@ -315,9 +436,14 @@ class EDMINBOOST_ANM_Admin {
 			return $links;
 		}
 
+		$docs_url = EDMINBOOST_ANM_Settings::get_plugin_docs_url();
+		if ( '' === $docs_url ) {
+			return $links;
+		}
+
 		$links[] = sprintf(
 			'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
-			esc_url( EDMINBOOST_ANM_PLUGIN_DOCS_URL ),
+			esc_url( $docs_url ),
 			esc_html__( 'Docs', EDMINBOOST_ANM_TEXT_DOMAIN )
 		);
 
@@ -534,9 +660,10 @@ class EDMINBOOST_ANM_Admin {
 			wp_die( esc_html__( 'You do not have permission to access this page.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
 		}
 
-		$settings   = EDMINBOOST_ANM_Settings::get();
-		$rules      = EDMINBOOST_ANM_Rules::get_all();
-		$wp_presets = EDMINBOOST_ANM_Rules::get_wp_presets_with_status();
+		$settings                        = EDMINBOOST_ANM_Settings::get();
+		$rules                           = EDMINBOOST_ANM_Rules::get_all();
+		$wp_presets                      = EDMINBOOST_ANM_Rules::get_wp_presets_with_status();
+		$edminboost_anm_rules_readonly   = ! EDMINBOOST_ANM_Multisite::site_can_edit_rules();
 
 		usort(
 			$rules,
@@ -558,14 +685,75 @@ class EDMINBOOST_ANM_Admin {
 			wp_die( esc_html__( 'You do not have permission to access this page.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
 		}
 
-		$settings     = EDMINBOOST_ANM_Settings::get();
-		$legacy       = EDMINBOOST_ANM_Importer::detect_legacy();
-		$export_url   = wp_nonce_url(
+		$settings                         = EDMINBOOST_ANM_Settings::get();
+		$legacy                           = EDMINBOOST_ANM_Importer::detect_legacy();
+		$export_url                       = wp_nonce_url(
 			admin_url( 'admin-post.php?action=edminboost_anm_export_rules' ),
 			'edminboost_anm_export_rules'
 		);
+		$edminboost_anm_settings_readonly = ! EDMINBOOST_ANM_Multisite::site_can_edit_settings();
 
 		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-settings-page.php';
+	}
+
+	/**
+	 * Render the network multisite policy page.
+	 *
+	 * @return void
+	 */
+	public function render_network_policy_page() {
+		if ( ! current_user_can( EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
+		}
+
+		$edminboost_anm_network = EDMINBOOST_ANM_Multisite::get_policy_option_raw();
+
+		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-network-policy-page.php';
+	}
+
+	/**
+	 * Render network-wide default plugin settings.
+	 *
+	 * @return void
+	 */
+	public function render_network_defaults_page() {
+		if ( ! current_user_can( EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
+		}
+
+		$settings                          = EDMINBOOST_ANM_Settings::merge_settings( EDMINBOOST_ANM_Multisite::get_network_settings_raw() );
+		$legacy                            = array();
+		$export_url                        = '';
+		$edminboost_anm_option_name        = EDMINBOOST_ANM_Multisite::NETWORK_SETTINGS_OPTION;
+		$edminboost_anm_settings_group     = EDMINBOOST_ANM_Multisite::NETWORK_SETTINGS_GROUP;
+		$edminboost_anm_settings_readonly  = false;
+		$edminboost_anm_hide_multisite_tab = true;
+
+		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-settings-page.php';
+	}
+
+	/**
+	 * Render shared network auto-rules.
+	 *
+	 * @return void
+	 */
+	public function render_network_rules_page() {
+		if ( ! current_user_can( EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
+		}
+
+		$settings   = EDMINBOOST_ANM_Settings::merge_settings( EDMINBOOST_ANM_Multisite::get_network_settings_raw() );
+		$rules      = EDMINBOOST_ANM_Rules::get_network_rules();
+		$wp_presets = EDMINBOOST_ANM_Rules::get_wp_presets_with_status();
+
+		usort(
+			$rules,
+			static function ( $a, $b ) {
+				return ( $b['hit_count'] ?? 0 ) <=> ( $a['hit_count'] ?? 0 );
+			}
+		);
+
+		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-rules-page.php';
 	}
 
 	/**

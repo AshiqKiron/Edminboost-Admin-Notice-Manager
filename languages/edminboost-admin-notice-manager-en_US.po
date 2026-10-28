@@ -555,8 +555,8 @@ msgstr "Notices"
 
 #: admin/partials/edminboost-anm-settings-page.php:35
 #: admin/partials/edminboost-anm-settings-page.php:371
-msgid "Access & visibility"
-msgstr "Access & visibility"
+msgid "Access"
+msgstr "Access"
 
 #: admin/partials/edminboost-anm-settings-page.php:36
 #: admin/partials/edminboost-anm-settings-page.php:481
@@ -576,8 +576,8 @@ msgid "Notifications"
 msgstr "Notifications"
 
 #: admin/partials/edminboost-anm-settings-page.php:40
-msgid "Migration & Tools"
-msgstr "Migration & Tools"
+msgid "Migration"
+msgstr "Migration"
 
 #: admin/partials/edminboost-anm-settings-page.php:60
 #: includes/class-edminboost-anm-admin.php:71
@@ -593,11 +593,11 @@ msgstr "Settings sections"
 #: admin/partials/edminboost-anm-settings-page.php:97
 msgid ""
 "Choose how notices appear on the dashboard. Per-type rules live on the "
-"Notices tab; who is affected on Access & visibility; how to open the inbox "
+"Notices tab; who is affected on Access; how to open the inbox "
 "on Admin bar."
 msgstr ""
 "Choose how notices appear on the dashboard. Per-type rules live on the "
-"Notices tab; who is affected on Access & visibility; how to open the inbox "
+"Notices tab; who is affected on Access; how to open the inbox "
 "on Admin bar."
 
 #: admin/partials/edminboost-anm-settings-page.php:98
@@ -2011,13 +2011,11 @@ msgstr "Clean dashboard + inbox / admin bar"
 
 #: includes/class-edminboost-anm-settings.php:792
 msgid ""
-"Recommended. Hides the notices you configure under Notices, Access & "
-"visibility, and Auto-Rules, then collects them in the inbox and admin bar "
-"panel."
+"Recommended. Hides the notices you configure under Notices, Access, and "
+"Auto-Rules, then collects them in the inbox and admin bar panel."
 msgstr ""
-"Recommended. Hides the notices you configure under Notices, Access & "
-"visibility, and Auto-Rules, then collects them in the inbox and admin bar "
-"panel."
+"Recommended. Hides the notices you configure under Notices, Access, and "
+"Auto-Rules, then collects them in the inbox and admin bar panel."
 
 #: includes/class-edminboost-anm-settings.php:796
 msgid "Toolbar only"

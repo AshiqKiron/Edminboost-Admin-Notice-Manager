@@ -6,10 +6,13 @@ Requires: pip install polib deep-translator
 
 Regenerate POT (from plugin root):
   wp i18n make-pot . languages/edminboost-admin-notice-manager.pot --ignore-domain
+
+Run one locale: LOCALES=hi_IN python3 build-translations.py
 """
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import sys
@@ -18,12 +21,12 @@ from pathlib import Path
 
 import polib
 from deep_translator import MyMemoryTranslator
+from deep_translator.exceptions import TooManyRequests
 
 PLUGIN_SLUG = "edminboost-admin-notice-manager"
 LANGUAGES_DIR = Path(__file__).resolve().parent
 POT_PATH = LANGUAGES_DIR / f"{PLUGIN_SLUG}.pot"
 
-# WordPress locale => (MyMemory target code, human label)
 LOCALES = {
 	"bn_BD": ("bn-IN", "Bengali (Bangla)"),
 	"en_US": (None, "English (United States)"),
@@ -54,17 +57,20 @@ def placeholders(text: str) -> list[str]:
 	return PLACEHOLDER_RE.findall(text)
 
 
-def translate_text(text: str, target: str, retries: int = 4) -> str:
+def translate_text(text: str, target: str, retries: int = 8) -> str:
 	last_error = None
 	for attempt in range(retries):
 		try:
 			result = MyMemoryTranslator(source="en-GB", target=target).translate(text)
 			if result:
 				return result
+		except TooManyRequests as exc:
+			last_error = exc
+			time.sleep(min(90, 15 * (attempt + 1)))
 		except Exception as exc:  # noqa: BLE001 — CLI tool
 			last_error = exc
-			time.sleep(1.5 * (attempt + 1))
-		time.sleep(0.35)
+			time.sleep(2.0 * (attempt + 1))
+		time.sleep(0.65)
 	if last_error:
 		raise last_error
 	return text
@@ -82,11 +88,17 @@ def translate_entry(msgid: str, target: str | None) -> str:
 def apply_locale_metadata(po: polib.POFile, locale: str, label: str) -> None:
 	po.metadata["Language"] = locale
 	po.metadata["Language-Team"] = f"{label} ({locale})"
-	po.metadata["Plural-Forms"] = po.metadata.get("Plural-Forms") or "nplurals=2; plural=(n != 1);"
 	if locale == "ar":
-		po.metadata["Plural-Forms"] = "nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5);"
-	if locale.startswith("zh"):
+		po.metadata["Plural-Forms"] = (
+			"nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : "
+			"n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5);"
+		)
+	elif locale.startswith("zh"):
 		po.metadata["Plural-Forms"] = "nplurals=1; plural=0;"
+	else:
+		po.metadata["Plural-Forms"] = po.metadata.get(
+			"Plural-Forms", "nplurals=2; plural=(n != 1);"
+		)
 
 
 def build_locale(locale: str, target: str | None, label: str) -> None:
@@ -101,6 +113,9 @@ def build_locale(locale: str, target: str | None, label: str) -> None:
 	apply_locale_metadata(po, locale, label)
 
 	cache: dict[str, str] = {}
+	for existing in po:
+		if existing.msgid and existing.msgstr and existing.msgstr.strip():
+			cache[existing.msgid] = existing.msgstr
 
 	def tr(msgid: str) -> str:
 		if msgid in cache:
@@ -114,7 +129,6 @@ def build_locale(locale: str, target: str | None, label: str) -> None:
 		if not entry.msgid:
 			continue
 		if entry.msgstr and entry.msgstr.strip():
-			cache[entry.msgid] = entry.msgstr
 			done += 1
 			continue
 		entry.msgstr = tr(entry.msgid)
@@ -122,16 +136,14 @@ def build_locale(locale: str, target: str | None, label: str) -> None:
 			plural_text = tr(entry.msgid_plural)
 			entry.msgstr_plural = {0: plural_text, 1: plural_text}
 		done += 1
-		if done % 25 == 0:
+		if done % 10 == 0:
+			po.save(str(po_path))
 			print(f"  {locale}: {done}/{total}", flush=True)
 		if target is not None and not should_skip_translation(entry.msgid):
-			time.sleep(0.2)
+			time.sleep(0.65)
 
 	po.save(str(po_path))
-	subprocess.run(
-		["msgfmt", "-o", str(mo_path), str(po_path)],
-		check=True,
-	)
+	subprocess.run(["msgfmt", "-o", str(mo_path), str(po_path)], check=True)
 	print(f"Built {po_path.name} and {mo_path.name}")
 
 
@@ -140,7 +152,17 @@ def main() -> int:
 		print(f"Missing {POT_PATH}", file=sys.stderr)
 		return 1
 
-	for locale, (target, label) in LOCALES.items():
+	only = os.environ.get("LOCALES", "").strip()
+	selected = LOCALES.keys()
+	if only:
+		selected = [code.strip() for code in only.split(",") if code.strip() in LOCALES]
+
+	for locale in selected:
+		target, label = LOCALES[locale]
+		mo_path = LANGUAGES_DIR / f"{PLUGIN_SLUG}-{locale}.mo"
+		if mo_path.exists() and locale not in (only.split(",") if only else []):
+			print(f"Skip {locale} (already built)")
+			continue
 		print(f"Translating {label}…")
 		build_locale(locale, target, label)
 

@@ -181,6 +181,15 @@ class EDMINBOOST_ANM_Settings {
 				'enabled' => false,
 				'urls'    => array(),
 			),
+			'white_label'       => array(
+				'enabled'        => false,
+				'menu_title'     => '',
+				'brand_name'     => '',
+				'logo_url'       => '',
+				'hide_docs_link' => false,
+				'docs_url'       => '',
+				'hide_brand'     => false,
+			),
 		);
 
 		/**
@@ -196,14 +205,111 @@ class EDMINBOOST_ANM_Settings {
 	 *
 	 * @return array
 	 */
-	public static function get() {
+	public static function get_stored_raw() {
 		$settings = get_option( self::OPTION_NAME, array() );
 
-		if ( ! is_array( $settings ) ) {
-			$settings = array();
+		return is_array( $settings ) ? $settings : array();
+	}
+
+	/**
+	 * Persist settings for the current site (blog option).
+	 *
+	 * @param array $settings Settings array.
+	 * @return bool
+	 */
+	public static function update_stored( $settings ) {
+		return update_option( self::OPTION_NAME, $settings, false );
+	}
+
+	/**
+	 * Remove all plugin options from the current site/blog.
+	 *
+	 * @return void
+	 */
+	public static function delete_site_options() {
+		delete_option( self::OPTION_NAME );
+		delete_option( self::RULES_OPTION );
+		delete_option( self::INBOX_OPTION );
+		delete_option( self::STATS_OPTION );
+		delete_option( self::HASH_PREFS_OPTION );
+		delete_option( self::VERSION_OPTION );
+
+		if ( class_exists( 'EDMINBOOST_ANM_Digest' ) ) {
+			EDMINBOOST_ANM_Digest::clear_schedule();
+		}
+	}
+
+	/**
+	 * Get merged plugin settings.
+	 *
+	 * @return array
+	 */
+	public static function get() {
+		$settings = self::get_stored_raw();
+
+		if ( class_exists( 'EDMINBOOST_ANM_Multisite' ) && EDMINBOOST_ANM_Multisite::uses_network_layer() ) {
+			$network_settings = EDMINBOOST_ANM_Multisite::get_network_settings_raw();
+
+			if ( 'network_locked' === EDMINBOOST_ANM_Multisite::get_policy() ) {
+				$settings = is_array( $network_settings ) ? $network_settings : array();
+			} else {
+				$settings = EDMINBOOST_ANM_Multisite::merge_settings_layers( $network_settings, $settings );
+			}
 		}
 
 		return self::merge_settings( $settings );
+	}
+
+	/**
+	 * Deep-merge two stored setting layers (overrides win over base).
+	 *
+	 * @param array $base      Lower-priority layer (e.g. network defaults).
+	 * @param array $overrides Higher-priority layer (e.g. site overrides).
+	 * @return array
+	 */
+	public static function merge_stored_layers( $base, $overrides ) {
+		if ( ! is_array( $base ) ) {
+			$base = array();
+		}
+
+		if ( ! is_array( $overrides ) ) {
+			$overrides = array();
+		}
+
+		$merged = wp_parse_args( $overrides, $base );
+
+		$nested_keys = array(
+			'notice_panel',
+			'upsell_preset',
+			'safety_guard',
+			'client_shield',
+			'digest',
+			'webhook',
+			'word_filters',
+			'block_ad_redirects',
+			'standard_admin_notices',
+			'non_standard_admin_notices',
+			'hiding_notifications',
+			'acl',
+		);
+
+		foreach ( $nested_keys as $key ) {
+			$base_nested = isset( $base[ $key ] ) && is_array( $base[ $key ] ) ? $base[ $key ] : array();
+			$override_nested = isset( $overrides[ $key ] ) && is_array( $overrides[ $key ] ) ? $overrides[ $key ] : array();
+			$merged[ $key ]  = wp_parse_args( $override_nested, $base_nested );
+		}
+
+		if ( isset( $merged['notice_panel']['colors'] ) || isset( $base['notice_panel']['colors'] ) || isset( $overrides['notice_panel']['colors'] ) ) {
+			$colors_base = isset( $base['notice_panel']['colors'] ) && is_array( $base['notice_panel']['colors'] )
+				? $base['notice_panel']['colors']
+				: array();
+			$colors_override = isset( $overrides['notice_panel']['colors'] ) && is_array( $overrides['notice_panel']['colors'] )
+				? $overrides['notice_panel']['colors']
+				: array();
+			$merged['notice_panel']['colors'] = wp_parse_args( $colors_override, $colors_base );
+		}
+
+		return $merged;
 	}
 
 	/**
@@ -240,6 +346,7 @@ class EDMINBOOST_ANM_Settings {
 			'non_standard_admin_notices',
 			'hiding_notifications',
 			'acl',
+			'white_label',
 		);
 
 		foreach ( $nested_keys as $key ) {
@@ -324,13 +431,24 @@ class EDMINBOOST_ANM_Settings {
 	 * @param array $input Raw settings input.
 	 * @return array
 	 */
-	public static function sanitize( $input ) {
+	public static function sanitize( $input, $base_raw = null ) {
 		if ( ! is_array( $input ) ) {
 			$input = array();
 		}
 
+		if ( null === $base_raw
+			&& class_exists( 'EDMINBOOST_ANM_Multisite' )
+			&& EDMINBOOST_ANM_Multisite::is_active()
+			&& ! EDMINBOOST_ANM_Multisite::site_can_edit_settings()
+			&& ! is_network_admin() ) {
+			return self::get_stored_raw();
+		}
+
 		$defaults = self::get_defaults();
-		$output   = self::get();
+		if ( null === $base_raw ) {
+			$base_raw = self::get_stored_raw();
+		}
+		$output   = self::merge_settings( is_array( $base_raw ) ? $base_raw : array() );
 
 		// Global enable is toggled from the dashboard only; omit from Settings form.
 		if ( array_key_exists( 'enabled', $input ) ) {
@@ -472,6 +590,12 @@ class EDMINBOOST_ANM_Settings {
 			'enabled' => ! empty( $redirect_input['enabled'] ),
 			'urls'    => self::sanitize_block_ad_redirect_urls( $redirect_input['urls'] ?? array() ),
 		);
+
+		$white_label_input = isset( $input['white_label'] ) && is_array( $input['white_label'] )
+			? $input['white_label']
+			: array();
+
+		$output['white_label'] = self::sanitize_white_label_settings( $white_label_input );
 
 		$output['notice_panel'] = wp_parse_args( $output['notice_panel'], $defaults['notice_panel'] );
 
@@ -790,7 +914,7 @@ class EDMINBOOST_ANM_Settings {
 			),
 			'clean_inbox'  => array(
 				'label'       => __( 'Clean dashboard + inbox / admin bar', EDMINBOOST_ANM_TEXT_DOMAIN ),
-				'description' => __( 'Recommended. Hides the notices you configure under Notices, Access & visibility, and Auto-Rules, then collects them in the inbox and admin bar panel.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'description' => __( 'Recommended. Hides the notices you configure under Notices, Access, and Auto-Rules, then collects them in the inbox and admin bar panel.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'mode'        => 'hide_selected',
 			),
 			'toolbar_only' => array(
@@ -1300,6 +1424,120 @@ class EDMINBOOST_ANM_Settings {
 	}
 
 	/**
+	 * Sanitize white label settings from Settings API input.
+	 *
+	 * @param array $input Raw white label settings.
+	 * @return array
+	 */
+	public static function sanitize_white_label_settings( array $input ) {
+		$menu_title = sanitize_text_field( $input['menu_title'] ?? '' );
+		$brand_name = sanitize_text_field( $input['brand_name'] ?? '' );
+		$logo_url   = esc_url_raw( $input['logo_url'] ?? '' );
+		$docs_url   = esc_url_raw( $input['docs_url'] ?? '' );
+
+		return array(
+			'enabled'        => ! empty( $input['enabled'] ),
+			'menu_title'     => $menu_title,
+			'brand_name'     => $brand_name,
+			'logo_url'       => $logo_url,
+			'hide_docs_link' => ! empty( $input['hide_docs_link'] ),
+			'docs_url'       => $docs_url,
+			'hide_brand'     => ! empty( $input['hide_brand'] ),
+		);
+	}
+
+	/**
+	 * Whether white label mode is enabled.
+	 *
+	 * @return bool
+	 */
+	public static function is_white_label_enabled() {
+		$settings = self::get();
+
+		return ! empty( $settings['white_label']['enabled'] );
+	}
+
+	/**
+	 * Admin menu title (parent and first submenu item).
+	 *
+	 * @return string
+	 */
+	public static function get_admin_menu_title() {
+		$defaults = __( 'Notice Manager', EDMINBOOST_ANM_TEXT_DOMAIN );
+		$settings = self::get();
+		$block    = $settings['white_label'] ?? self::get_defaults()['white_label'];
+
+		if ( empty( $block['enabled'] ) || '' === trim( (string) ( $block['menu_title'] ?? '' ) ) ) {
+			return $defaults;
+		}
+
+		return trim( (string) $block['menu_title'] );
+	}
+
+	/**
+	 * Docs URL for the Plugins screen row meta link.
+	 *
+	 * @return string Empty when the link should be hidden.
+	 */
+	public static function get_plugin_docs_url() {
+		$settings = self::get();
+		$block    = $settings['white_label'] ?? self::get_defaults()['white_label'];
+
+		if ( ! empty( $block['enabled'] ) && ! empty( $block['hide_docs_link'] ) ) {
+			return '';
+		}
+
+		if ( ! empty( $block['enabled'] ) && ! empty( $block['docs_url'] ) ) {
+			return $block['docs_url'];
+		}
+
+		return EDMINBOOST_ANM_PLUGIN_DOCS_URL;
+	}
+
+	/**
+	 * Dashboard top bar brand display (name, logo, visibility).
+	 *
+	 * @return array{show: bool, name: string, logo_url: string}
+	 */
+	public static function get_dashboard_brand() {
+		$settings = self::get();
+		$block    = $settings['white_label'] ?? self::get_defaults()['white_label'];
+
+		if ( empty( $block['enabled'] ) ) {
+			return array(
+				'show'     => true,
+				'name'     => __( 'Edminboost', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'logo_url' => '',
+			);
+		}
+
+		if ( ! empty( $block['hide_brand'] ) ) {
+			return array(
+				'show'     => false,
+				'name'     => '',
+				'logo_url' => '',
+			);
+		}
+
+		$name     = trim( (string) ( $block['brand_name'] ?? '' ) );
+		$logo_url = trim( (string) ( $block['logo_url'] ?? '' ) );
+
+		if ( '' === $name && '' === $logo_url ) {
+			return array(
+				'show'     => false,
+				'name'     => '',
+				'logo_url' => '',
+			);
+		}
+
+		return array(
+			'show'     => true,
+			'name'     => $name,
+			'logo_url' => $logo_url,
+		);
+	}
+
+	/**
 	 * Sanitize digest settings from Settings API or preview AJAX input.
 	 *
 	 * @param array $input    Raw digest settings.
@@ -1472,5 +1710,19 @@ class EDMINBOOST_ANM_Settings {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Sanitize network default settings (sitemeta).
+	 *
+	 * @param array $input Raw settings input.
+	 * @return array
+	 */
+	public static function sanitize_network_settings( $input ) {
+		if ( ! class_exists( 'EDMINBOOST_ANM_Multisite' ) || ! EDMINBOOST_ANM_Multisite::is_active() ) {
+			return self::sanitize( $input );
+		}
+
+		return self::sanitize( $input, EDMINBOOST_ANM_Multisite::get_network_settings_raw() );
 	}
 }

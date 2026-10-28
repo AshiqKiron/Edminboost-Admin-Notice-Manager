@@ -530,7 +530,7 @@ msgstr ""
 
 #: admin/partials/edminboost-anm-settings-page.php:35
 #: admin/partials/edminboost-anm-settings-page.php:371
-msgid "Access & visibility"
+msgid "Access"
 msgstr ""
 
 #: admin/partials/edminboost-anm-settings-page.php:36
@@ -551,7 +551,7 @@ msgid "Notifications"
 msgstr ""
 
 #: admin/partials/edminboost-anm-settings-page.php:40
-msgid "Migration & Tools"
+msgid "Migration"
 msgstr ""
 
 #: admin/partials/edminboost-anm-settings-page.php:60
@@ -566,7 +566,7 @@ msgid "Settings sections"
 msgstr ""
 
 #: admin/partials/edminboost-anm-settings-page.php:97
-msgid "Choose how notices appear on the dashboard. Per-type rules live on the Notices tab; who is affected on Access & visibility; how to open the inbox on Admin bar."
+msgid "Choose how notices appear on the dashboard. Per-type rules live on the Notices tab; who is affected on Access; how to open the inbox on Admin bar."
 msgstr ""
 
 #: admin/partials/edminboost-anm-settings-page.php:98
@@ -1777,7 +1777,7 @@ msgid "Clean dashboard + inbox / admin bar"
 msgstr ""
 
 #: includes/class-edminboost-anm-settings.php:792
-msgid "Recommended. Hides the notices you configure under Notices, Access & visibility, and Auto-Rules, then collects them in the inbox and admin bar panel."
+msgid "Recommended. Hides the notices you configure under Notices, Access, and Auto-Rules, then collects them in the inbox and admin bar panel."
 msgstr ""
 
 #: includes/class-edminboost-anm-settings.php:796

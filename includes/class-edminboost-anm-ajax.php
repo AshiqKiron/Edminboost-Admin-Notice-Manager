@@ -56,8 +56,33 @@ class EDMINBOOST_ANM_Ajax {
 	private function verify_request() {
 		check_ajax_referer( 'edminboost_anm_admin', 'nonce' );
 
+		$context = sanitize_key( wp_unslash( $_POST['context'] ?? 'site' ) );
+		if ( 'network' === $context ) {
+			if ( ! EDMINBOOST_ANM_Multisite::is_active() || ! current_user_can( EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY ) ) {
+				wp_send_json_error( array( 'message' => __( 'Permission denied.', EDMINBOOST_ANM_TEXT_DOMAIN ) ), 403 );
+			}
+
+			return;
+		}
+
 		if ( ! current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', EDMINBOOST_ANM_TEXT_DOMAIN ) ), 403 );
+		}
+	}
+
+	/**
+	 * Verify the current user may change site-level settings.
+	 *
+	 * @return void
+	 */
+	private function verify_site_settings_mutation() {
+		$this->verify_request();
+
+		if ( EDMINBOOST_ANM_Multisite::is_active() && ! EDMINBOOST_ANM_Multisite::site_can_edit_settings() ) {
+			wp_send_json_error(
+				array( 'message' => __( 'Settings are managed by the network administrator.', EDMINBOOST_ANM_TEXT_DOMAIN ) ),
+				403
+			);
 		}
 	}
 
@@ -80,12 +105,12 @@ class EDMINBOOST_ANM_Ajax {
 	 * @return void
 	 */
 	public function handle_toggle_enabled() {
-		$this->verify_request();
+		$this->verify_site_settings_mutation();
 
-		$settings          = EDMINBOOST_ANM_Settings::get();
+		$stored            = EDMINBOOST_ANM_Settings::get_stored_raw();
 		$enabled           = ! empty( $_POST['enabled'] );
-		$settings['enabled'] = $enabled;
-		update_option( EDMINBOOST_ANM_Settings::OPTION_NAME, $settings, false );
+		$stored['enabled'] = $enabled;
+		EDMINBOOST_ANM_Settings::update_stored( $stored );
 
 		wp_send_json_success(
 			array(
@@ -100,13 +125,13 @@ class EDMINBOOST_ANM_Ajax {
 	 * @return void
 	 */
 	public function handle_toggle_preset() {
-		$this->verify_request();
+		$this->verify_site_settings_mutation();
 
-		$settings = EDMINBOOST_ANM_Settings::get();
+		$settings = EDMINBOOST_ANM_Settings::merge_settings( EDMINBOOST_ANM_Settings::get_stored_raw() );
 		$enabled  = ! empty( $_POST['enabled'] );
 
 		$settings['upsell_preset']['enabled'] = $enabled;
-		update_option( EDMINBOOST_ANM_Settings::OPTION_NAME, $settings, false );
+		EDMINBOOST_ANM_Settings::update_stored( $settings );
 
 		wp_send_json_success(
 			array(
@@ -126,8 +151,9 @@ class EDMINBOOST_ANM_Ajax {
 
 		$id      = sanitize_key( wp_unslash( $_POST['id'] ?? '' ) );
 		$enabled = ! empty( $_POST['enabled'] );
+		$context = sanitize_key( wp_unslash( $_POST['context'] ?? 'site' ) );
 
-		$rule = EDMINBOOST_ANM_Rules::toggle( $id, $enabled );
+		$rule = EDMINBOOST_ANM_Rules::toggle( $id, $enabled, $context );
 
 		if ( ! $rule ) {
 			wp_send_json_error( array( 'message' => __( 'Rule not found.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
@@ -144,13 +170,18 @@ class EDMINBOOST_ANM_Ajax {
 	public function handle_save_rule() {
 		$this->verify_request();
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in verify_request().
+		$post = wp_unslash( $_POST );
+
 		$data = array(
-			'id'           => sanitize_key( wp_unslash( $_POST['id'] ?? '' ) ),
-			'name'         => sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ),
-			'match_type'   => sanitize_key( wp_unslash( $_POST['match_type'] ?? 'keyword' ) ),
-			'match_string' => sanitize_text_field( wp_unslash( $_POST['match_string'] ?? '' ) ),
-			'action'       => sanitize_key( wp_unslash( $_POST['rule_action'] ?? 'auto_dismiss_inbox' ) ),
-			'enabled'      => ! empty( $_POST['enabled'] ),
+			'id'           => sanitize_key( $post['id'] ?? '' ),
+			'name'         => sanitize_text_field( $post['name'] ?? '' ),
+			'match_type'   => sanitize_key( $post['match_type'] ?? 'keyword' ),
+			'match_string' => sanitize_text_field( $post['match_string'] ?? '' ),
+			'action'       => sanitize_key( $post['rule_action'] ?? 'auto_dismiss_inbox' ),
+			'enabled'      => ! empty( $post['enabled'] ),
+			'schedule'     => EDMINBOOST_ANM_Rules::schedule_from_request( $post ),
+			'context'      => sanitize_key( $post['context'] ?? 'site' ),
 		);
 
 		$result = EDMINBOOST_ANM_Rules::save( $data );
@@ -170,8 +201,9 @@ class EDMINBOOST_ANM_Ajax {
 	public function handle_delete_rule() {
 		$this->verify_request();
 
-		$id   = sanitize_key( wp_unslash( $_POST['id'] ?? '' ) );
-		$rule = EDMINBOOST_ANM_Rules::get( $id );
+		$id      = sanitize_key( wp_unslash( $_POST['id'] ?? '' ) );
+		$context = sanitize_key( wp_unslash( $_POST['context'] ?? 'site' ) );
+		$rule    = EDMINBOOST_ANM_Rules::get( $id );
 
 		if ( ! $rule ) {
 			wp_send_json_error( array( 'message' => __( 'Rule not found.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
@@ -179,7 +211,7 @@ class EDMINBOOST_ANM_Ajax {
 
 		$wp_notice_preset = sanitize_key( $rule['wp_notice_preset'] ?? '' );
 
-		if ( ! EDMINBOOST_ANM_Rules::delete( $id ) ) {
+		if ( ! EDMINBOOST_ANM_Rules::delete( $id, $context ) ) {
 			wp_send_json_error( array( 'message' => __( 'Rule not found.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
 		}
 
@@ -269,8 +301,15 @@ class EDMINBOOST_ANM_Ajax {
 
 		switch ( $action ) {
 			case 'read':
-				EDMINBOOST_ANM_Inbox::mark_read( $id );
-				break;
+				if ( '' === $id || ! EDMINBOOST_ANM_Inbox::mark_read( $id ) ) {
+					wp_send_json_error(
+						array(
+							'message' => __( 'Could not mark notice as read.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+						)
+					);
+				}
+				wp_send_json_success( array( 'read' => true ) );
+				return;
 			case 'snooze':
 				$duration_key = sanitize_key( wp_unslash( $_POST['duration'] ?? '1d' ) );
 				$duration_key = '7d' === $duration_key ? '7d' : '1d';

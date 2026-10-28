@@ -486,9 +486,56 @@
 }
 
 .edminboost-anm-settings-tabs {
-	margin-bottom: 0;
+	display: flex;
 	flex-wrap: wrap;
+	float: none;
+	margin-bottom: 0;
+	padding-top: 9px;
 	gap: 0;
+	row-gap: 2px;
+}
+
+.edminboost-anm-settings-tabs .nav-tab {
+	float: none;
+	margin-left: 0.3em;
+	margin-bottom: -1px;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.edminboost-anm-settings-tabs .nav-tab:first-child {
+	margin-left: 0;
+}
+
+.edminboost-anm-settings-tabs button.nav-tab {
+	appearance: none;
+	background: #dcdcde;
+	border: 1px solid #c3c4c7;
+	border-bottom: none;
+	color: #50575e;
+	cursor: pointer;
+	font-family: inherit;
+	font-size: 14px;
+	line-height: 1.71428571;
+	padding: 5px 10px;
+	text-decoration: none;
+}
+
+.edminboost-anm-settings-tabs button.nav-tab:hover {
+	background-color: #fff;
+	color: #3c434a;
+}
+
+.edminboost-anm-settings-tabs button.nav-tab.nav-tab-active,
+.edminboost-anm-settings-tabs button.nav-tab.nav-tab-active:hover {
+	background: #fff;
+	border-bottom: 1px solid #fff;
+	color: #000;
+}
+
+.edminboost-anm-settings-tabs button.nav-tab:focus-visible {
+	box-shadow: 0 0 0 2px #2271b1;
+	outline: 2px solid transparent;
 }
 
 .edminboost-anm-settings-panels .edminboost-anm-tab-panel > .edminboost-anm-card {
@@ -567,10 +614,10 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	font-size: 15px;
 }
 
-.edminboost-anm-topbar__version {
-	color: #646970;
-	font-weight: 400;
-	font-size: 13px;
+.edminboost-anm-topbar__logo {
+	display: block;
+	max-height: 28px;
+	width: auto;
 }
 
 .edminboost-anm-topbar__status {
@@ -1103,6 +1150,12 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	color: #135e96;
 }
 
+.edminboost-anm-badge--muted {
+	background: #f0f0f1;
+	color: #646970;
+	font-weight: 500;
+}
+
 .edminboost-anm-inbox-convert.is-converted-to-rule,
 .edminboost-anm-wp-preset-convert.is-converted-to-rule {
 	color: #a7aaad !important;
@@ -1112,12 +1165,17 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	cursor: pointer;
 }
 
-.edminboost-anm-inbox-read:disabled {
+.edminboost-anm-inbox-read:disabled,
+.edminboost-anm-inbox-read.is-marked-read {
 	color: #a7aaad !important;
 	border-color: #dcdcde !important;
 	background: #f6f7f7 !important;
 	box-shadow: none !important;
 	cursor: default;
+}
+
+.edminboost-anm-inbox-read.is-marked-read:not(:disabled) {
+	pointer-events: none;
 }
 
 .edminboost-anm-inbox-snooze-toggle.is-snoozed {
@@ -1126,6 +1184,16 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	background: #f6f7f7 !important;
 	box-shadow: none !important;
 	cursor: pointer;
+}
+
+.edminboost-anm-inbox-snooze-toggle__days {
+	margin-inline-start: 0.35em;
+	font-weight: 600;
+	color: #50575e;
+}
+
+.edminboost-anm-inbox-snooze-toggle.is-snoozed .edminboost-anm-inbox-snooze-toggle__days {
+	color: #787c82;
 }
 
 .edminboost-anm-inbox-snooze.is-snoozed-active {
@@ -1296,6 +1364,54 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	margin: 0;
 }
 
+.edminboost-anm-rule-form__schedule-enable {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0 0 4px;
+}
+
+.edminboost-anm-rule-form__schedule-fields {
+	margin-top: 12px;
+	padding: 0;
+	border: 0;
+	min-width: 0;
+}
+
+.edminboost-anm-rule-form__schedule-days {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 14px;
+	margin-bottom: 12px;
+}
+
+.edminboost-anm-rule-form__schedule-day {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	margin: 0;
+	font-size: 13px;
+}
+
+.edminboost-anm-rule-form__schedule-times {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+}
+
+.edminboost-anm-rule-form__schedule-times label {
+	margin: 0;
+	font-weight: 500;
+}
+
+.edminboost-anm-rule-schedule {
+	display: inline-block;
+	max-width: 220px;
+	font-size: 12px;
+	line-height: 1.4;
+}
+
 .edminboost-anm-modal__actions {
 	display: flex;
 	flex-wrap: wrap;
@@ -1379,7 +1495,8 @@ button.edminboost-anm-tabs__tab:focus-visible {
 .edminboost-anm-digest-layout__columns,
 .edminboost-anm-notice-panel-layout__columns,
 .edminboost-anm-display-experience-layout__columns,
-.edminboost-anm-general-options-layout__columns {
+.edminboost-anm-general-options-layout__columns,
+.edminboost-anm-white-label-layout__columns {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
 	gap: 24px;
@@ -1390,7 +1507,8 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	.edminboost-anm-digest-layout__columns,
 	.edminboost-anm-notice-panel-layout__columns,
 	.edminboost-anm-display-experience-layout__columns,
-	.edminboost-anm-general-options-layout__columns {
+	.edminboost-anm-general-options-layout__columns,
+	.edminboost-anm-white-label-layout__columns {
 		grid-template-columns: 1fr;
 	}
 }
@@ -1398,7 +1516,8 @@ button.edminboost-anm-tabs__tab:focus-visible {
 .edminboost-anm-digest-layout__preview,
 .edminboost-anm-notice-panel-layout__preview,
 .edminboost-anm-display-experience-layout__preview,
-.edminboost-anm-general-options-layout__preview {
+.edminboost-anm-general-options-layout__preview,
+.edminboost-anm-white-label-layout__preview {
 	position: sticky;
 	top: 32px;
 }
@@ -1407,9 +1526,94 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	.edminboost-anm-digest-layout__preview,
 	.edminboost-anm-notice-panel-layout__preview,
 	.edminboost-anm-display-experience-layout__preview,
-	.edminboost-anm-general-options-layout__preview {
+	.edminboost-anm-general-options-layout__preview,
+	.edminboost-anm-white-label-layout__preview {
 		position: static;
 	}
+}
+
+.edminboost-anm-white-label-layout__settings .form-table {
+	margin-top: 0;
+}
+
+.edminboost-anm-white-label-preview__hint {
+	margin: 0 0 12px;
+}
+
+.edminboost-anm-white-label-preview__stage {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.edminboost-anm-white-label-preview__block {
+	margin: 0;
+}
+
+.edminboost-anm-white-label-preview__label {
+	margin: 0 0 6px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+	color: #646970;
+}
+
+.edminboost-anm-white-label-preview__menu {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	max-width: 200px;
+	padding: 8px 0;
+	background: #1d2327;
+	border-radius: 4px;
+}
+
+.edminboost-anm-white-label-preview__menu-item {
+	display: block;
+	padding: 6px 12px;
+	font-size: 13px;
+	line-height: 1.4;
+	color: rgba(240, 246, 252, 0.7);
+}
+
+.edminboost-anm-white-label-preview__menu-item.is-current {
+	color: #fff;
+	background: #2271b1;
+}
+
+.edminboost-anm-white-label-preview__menu-item.is-muted {
+	font-size: 12px;
+	opacity: 0.65;
+}
+
+.edminboost-anm-white-label-preview__topbar {
+	margin: 0;
+}
+
+.edminboost-anm-white-label-preview__plugin-row {
+	padding: 12px 14px;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+}
+
+.edminboost-anm-white-label-preview__plugin-name {
+	display: block;
+	margin: 0 0 4px;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.edminboost-anm-white-label-preview__plugin-meta {
+	margin: 0;
+	font-size: 13px;
+	color: #2271b1;
+}
+
+.edminboost-anm-white-label-preview__meta-link {
+	text-decoration: underline;
+	cursor: default;
 }
 
 .edminboost-anm-general-options-layout__heading {
@@ -2976,14 +3180,11 @@ button.edminboost-anm-tabs__tab:focus-visible {
 		padding: 8px 12px;
 	}
 
-	.edminboost-anm-settings-tabs {
-		gap: 2px;
-	}
-
-	.edminboost-anm-settings-tabs .edminboost-anm-tabs__tab {
-		padding: 8px 10px;
+	.edminboost-anm-settings-tabs .nav-tab {
 		font-size: 12px;
-		line-height: 1.35;
+		line-height: 1.4;
+		padding: 4px 8px;
+		margin-left: 0.2em;
 	}
 
 	.edminboost-anm-settings .form-table th,

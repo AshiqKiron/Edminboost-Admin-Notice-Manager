@@ -114,6 +114,7 @@ class EDMINBOOST_ANM_Inbox {
 			'html'           => $html,
 			'type'           => $type,
 			'status'         => 'new',
+			'read_at'        => 0,
 			'snoozed_until'  => 0,
 			'intercepted_at' => time(),
 			'hash'           => $hash,
@@ -317,13 +318,64 @@ class EDMINBOOST_ANM_Inbox {
 	}
 
 	/**
+	 * Whether the notice was marked read (independent of snooze status).
+	 *
+	 * @param array $notice Notice row.
+	 * @return bool
+	 */
+	public static function is_marked_read( $notice ) {
+		if ( (int) ( $notice['read_at'] ?? 0 ) > 0 ) {
+			return true;
+		}
+
+		return 'read' === ( $notice['status'] ?? '' );
+	}
+
+	/**
+	 * Ensure read_at is stored when the notice is logically read (legacy rows used status only).
+	 *
+	 * @param array $notice Notice row (by reference).
+	 * @return void
+	 */
+	private static function ensure_read_at( array &$notice ) {
+		if ( (int) ( $notice['read_at'] ?? 0 ) > 0 ) {
+			return;
+		}
+
+		if ( ! self::is_marked_read( $notice ) ) {
+			return;
+		}
+
+		$notice['read_at'] = time();
+	}
+
+	/**
 	 * Mark notice as read.
 	 *
 	 * @param string $id Notice ID.
 	 * @return bool
 	 */
 	public static function mark_read( $id ) {
-		return self::update_status( $id, 'read' );
+		$notices = self::get_all();
+
+		foreach ( $notices as $index => $notice ) {
+			if ( ! self::id_matches( $notice['id'] ?? '', $id ) ) {
+				continue;
+			}
+
+			$notices[ $index ]['read_at'] = time();
+
+			if ( self::is_actively_snoozed( $notice ) ) {
+				self::save_all( $notices );
+				return true;
+			}
+
+			$notices[ $index ]['status'] = 'read';
+			self::save_all( $notices );
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -373,6 +425,7 @@ class EDMINBOOST_ANM_Inbox {
 
 		foreach ( $notices as $index => $notice ) {
 			if ( self::id_matches( $notice['id'] ?? '', $id ) ) {
+				self::ensure_read_at( $notices[ $index ] );
 				$notices[ $index ]['status']          = 'snoozed';
 				$notices[ $index ]['snoozed_until']   = time() + (int) $duration;
 				$notices[ $index ]['snooze_duration'] = $duration_key;
@@ -395,9 +448,9 @@ class EDMINBOOST_ANM_Inbox {
 
 		foreach ( $notices as $index => $notice ) {
 			if ( self::id_matches( $notice['id'] ?? '', $id ) ) {
-				$notices[ $index ]['status']          = 'new';
 				$notices[ $index ]['snoozed_until']   = 0;
 				$notices[ $index ]['snooze_duration'] = '';
+				$notices[ $index ]['status']          = self::is_marked_read( $notice ) ? 'read' : 'new';
 				self::save_all( $notices );
 				return true;
 			}

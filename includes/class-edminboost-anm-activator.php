@@ -19,9 +19,40 @@ class EDMINBOOST_ANM_Activator {
 	/**
 	 * Run activation tasks.
 	 *
+	 * @param bool $network_wide Whether the plugin is being activated network-wide.
 	 * @return void
 	 */
-	public static function activate() {
+	public static function activate( $network_wide = false ) {
+		require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-multisite.php';
+
+		if ( is_multisite() && $network_wide ) {
+			EDMINBOOST_ANM_Multisite::seed_network_options();
+
+			$sites = get_sites(
+				array(
+					'number' => 0,
+					'fields' => 'ids',
+				)
+			);
+
+			foreach ( $sites as $blog_id ) {
+				switch_to_blog( (int) $blog_id );
+				self::activate_site();
+				restore_current_blog();
+			}
+
+			return;
+		}
+
+		self::activate_site();
+	}
+
+	/**
+	 * Seed options for the current site/blog.
+	 *
+	 * @return void
+	 */
+	public static function activate_site() {
 		require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-settings.php';
 		require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-stats.php';
 		require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-rules.php';
@@ -43,7 +74,7 @@ class EDMINBOOST_ANM_Activator {
 		}
 
 		if ( false === get_option( EDMINBOOST_ANM_Settings::STATS_OPTION, false ) ) {
-			$stats = EDMINBOOST_ANM_Stats::get_defaults();
+			$stats                        = EDMINBOOST_ANM_Stats::get_defaults();
 			$stats['preset_phrase_count'] = EDMINBOOST_ANM_Rules::get_preset_phrase_count();
 			add_option( EDMINBOOST_ANM_Settings::STATS_OPTION, $stats, '', false );
 		}

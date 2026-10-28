@@ -29,10 +29,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ## Security
 
-- Check capabilities before rendering admin pages: `current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY )`.
+- Check capabilities before rendering admin pages: `current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY )` on site admin; `current_user_can( EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY )` on network admin screens.
 - Escape output: `esc_html()`, `esc_attr()`, `esc_url()`, `esc_html__()`, `esc_html_e()`.
-- Sanitize all settings via `EDMINBOOST_ANM_Settings::sanitize()` as `sanitize_callback` in `register_setting()`.
-- New AJAX handlers: register in `EDMINBOOST_ANM_Ajax::register_hooks()`, implement `handle_*`, call `verify_request()` (digest/webhook preview: sanitize nested input with dedicated helpers when accepting unsaved form fields).
+- Sanitize site settings via `EDMINBOOST_ANM_Settings::sanitize()` as `sanitize_callback` in `register_setting()`; network defaults via `sanitize_network_settings()`; network policy via `EDMINBOOST_ANM_Multisite::sanitize_policy()`.
+- New AJAX handlers: register in `EDMINBOOST_ANM_Ajax::register_hooks()`, implement `handle_*`, call `verify_request()` (honor posted `context` for network vs site); use `verify_site_settings_mutation()` when changing site-level settings storage (digest/webhook preview: sanitize nested input with dedicated helpers when accepting unsaved form fields).
 
 ## WordPress APIs
 
@@ -47,8 +47,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 - Bootstrap requires core classes; instantiate only via `edminboost_anm_run_plugin()`.
 - `EDMINBOOST_ANM_Plugin` constructor: `Admin`, `Notices`, `Interceptor`, `Ajax`, `Digest`, `Ad_Redirects`.
-- Domain helpers (static or instantiated as needed): `EDMINBOOST_ANM_Settings`, `EDMINBOOST_ANM_Rules`, `EDMINBOOST_ANM_Inbox`, `EDMINBOOST_ANM_Stats`, `EDMINBOOST_ANM_Importer`, `EDMINBOOST_ANM_Webhook`, `EDMINBOOST_ANM_Ad_Redirects` (URL normalize/match helpers).
-- Activation seeds options via `EDMINBOOST_ANM_Activator`; deactivation clears digest schedule.
+- Domain helpers (static or instantiated as needed): `EDMINBOOST_ANM_Settings`, `EDMINBOOST_ANM_Rules`, `EDMINBOOST_ANM_Inbox`, `EDMINBOOST_ANM_Stats`, `EDMINBOOST_ANM_Importer`, `EDMINBOOST_ANM_Webhook`, `EDMINBOOST_ANM_Ad_Redirects` (URL normalize/match helpers), `EDMINBOOST_ANM_Multisite` (network policy, merge layers, uninstall network-wide).
+- Bootstrap requires `class-edminboost-anm-multisite.php` (always loaded). Activation seeds options via `EDMINBOOST_ANM_Activator` (+ network sitemeta when network-activated); deactivation clears digest schedule; `wp_initialize_site` seeds new blogs via `EDMINBOOST_ANM_Plugin::handle_new_site()`.
 
 ## Settings Option Shape (top-level keys)
 
@@ -94,10 +94,19 @@ array(
 	),
 	'word_filters'      => array( 'spam_words' => array(), 'whitelist_words' => array() ),
 	'block_ad_redirects'=> array( 'enabled' => false, 'urls' => array() ),
+	'white_label'       => array(
+		'enabled'        => false,
+		'menu_title'     => '',
+		'brand_name'     => '',
+		'logo_url'       => '',
+		'hide_docs_link' => false,
+		'docs_url'       => '',
+		'hide_brand'     => false,
+	),
 )
 ```
 
-Separate options: `RULES_OPTION` (rule list), `INBOX_OPTION` (captured notices), `STATS_OPTION` (counters).
+Separate per-site options: `RULES_OPTION` (rule list), `INBOX_OPTION` (captured notices), `STATS_OPTION` (counters). Multisite sitemeta: `EDMINBOOST_ANM_Multisite::NETWORK_OPTION`, `NETWORK_SETTINGS_OPTION`, `NETWORK_RULES_OPTION`.
 
 ## Partials
 
@@ -107,7 +116,8 @@ Separate options: `RULES_OPTION` (rule list), `INBOX_OPTION` (captured notices),
 | `edminboost-anm-inbox-page.php` | Inbox list table shell |
 | `edminboost-anm-inbox-table-rows.php` | Inbox `<tr>` fragment (page + AJAX) |
 | `edminboost-anm-rules-page.php` | Rules + WP preset conversion |
-| `edminboost-anm-settings-page.php` | Settings API form |
+| `edminboost-anm-settings-page.php` | Settings API form (site or network defaults) |
+| `edminboost-anm-network-policy-page.php` | Network multisite policy |
 | `edminboost-anm-notice-panel-dropdown.php` | Admin bar dropdown preview |
 
 `EDMINBOOST_ANM_Notices::DROPDOWN_PREVIEW_LIMIT` (8) caps dropdown preview items.
@@ -122,7 +132,9 @@ Separate options: `RULES_OPTION` (rule list), `INBOX_OPTION` (captured notices),
 - Webhook save: `sanitize_webhook_settings()` keeps `url` when disabled (do not wipe stored URL on toggle-off).
 - Admin routing: `EDMINBOOST_ANM_Admin::is_plugin_screen( $hook_suffix )` — screen id, optional hook suffix, or `$_GET['page']` contains `PAGE_SLUG`.
 - Digest: `EDMINBOOST_ANM_Digest::build_email_content()`, `format_email_body_plain()`, `build_email()`, `get_preview()` (structured `content`, plain `body`, `next_send`), `get_recipients()`, `SITE_NAME_TOKEN`, `add_cron_schedules()`, `sync_schedule()`, `sanitize_send_weekday()`, `get_next_send_timestamp()`; filter `edminboost_anm_digest_email`.
-- Rules: `save()` allows `match_type` `keyword`|`regex`|`css`; `html_matches_css_selector()`, `get_custom_blacklist_phrases()`, `get_active_blacklist_phrases()`.
+- Rules: `save()` allows `match_type` `keyword`|`regex`|`css`; `html_matches_css_selector()`, `get_custom_blacklist_phrases()`, `get_active_blacklist_phrases()`; `context` `site`|`network` for storage; `get_all()` merges network rules when multisite sharing is enabled.
+- Multisite: `EDMINBOOST_ANM_Multisite::get_policy()`, `site_can_edit_settings()`, `site_can_edit_rules()`, `shares_network_rules()`, `merge_settings_layers()`, `is_network_plugin_screen()`.
+- White label: `sanitize_white_label_settings()`, `is_white_label_enabled()`, menu/brand/docs URL helpers on `EDMINBOOST_ANM_Settings`.
 - Webhook: `EDMINBOOST_ANM_Webhook::build_payload()`, `build_message_text()`, `get_preview()`, `get_preview_notice()`, `get_sample_notice()`; filter `edminboost_anm_webhook_payload`.
 - Sanitize helpers: `EDMINBOOST_ANM_Settings::sanitize_digest_settings()`, `sanitize_webhook_settings()` (Settings API save; digest preview uses full digest sanitizer; webhook preview AJAX sanitizes `message` only).
 

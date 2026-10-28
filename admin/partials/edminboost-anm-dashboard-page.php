@@ -20,17 +20,26 @@ $edminboost_anm_max_hits       = 1;
 foreach ( $edminboost_anm_top_plugins as $plugin ) {
 	$edminboost_anm_max_hits = max( $edminboost_anm_max_hits, (int) ( $plugin['hits'] ?? 0 ) );
 }
+
+$edminboost_anm_dashboard_brand       = EDMINBOOST_ANM_Settings::get_dashboard_brand();
+$edminboost_anm_can_toggle_enabled    = EDMINBOOST_ANM_Multisite::site_can_edit_settings();
 ?>
 <div class="wrap edminboost-anm-wrap">
 	<div class="edminboost-anm-topbar">
+		<?php if ( ! empty( $edminboost_anm_dashboard_brand['show'] ) ) : ?>
 		<div class="edminboost-anm-topbar__brand">
-			<strong><?php esc_html_e( 'Edminboost', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></strong>
-			<span class="edminboost-anm-topbar__version">v<?php echo esc_html( EDMINBOOST_ANM_VERSION ); ?></span>
+			<?php if ( ! empty( $edminboost_anm_dashboard_brand['logo_url'] ) ) : ?>
+				<img class="edminboost-anm-topbar__logo" src="<?php echo esc_url( $edminboost_anm_dashboard_brand['logo_url'] ); ?>" alt="<?php echo esc_attr( $edminboost_anm_dashboard_brand['name'] ?? '' ); ?>" />
+			<?php endif; ?>
+			<?php if ( '' !== ( $edminboost_anm_dashboard_brand['name'] ?? '' ) ) : ?>
+				<strong><?php echo esc_html( $edminboost_anm_dashboard_brand['name'] ); ?></strong>
+			<?php endif; ?>
 		</div>
+		<?php endif; ?>
 		<div class="edminboost-anm-topbar__status" data-edminboost-anm-quick-status>
 			<?php esc_html_e( 'Quick Status:', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
 			<label class="edminboost-anm-switch edminboost-anm-switch--inline">
-				<input type="checkbox" class="edminboost-anm-enabled-toggle" <?php checked( $edminboost_anm_is_enabled ); ?> aria-label="<?php esc_attr_e( 'Toggle notice interception', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" />
+				<input type="checkbox" class="edminboost-anm-enabled-toggle" <?php checked( $edminboost_anm_is_enabled ); ?> <?php disabled( ! $edminboost_anm_can_toggle_enabled ); ?> aria-label="<?php esc_attr_e( 'Toggle notice interception', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" />
 				<span class="edminboost-anm-switch__slider"></span>
 			</label>
 			<span class="edminboost-anm-status <?php echo $edminboost_anm_is_enabled ? 'is-active' : 'is-inactive'; ?>" data-edminboost-anm-enabled-status>
@@ -96,16 +105,18 @@ foreach ( $edminboost_anm_top_plugins as $plugin ) {
 			<span class="edminboost-anm-status <?php echo $edminboost_anm_preset_enabled ? 'is-active' : 'is-inactive'; ?>" data-edminboost-anm-preset-status>
 				<?php echo $edminboost_anm_preset_enabled ? esc_html__( 'ENABLED', EDMINBOOST_ANM_TEXT_DOMAIN ) : esc_html__( 'DISABLED', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
 			</span>
-			<span class="edminboost-anm-muted">
-				( <?php
-				echo esc_html(
-					sprintf(
-						/* translators: %d: phrase count */
-						__( 'Active blacklist: %d phrases', EDMINBOOST_ANM_TEXT_DOMAIN ),
-						$metrics['preset_phrase_count']
-					)
-				);
-				?> )
+			<span class="edminboost-anm-muted" data-edminboost-anm-preset-blacklist<?php echo $edminboost_anm_preset_enabled ? '' : ' hidden'; ?>>
+				<?php if ( $edminboost_anm_preset_enabled ) : ?>
+					( <?php
+					echo esc_html(
+						sprintf(
+							/* translators: %d: phrase count */
+							__( 'Active blacklist: %d phrases', EDMINBOOST_ANM_TEXT_DOMAIN ),
+							(int) ( $metrics['preset_phrase_count'] ?? 0 )
+						)
+					);
+					?> )
+				<?php endif; ?>
 			</span>
 		</p>
 	</div>

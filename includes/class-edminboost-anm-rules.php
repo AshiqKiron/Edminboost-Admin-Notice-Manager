@@ -155,18 +155,90 @@ class EDMINBOOST_ANM_Rules {
 	 */
 	public static function get_all() {
 		$rules = get_option( EDMINBOOST_ANM_Settings::RULES_OPTION, array() );
+		$rules = is_array( $rules ) ? $rules : array();
+
+		if ( class_exists( 'EDMINBOOST_ANM_Multisite' ) ) {
+			return EDMINBOOST_ANM_Multisite::merge_rules_layers( $rules );
+		}
+
+		return $rules;
+	}
+
+	/**
+	 * Get rules stored on the current site (without network merge).
+	 *
+	 * @return array
+	 */
+	public static function get_site_rules() {
+		$rules = get_option( EDMINBOOST_ANM_Settings::RULES_OPTION, array() );
 
 		return is_array( $rules ) ? $rules : array();
 	}
 
 	/**
+	 * Get rules stored at the network level.
+	 *
+	 * @return array
+	 */
+	public static function get_network_rules() {
+		if ( ! class_exists( 'EDMINBOOST_ANM_Multisite' ) || ! EDMINBOOST_ANM_Multisite::is_active() ) {
+			return array();
+		}
+
+		return EDMINBOOST_ANM_Multisite::get_network_rules_raw();
+	}
+
+	/**
 	 * Save all rules.
 	 *
-	 * @param array $rules Rules list.
+	 * @param array  $rules   Rules list.
+	 * @param string $context Storage context: site or network.
 	 * @return bool
 	 */
-	public static function save_all( $rules ) {
+	public static function save_all( $rules, $context = 'site' ) {
+		if ( 'network' === $context ) {
+			if ( ! class_exists( 'EDMINBOOST_ANM_Multisite' ) || ! EDMINBOOST_ANM_Multisite::is_active() ) {
+				return false;
+			}
+
+			return update_site_option( EDMINBOOST_ANM_Multisite::NETWORK_RULES_OPTION, $rules );
+		}
+
+		if ( class_exists( 'EDMINBOOST_ANM_Multisite' ) && ! EDMINBOOST_ANM_Multisite::site_can_edit_rules() ) {
+			return false;
+		}
+
 		return update_option( EDMINBOOST_ANM_Settings::RULES_OPTION, $rules, false );
+	}
+
+	/**
+	 * Rules list for CRUD in a given storage context.
+	 *
+	 * @param string $context site|network.
+	 * @return array
+	 */
+	private static function get_mutable_rules( $context = 'site' ) {
+		if ( 'network' === $context ) {
+			return self::get_network_rules();
+		}
+
+		return self::get_site_rules();
+	}
+
+	/**
+	 * Whether a rule ID belongs to the network ruleset.
+	 *
+	 * @param string $id Rule ID.
+	 * @return bool
+	 */
+	private static function is_network_rule_id( $id ) {
+		foreach ( self::get_network_rules() as $rule ) {
+			if ( self::id_matches( $rule['id'] ?? '', $id ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -223,20 +295,35 @@ class EDMINBOOST_ANM_Rules {
 			$action = 'auto_dismiss_inbox';
 		}
 
-		$rules = self::get_all();
+		$context = sanitize_key( $data['context'] ?? 'site' );
+		if ( ! in_array( $context, array( 'site', 'network' ), true ) ) {
+			$context = 'site';
+		}
+
+		if ( 'site' === $context && class_exists( 'EDMINBOOST_ANM_Multisite' ) && ! EDMINBOOST_ANM_Multisite::site_can_edit_rules() ) {
+			return new WP_Error( 'forbidden', __( 'Auto-rules are managed by the network administrator.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
+		}
+
+		$rules = self::get_mutable_rules( $context );
 		$id    = ! empty( $data['id'] ) ? sanitize_key( $data['id'] ) : sanitize_key( 'rule_' . wp_generate_password( 8, false ) );
 
-		$existing_hits   = 0;
-		$created         = time();
+		$existing_hits    = 0;
+		$created          = time();
 		$wp_notice_preset = '';
+		$schedule         = self::get_default_schedule();
 
 		foreach ( $rules as $rule ) {
 			if ( self::id_matches( $rule['id'] ?? '', $id ) ) {
 				$existing_hits    = (int) ( $rule['hit_count'] ?? 0 );
 				$created          = (int) ( $rule['created'] ?? time() );
 				$wp_notice_preset = sanitize_key( $rule['wp_notice_preset'] ?? '' );
+				$schedule         = self::sanitize_schedule( $rule['schedule'] ?? array() );
 				break;
 			}
+		}
+
+		if ( isset( $data['schedule'] ) && is_array( $data['schedule'] ) ) {
+			$schedule = self::sanitize_schedule( $data['schedule'] );
 		}
 
 		if ( ! empty( $data['wp_notice_preset'] ) ) {
@@ -250,6 +337,7 @@ class EDMINBOOST_ANM_Rules {
 			'match_string' => $match_string,
 			'action'       => $action,
 			'enabled'      => $enabled,
+			'schedule'     => $schedule,
 			'hit_count'    => $existing_hits,
 			'created'      => $created,
 		);
@@ -271,7 +359,7 @@ class EDMINBOOST_ANM_Rules {
 			$rules[] = $new_rule;
 		}
 
-		self::save_all( $rules );
+		self::save_all( $rules, $context );
 
 		return $new_rule;
 	}
@@ -279,18 +367,32 @@ class EDMINBOOST_ANM_Rules {
 	/**
 	 * Delete a rule.
 	 *
-	 * @param string $id Rule ID.
+	 * @param string $id      Rule ID.
+	 * @param string $context Storage context: site or network.
 	 * @return bool
 	 */
-	public static function delete( $id ) {
+	public static function delete( $id, $context = 'site' ) {
+		$context = sanitize_key( $context );
+		if ( ! in_array( $context, array( 'site', 'network' ), true ) ) {
+			$context = 'site';
+		}
+
+		if ( 'site' === $context && class_exists( 'EDMINBOOST_ANM_Multisite' ) && ! EDMINBOOST_ANM_Multisite::site_can_edit_rules() ) {
+			return false;
+		}
+
+		if ( 'site' === $context && self::is_network_rule_id( $id ) && class_exists( 'EDMINBOOST_ANM_Multisite' ) && EDMINBOOST_ANM_Multisite::shares_network_rules() ) {
+			return false;
+		}
+
 		$rules = array_filter(
-			self::get_all(),
+			self::get_mutable_rules( $context ),
 			static function ( $rule ) use ( $id ) {
 				return ! self::id_matches( $rule['id'] ?? '', $id );
 			}
 		);
 
-		return self::save_all( array_values( $rules ) );
+		return self::save_all( array_values( $rules ), $context );
 	}
 
 	/**
@@ -298,15 +400,29 @@ class EDMINBOOST_ANM_Rules {
 	 *
 	 * @param string $id      Rule ID.
 	 * @param bool   $enabled Enabled state.
+	 * @param string $context Storage context: site or network.
 	 * @return array|null
 	 */
-	public static function toggle( $id, $enabled ) {
-		$rules = self::get_all();
+	public static function toggle( $id, $enabled, $context = 'site' ) {
+		$context = sanitize_key( $context );
+		if ( ! in_array( $context, array( 'site', 'network' ), true ) ) {
+			$context = 'site';
+		}
+
+		if ( 'site' === $context && class_exists( 'EDMINBOOST_ANM_Multisite' ) && ! EDMINBOOST_ANM_Multisite::site_can_edit_rules() ) {
+			return null;
+		}
+
+		if ( 'site' === $context && self::is_network_rule_id( $id ) ) {
+			return null;
+		}
+
+		$rules = self::get_mutable_rules( $context );
 
 		foreach ( $rules as $index => $rule ) {
 			if ( self::id_matches( $rule['id'] ?? '', $id ) ) {
 				$rules[ $index ]['enabled'] = (bool) $enabled;
-				self::save_all( $rules );
+				self::save_all( $rules, $context );
 				return $rules[ $index ];
 			}
 		}
@@ -321,12 +437,13 @@ class EDMINBOOST_ANM_Rules {
 	 * @return void
 	 */
 	public static function increment_hit( $id ) {
-		$rules = self::get_all();
+		$context = self::is_network_rule_id( $id ) ? 'network' : 'site';
+		$rules   = self::get_mutable_rules( $context );
 
 		foreach ( $rules as $index => $rule ) {
-			if ( ( $rule['id'] ?? '' ) === $id ) {
+			if ( self::id_matches( $rule['id'] ?? '', $id ) ) {
 				$rules[ $index ]['hit_count'] = (int) ( $rule['hit_count'] ?? 0 ) + 1;
-				self::save_all( $rules );
+				self::save_all( $rules, $context );
 				return;
 			}
 		}
@@ -348,7 +465,7 @@ class EDMINBOOST_ANM_Rules {
 		}
 
 		foreach ( self::get_all() as $rule ) {
-			if ( empty( $rule['enabled'] ) ) {
+			if ( ! self::is_rule_effective( $rule ) ) {
 				continue;
 			}
 
@@ -633,6 +750,220 @@ class EDMINBOOST_ANM_Rules {
 		);
 
 		return $labels[ $type ] ?? $labels['keyword'];
+	}
+
+	/**
+	 * Default schedule shape for new rules (disabled until enabled in the UI).
+	 *
+	 * @return array{enabled:bool,days:string[],start:string,end:string}
+	 */
+	public static function get_default_schedule() {
+		return array(
+			'enabled' => false,
+			'days'    => array( 'monday', 'tuesday', 'wednesday', 'thursday', 'friday' ),
+			'start'   => '09:00',
+			'end'     => '17:00',
+		);
+	}
+
+	/**
+	 * Weekday choices for rule schedules (site-local).
+	 *
+	 * @return array<string, string>
+	 */
+	public static function get_schedule_weekday_choices() {
+		return EDMINBOOST_ANM_Digest::get_send_weekday_choices();
+	}
+
+	/**
+	 * Sanitize schedule settings stored on a rule.
+	 *
+	 * @param array $raw Raw schedule array.
+	 * @return array{enabled:bool,days:string[],start:string,end:string}
+	 */
+	public static function sanitize_schedule( $raw ) {
+		$defaults = self::get_default_schedule();
+
+		if ( ! is_array( $raw ) ) {
+			return $defaults;
+		}
+
+		$enabled = ! empty( $raw['enabled'] );
+		$days    = array();
+
+		if ( ! empty( $raw['days'] ) && is_array( $raw['days'] ) ) {
+			$choices = array_keys( self::get_schedule_weekday_choices() );
+			foreach ( $raw['days'] as $day ) {
+				$day = sanitize_key( (string) $day );
+				if ( in_array( $day, $choices, true ) ) {
+					$days[] = $day;
+				}
+			}
+			$days = array_values( array_unique( $days ) );
+		}
+
+		return array(
+			'enabled' => $enabled,
+			'days'    => $days,
+			'start'   => self::sanitize_schedule_time( $raw['start'] ?? $defaults['start'], $defaults['start'] ),
+			'end'     => self::sanitize_schedule_time( $raw['end'] ?? $defaults['end'], $defaults['end'] ),
+		);
+	}
+
+	/**
+	 * Sanitize HH:MM time for schedules.
+	 *
+	 * @param string $value   Raw time.
+	 * @param string $fallback Fallback when invalid.
+	 * @return string
+	 */
+	public static function sanitize_schedule_time( $value, $fallback = '09:00' ) {
+		$value = sanitize_text_field( (string) $value );
+
+		if ( preg_match( '/^([01]?\d|2[0-3]):([0-5]\d)$/', $value, $matches ) ) {
+			return sprintf( '%02d:%02d', (int) $matches[1], (int) $matches[2] );
+		}
+
+		return $fallback;
+	}
+
+	/**
+	 * Build schedule array from rule save AJAX POST fields.
+	 *
+	 * @param array $post Raw POST (unslashed).
+	 * @return array{enabled:bool,days:string[],start:string,end:string}
+	 */
+	public static function schedule_from_request( $post ) {
+		$days = array();
+		if ( isset( $post['schedule_days'] ) && is_array( $post['schedule_days'] ) ) {
+			$days = $post['schedule_days'];
+		}
+
+		return self::sanitize_schedule(
+			array(
+				'enabled' => ! empty( $post['schedule_enabled'] ),
+				'days'    => $days,
+				'start'   => $post['schedule_start'] ?? '',
+				'end'     => $post['schedule_end'] ?? '',
+			)
+		);
+	}
+
+	/**
+	 * Whether a rule is enabled and within its optional schedule window.
+	 *
+	 * @param array $rule Rule record.
+	 * @return bool
+	 */
+	public static function is_rule_effective( $rule ) {
+		if ( empty( $rule['enabled'] ) ) {
+			return false;
+		}
+
+		return self::is_schedule_active( $rule['schedule'] ?? array() );
+	}
+
+	/**
+	 * Whether the current site-local time falls inside a rule schedule.
+	 *
+	 * @param array $schedule Sanitized schedule array.
+	 * @return bool True when schedule is off or the current moment is inside the window.
+	 */
+	public static function is_schedule_active( $schedule ) {
+		$schedule = self::sanitize_schedule( is_array( $schedule ) ? $schedule : array() );
+
+		if ( empty( $schedule['enabled'] ) ) {
+			return true;
+		}
+
+		$tz  = wp_timezone();
+		$now = new DateTimeImmutable( 'now', $tz );
+		$w   = (int) $now->format( 'w' );
+
+		if ( ! empty( $schedule['days'] ) ) {
+			$allowed = array();
+			foreach ( $schedule['days'] as $slug ) {
+				$allowed[] = EDMINBOOST_ANM_Digest::weekday_slug_to_php_w( $slug );
+			}
+			if ( ! in_array( $w, $allowed, true ) ) {
+				return false;
+			}
+		}
+
+		$start_minutes = self::schedule_time_to_minutes( $schedule['start'] );
+		$end_minutes   = self::schedule_time_to_minutes( $schedule['end'] );
+		$current       = ( (int) $now->format( 'G' ) * 60 ) + (int) $now->format( 'i' );
+
+		if ( $start_minutes <= $end_minutes ) {
+			return $current >= $start_minutes && $current <= $end_minutes;
+		}
+
+		return $current >= $start_minutes || $current <= $end_minutes;
+	}
+
+	/**
+	 * Convert HH:MM to minutes from midnight.
+	 *
+	 * @param string $time HH:MM.
+	 * @return int
+	 */
+	private static function schedule_time_to_minutes( $time ) {
+		$parts = explode( ':', $time );
+		$hour  = isset( $parts[0] ) ? (int) $parts[0] : 0;
+		$min   = isset( $parts[1] ) ? (int) $parts[1] : 0;
+
+		return ( $hour * 60 ) + $min;
+	}
+
+	/**
+	 * Format a schedule time for display using site time format.
+	 *
+	 * @param string $time HH:MM.
+	 * @return string
+	 */
+	public static function format_schedule_time_display( $time ) {
+		$time  = self::sanitize_schedule_time( $time );
+		$parts = explode( ':', $time );
+		$dt    = ( new DateTimeImmutable( 'now', wp_timezone() ) )->setTime( (int) $parts[0], (int) $parts[1] );
+
+		return wp_date( get_option( 'time_format' ), $dt->getTimestamp() );
+	}
+
+	/**
+	 * Short human-readable schedule summary for the rules table.
+	 *
+	 * @param array $rule Rule record.
+	 * @return string Empty when scheduling is off.
+	 */
+	public static function get_schedule_summary( $rule ) {
+		$schedule = self::sanitize_schedule( $rule['schedule'] ?? array() );
+
+		if ( empty( $schedule['enabled'] ) ) {
+			return '';
+		}
+
+		$choices = self::get_schedule_weekday_choices();
+		$labels  = array();
+
+		if ( empty( $schedule['days'] ) ) {
+			$labels[] = __( 'Every day', EDMINBOOST_ANM_TEXT_DOMAIN );
+		} else {
+			foreach ( $schedule['days'] as $slug ) {
+				if ( isset( $choices[ $slug ] ) ) {
+					$labels[] = $choices[ $slug ];
+				}
+			}
+		}
+
+		$days_part = implode( ', ', $labels );
+		$time_part = sprintf(
+			/* translators: 1: start time, 2: end time (site time format) */
+			__( '%1$s–%2$s', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			self::format_schedule_time_display( $schedule['start'] ),
+			self::format_schedule_time_display( $schedule['end'] )
+		);
+
+		return trim( $days_part . ' · ' . $time_part );
 	}
 
 	/**

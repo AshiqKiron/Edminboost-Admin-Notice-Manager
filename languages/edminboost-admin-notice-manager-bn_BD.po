@@ -563,8 +563,8 @@ msgstr "নোটিশ"
 
 #: admin/partials/edminboost-anm-settings-page.php:35
 #: admin/partials/edminboost-anm-settings-page.php:371
-msgid "Access & visibility"
-msgstr "অ্যাক্সেস এবং দৃশ্যমানতা"
+msgid "Access"
+msgstr "অ্যাক্সেস"
 
 #: admin/partials/edminboost-anm-settings-page.php:36
 #: admin/partials/edminboost-anm-settings-page.php:481
@@ -584,8 +584,8 @@ msgid "Notifications"
 msgstr "বিজ্ঞপ্তি"
 
 #: admin/partials/edminboost-anm-settings-page.php:40
-msgid "Migration & Tools"
-msgstr "মাইগ্রেশন এবং টুলস"
+msgid "Migration"
+msgstr "মাইগ্রেশন"
 
 #: admin/partials/edminboost-anm-settings-page.php:60
 #: includes/class-edminboost-anm-admin.php:71
@@ -601,11 +601,11 @@ msgstr "সেটিংস বিভাগ"
 #: admin/partials/edminboost-anm-settings-page.php:97
 msgid ""
 "Choose how notices appear on the dashboard. Per-type rules live on the "
-"Notices tab; who is affected on Access & visibility; how to open the inbox "
+"Notices tab; who is affected on Access; how to open the inbox "
 "on Admin bar."
 msgstr ""
 "ড্যাশবোর্ডে বিজ্ঞপ্তিগুলি কীভাবে প্রদর্শিত হয় তা বেছে নিন । প্রতি-টাইপের "
-"নিয়মগুলি নোটিশ ট্যাবে লাইভ; অ্যাক্সেস এবং দৃশ্যমানতায় কে প্রভাবিত হয়; "
+"নিয়মগুলি নোটিশ ট্যাবে লাইভ; অ্যাক্সেসে কে প্রভাবিত হয়; "
 "অ্যাডমিন বারে ইনবক্সটি কীভাবে খুলবেন ।"
 
 #: admin/partials/edminboost-anm-settings-page.php:98
@@ -2059,13 +2059,12 @@ msgstr "ড্যাশবোর্ড + ইনবক্স / অ্যাডম
 
 #: includes/class-edminboost-anm-settings.php:792
 msgid ""
-"Recommended. Hides the notices you configure under Notices, Access & "
-"visibility, and Auto-Rules, then collects them in the inbox and admin bar "
-"panel."
+"Recommended. Hides the notices you configure under Notices, Access, and "
+"Auto-Rules, then collects them in the inbox and admin bar panel."
 msgstr ""
-"প্রস্তাবিত । নোটিশ, অ্যাক্সেস এবং দৃশ্যমানতা এবং অটো-রুলগুলির অধীনে আপনি যে "
-"বিজ্ঞপ্তিগুলি কনফিগার করেছেন তা গোপন করে, তারপরে সেগুলি ইনবক্স এবং অ্যাডমিন "
-"বার প্যানেলে সংগ্রহ করে ।"
+"প্রস্তাবিত । নোটিশ, অ্যাক্সেস এবং অটো-রুলগুলির অধীনে আপনি যে বিজ্ঞপ্তিগুলি "
+"কনফিগার করেছেন তা গোপন করে, তারপরে সেগুলি ইনবক্স এবং অ্যাডমিন বার প্যানেলে "
+"সংগ্রহ করে ।"
 
 #: includes/class-edminboost-anm-settings.php:796
 msgid "Toolbar only"

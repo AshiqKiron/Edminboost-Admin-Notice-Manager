@@ -12,7 +12,8 @@ WordPress plugin that intercepts, filters, and organizes admin notices from a ce
 | Function prefix | `edminboost_anm_*` |
 | Main option | `edminboost_anm_settings` |
 | Other options | `edminboost_anm_rules`, `edminboost_anm_inbox`, `edminboost_anm_stats`, `edminboost_anm_version` |
-| Capability | `manage_options` |
+| Multisite sitemeta | `edminboost_anm_network`, `edminboost_anm_network_settings`, `edminboost_anm_network_rules` |
+| Capability | `manage_options` (site); `manage_network_options` (network admin) |
 | AJAX nonce | `edminboost_anm_admin` |
 
 ## Architecture
@@ -33,6 +34,7 @@ includes/
   class-edminboost-anm-digest.php
   class-edminboost-anm-webhook.php
   class-edminboost-anm-ad-redirects.php  # block unwanted admin redirects
+  class-edminboost-anm-multisite.php  # network policy, defaults, shared rules
   class-edminboost-anm-debug.php      # WP_DEBUG only
   class-edminboost-anm-{activator,deactivator}.php
 admin/
@@ -44,13 +46,16 @@ admin/
   partials/edminboost-anm-{dashboard,inbox,rules,settings}-page.php
   partials/edminboost-anm-inbox-table-rows.php
   partials/edminboost-anm-notice-panel-dropdown.php
+  partials/edminboost-anm-network-policy-page.php
 languages/  # .pot, locale .po/.mo; optional build-translations.py
 uninstall.php  readme.txt  composer.json
 ```
 
-- Bootstrap defines constants and calls `edminboost_anm_run_plugin()`.
-- `EDMINBOOST_ANM_Plugin::run()` wires i18n, admin menu/settings/assets, and on `init`: notices, interceptor, AJAX, digest, ad redirects.
-- Settings: primary option via `EDMINBOOST_ANM_Settings` (Settings API group `edminboost_anm_settings_group`). Rules and inbox stored in separate options. Tabbed settings UI (General, Notices, Access & visibility, Admin bar, Filtering, Security, Notifications, Migration & Tools).
+- Bootstrap defines constants, requires multisite helper, and calls `edminboost_anm_run_plugin()`.
+- `EDMINBOOST_ANM_Plugin::run()` wires i18n, site + network admin menu/settings/assets, `wp_initialize_site` seeding, and on `init`: notices, interceptor, AJAX, digest, ad redirects.
+- Settings: primary option via `EDMINBOOST_ANM_Settings` (Settings API group `edminboost_anm_settings_group`). Rules and inbox stored in separate per-site options. Tabbed settings UI (General, Notices, Access, Admin bar, Filtering, Security, Notifications, White label, Migration; **Multisite** tab on multisite sites). Network admin: multisite policy, network default settings (same partial), network auto-rules.
+- **Multisite**: policies `per_site` / `network_defaults` / `network_locked`; merged effective settings; optional shared network auto-rules; site edit gates via `site_can_edit_settings()` / `site_can_edit_rules()`.
+- **White label**: agency menu title, dashboard brand/logo, docs link overrides (`settings.white_label`).
 - Options API only — no custom tables. No REST API.
 - AJAX for dashboard/rules/inbox (including `edminboost_anm_inbox_list` sort; inbox snooze toggle and read state), importer, capture, WP preset conversion, user search, notice hide/reset hidden; weekly digest via WP-Cron (`send_weekday`, custom `weekly` schedule); optional webhook (user URL preserved when disabled, off by default).
 - Auto-Rules: `keyword`, `regex`, and `css` selector match types; custom upsell blacklist phrases apply even when Kill All Upsells preset is off.
@@ -58,9 +63,10 @@ uninstall.php  readme.txt  composer.json
 - **Inline notice controls**: `edminboost-anm-notice-inline.js` on non–plugin-screen wp-admin for “Hide for me” / “Hide for all”.
 - **Notifications previews**: Settings Notifications tab — two-column digest form + sticky structured email preview; live webhook text/JSON preview (no send on preview).
 - **Admin bar panel**: Always enabled when plugin is on (`notice_panel.enabled` on save); Admin bar tab is style/position/badge/colors only (no separate enable checkbox). Styles `link`, `bell_link`, `dropdown`, `dropdown_compact`; six position slots; badge caps and dot/pulse/none. Assets when `should_show_admin_bar_notice_panel()`. Settings preview via `initNoticePanelPreview()` (always renders mock). Dropdown JS via `enqueue_admin_bar_dropdown_script()`.
-- **Settings UX**: Global **Enable** only on Dashboard Quick Status (not Settings save). No **Hidden notices in toolbar** option (removed). General tab: two-column **Display experience** + **Update & hidden notices** live previews; **Access & visibility** (ACL + user pickers); **Notices** tab (short Inbox/Hide/Default selects); **Admin bar** tab panel preview. Enqueues `list-tables`, `dashicons`, plugin-screen notice-hide inline CSS on plugin screens.
+- **Settings UX**: Global **Enable** only on Dashboard Quick Status (not Settings save). No **Hidden notices in toolbar** option (removed). General tab: two-column **Display experience** + **Update & hidden notices** live previews; **Access** (ACL + user pickers); **Notices** tab (short Inbox/Hide/Default selects); **Admin bar** tab panel preview. Enqueues `list-tables`, `dashicons`, plugin-screen notice-hide inline CSS on plugin screens.
 - **Plugin screens**: CSS + JS hide stray WP notices; settings preview mocks exempt; debug live-test queue cleared when visiting plugin screens.
-- **Dashboard**: Quick Status enable toggle reloads the page after successful AJAX save.
+- **Dashboard**: Quick Status enable toggle reloads the page after successful AJAX save (when site may edit settings).
+- **AJAX**: rule mutations accept posted `context` (`site`|`network`); `verify_request()` checks `manage_network_options` for network context; settings toggles use `verify_site_settings_mutation()`.
 
 ## Admin Pages
 
@@ -72,6 +78,14 @@ Use `EDMINBOOST_ANM_Admin::PAGE_SLUG` — never hardcode slug strings.
 | Inbox | `PAGE_SLUG . '-inbox'` | `render_inbox_page()` |
 | Rules | `PAGE_SLUG . '-rules'` | `render_rules_page()` |
 | Settings | `PAGE_SLUG . '-settings'` | `render_settings_page()` |
+
+**Network admin** (multisite; `EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY`):
+
+| Page | Slug | Renderer |
+|------|------|----------|
+| Multisite policy | `EDMINBOOST_ANM_Multisite::NETWORK_PAGE_SLUG` | `render_network_policy_page()` |
+| Network defaults | `NETWORK_SETTINGS_PAGE_SLUG` | `render_network_defaults_page()` |
+| Network Auto-Rules | `NETWORK_PAGE_SLUG . '-rules'` | `render_network_rules_page()` |
 
 ## Notable AJAX actions
 
@@ -119,6 +133,6 @@ Persistent AI guidance lives in `.cursor/rules/`:
 - Minimize diff scope; match existing file structure and style.
 - Add `index.php` silence files when creating new directories.
 - Update `readme.txt` changelog for user-facing changes; keep `.cursor/rules/` and `AGENTS.md` in sync when behavior or architecture changes.
-- Update `uninstall.php` (and deactivator for cron) when adding stored options or schedules.
+- Update `uninstall.php` (and deactivator for cron) when adding stored options or schedules; multisite uninstall uses `EDMINBOOST_ANM_Multisite::uninstall_all_sites()`.
 - New AJAX actions: register in `EDMINBOOST_ANM_Ajax`, use `verify_request()` (or `verify_debug_request()` for debug-only).
 - Shared inbox row markup: update `edminboost-anm-inbox-table-rows.php` once for both full page and AJAX list responses.

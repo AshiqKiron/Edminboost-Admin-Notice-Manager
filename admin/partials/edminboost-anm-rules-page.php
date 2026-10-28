@@ -13,13 +13,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
+$edminboost_anm_option_name    = EDMINBOOST_ANM_Settings::OPTION_NAME;
+$edminboost_anm_rules_readonly = ! empty( $edminboost_anm_rules_readonly );
 ?>
-<div class="wrap edminboost-anm-wrap edminboost-anm-wrap--wide" data-edminboost-anm-rules>
+<div class="wrap edminboost-anm-wrap edminboost-anm-wrap--wide" data-edminboost-anm-rules<?php echo $edminboost_anm_rules_readonly ? ' data-edminboost-anm-rules-readonly="1"' : ''; ?>>
 	<header class="edminboost-anm-page-header">
 		<h1><?php esc_html_e( 'Auto-Rules & Keyword Filtering', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h1>
-		<button type="button" class="button button-primary edminboost-anm-add-rule"><?php esc_html_e( '+ Add New Rule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
+		<?php if ( ! $edminboost_anm_rules_readonly ) : ?>
+			<button type="button" class="button button-primary edminboost-anm-add-rule"><?php esc_html_e( '+ Add New Rule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
+		<?php endif; ?>
 	</header>
+
+	<?php if ( $edminboost_anm_rules_readonly ) : ?>
+		<div class="notice notice-warning">
+			<p><?php esc_html_e( 'Auto-rules are managed by your network administrator on this site.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+		</div>
+	<?php endif; ?>
 
 	<div class="edminboost-anm-card edminboost-anm-card--flush edminboost-anm-card--list-table" data-edminboost-anm-rules-list>
 		<?php if ( ! empty( $rules ) ) : ?>
@@ -28,18 +37,34 @@ $edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
 					<tr>
 						<th scope="col" class="manage-column column-primary"><?php esc_html_e( 'Rule Name / Pattern', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 						<th scope="col" class="manage-column"><?php esc_html_e( 'Target Type', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<th scope="col" class="manage-column"><?php esc_html_e( 'Schedule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 						<th scope="col" class="manage-column"><?php esc_html_e( 'Hit Count', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 						<th scope="col" class="manage-column column-actions"><?php esc_html_e( 'Status / Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 					<?php foreach ( $rules as $rule ) : ?>
+						<?php
+						$edminboost_anm_schedule       = EDMINBOOST_ANM_Rules::sanitize_schedule( $rule['schedule'] ?? array() );
+						$edminboost_anm_schedule_label = EDMINBOOST_ANM_Rules::get_schedule_summary( $rule );
+						$edminboost_anm_outside        = ! empty( $rule['enabled'] ) && ! empty( $edminboost_anm_schedule['enabled'] ) && ! EDMINBOOST_ANM_Rules::is_schedule_active( $edminboost_anm_schedule );
+						?>
 						<tr data-rule-id="<?php echo esc_attr( $rule['id'] ); ?>"<?php echo ! empty( $rule['wp_notice_preset'] ) ? ' data-wp-notice-preset="' . esc_attr( $rule['wp_notice_preset'] ) . '"' : ''; ?>>
 							<td class="column-primary" data-colname="<?php esc_attr_e( 'Rule Name / Pattern', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">
 								<strong><?php echo esc_html( $rule['name'] ?? '' ); ?></strong>
 								<br /><code><?php echo esc_html( $rule['match_string'] ?? '' ); ?></code>
 							</td>
 							<td data-colname="<?php esc_attr_e( 'Target Type', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"><?php echo esc_html( EDMINBOOST_ANM_Rules::get_match_type_label( $rule['match_type'] ?? 'keyword' ) ); ?></td>
+							<td data-colname="<?php esc_attr_e( 'Schedule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">
+								<?php if ( '' !== $edminboost_anm_schedule_label ) : ?>
+									<span class="edminboost-anm-rule-schedule"><?php echo esc_html( $edminboost_anm_schedule_label ); ?></span>
+									<?php if ( $edminboost_anm_outside ) : ?>
+										<br /><span class="edminboost-anm-badge edminboost-anm-badge--muted"><?php esc_html_e( 'Outside schedule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></span>
+									<?php endif; ?>
+								<?php else : ?>
+									<span class="edminboost-anm-muted"><?php esc_html_e( 'Always on', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></span>
+								<?php endif; ?>
+							</td>
 							<td data-colname="<?php esc_attr_e( 'Hit Count', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">
 								<?php
 								echo esc_html(
@@ -62,6 +87,7 @@ $edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
 									data-match-type="<?php echo esc_attr( $rule['match_type'] ?? 'keyword' ); ?>"
 									data-match-string="<?php echo esc_attr( $rule['match_string'] ?? '' ); ?>"
 									data-rule-action="<?php echo esc_attr( $rule['action'] ?? 'auto_dismiss_inbox' ); ?>"
+									data-schedule="<?php echo esc_attr( wp_json_encode( $edminboost_anm_schedule ) ); ?>"
 								><?php esc_html_e( 'Edit', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
 								<a href="#"
 									class="submitdelete edminboost-anm-delete-rule"
@@ -171,6 +197,33 @@ $edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
 								<option value="dismiss_only"><?php esc_html_e( 'Auto-Dismiss Only', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
 								<option value="route_inbox"><?php esc_html_e( 'Route to Inbox Only', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
 							</select>
+						</td>
+					</tr>
+					<tr class="edminboost-anm-rule-form__row-schedule">
+						<th scope="row"><?php esc_html_e( 'Schedule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<td>
+							<label class="edminboost-anm-rule-form__schedule-enable">
+								<input type="checkbox" id="edminboost-anm-rule-schedule-enabled" name="schedule_enabled" value="1" />
+								<?php esc_html_e( 'Only apply this rule during set days and hours', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+							</label>
+							<p class="description"><?php esc_html_e( 'Uses your site timezone. Leave all weekdays unchecked to run every day.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+							<fieldset class="edminboost-anm-rule-form__schedule-fields" id="edminboost-anm-rule-schedule-fields" hidden>
+								<legend class="screen-reader-text"><?php esc_html_e( 'Rule schedule', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></legend>
+								<div class="edminboost-anm-rule-form__schedule-days">
+									<?php foreach ( EDMINBOOST_ANM_Rules::get_schedule_weekday_choices() as $edminboost_anm_day_slug => $edminboost_anm_day_label ) : ?>
+										<label class="edminboost-anm-rule-form__schedule-day">
+											<input type="checkbox" name="schedule_days[]" value="<?php echo esc_attr( $edminboost_anm_day_slug ); ?>" />
+											<?php echo esc_html( $edminboost_anm_day_label ); ?>
+										</label>
+									<?php endforeach; ?>
+								</div>
+								<div class="edminboost-anm-rule-form__schedule-times">
+									<label for="edminboost-anm-rule-schedule-start"><?php esc_html_e( 'From', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+									<input type="time" id="edminboost-anm-rule-schedule-start" name="schedule_start" value="09:00" step="60" />
+									<label for="edminboost-anm-rule-schedule-end"><?php esc_html_e( 'Until', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+									<input type="time" id="edminboost-anm-rule-schedule-end" name="schedule_end" value="17:00" step="60" />
+								</div>
+							</fieldset>
 						</td>
 					</tr>
 					<tr>

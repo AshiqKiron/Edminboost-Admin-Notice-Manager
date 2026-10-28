@@ -36,12 +36,13 @@ Cross-cutting quality standards. See also: `edminboost-anm-project.mdc`, `edminb
 - Digest/webhook previews: `aria-live="polite"` on preview containers; digest body built client-side must escape all dynamic strings (`escapeHtml` in admin JS).
 - Admin bar settings preview: non-functional mock (tabindex `-1` on controls); sample notices only — must not imply live inbox data.
 - General settings previews (`display-experience`, `general-options`): `aria-live="polite"`; client-built HTML must use `anmPreviewEscapeHtml` / equivalent; cross-tab Admin bar field changes may refresh display-experience mock without saving.
+- White label preview (`#edminboost-anm-white-label-preview`): `aria-live="polite"`; client-built mock must escape all dynamic strings (`anmPreviewEscapeHtml`).
 - Admin bar dropdown: use `aria-haspopup`, `aria-expanded`, `aria-controls`, and screen-reader text for counts; panel `#edminboost-anm-notices-panel` uses `hidden` when closed.
 
 ## Admin UX
 
 - Add notices sparingly and only when relevant.
-- Load plugin-screen assets only on this plugin's pages (`is_plugin_screen()`).
+- Load plugin-screen assets only on this plugin's pages (`is_plugin_screen()` or `EDMINBOOST_ANM_Multisite::is_network_plugin_screen()` on multisite).
 - Notice CSS may load on wp-admin when the plugin is enabled, and on the front-end admin bar when the notice panel is active for capable users.
 - Interceptor JS loads on all wp-admin when plugin is enabled — required for live notice capture.
 - Features must respect the global `enabled` kill switch via `EDMINBOOST_ANM_Settings::is_enabled()`.
@@ -51,7 +52,7 @@ Cross-cutting quality standards. See also: `edminboost-anm-project.mdc`, `edminb
 
 - Load code only where needed.
 - Avoid expensive queries on every request.
-- Options (`edminboost_anm_settings`, `edminboost_anm_rules`, `edminboost_anm_inbox`, `edminboost_anm_stats`, `edminboost_anm_version`) are not autoloaded.
+- Per-site options (`edminboost_anm_settings`, `edminboost_anm_rules`, `edminboost_anm_inbox`, `edminboost_anm_stats`, `edminboost_anm_version`) are not autoloaded. Multisite network layer uses sitemeta (`edminboost_anm_network*`) — also not autoloaded.
 - Cap inbox growth and batch operations where the codebase already defines limits.
 - Avoid front-end impact beyond admin bar notice panel styling/behavior for capable users when the panel is enabled.
 
@@ -63,9 +64,9 @@ Cross-cutting quality standards. See also: `edminboost-anm-project.mdc`, `edminb
 
 ## Uninstall & Lifecycle
 
-- **Activate**: seed defaults, stats, empty rules/inbox, version, digest schedule sync, optional redirect transient.
+- **Activate**: seed defaults, stats, empty rules/inbox, version, digest schedule sync, optional redirect transient; network-wide activation seeds multisite sitemeta via `EDMINBOOST_ANM_Multisite::seed_network_options()`.
 - **Deactivate**: clear activation redirect transient; `EDMINBOOST_ANM_Digest::clear_schedule()`.
-- **Delete**: `uninstall.php` removes all `EDMINBOOST_ANM_Settings::*_OPTION` keys and clears digest cron.
+- **Delete**: `uninstall.php` removes per-site `EDMINBOOST_ANM_Settings::*_OPTION` keys on each blog; on multisite also deletes network sitemeta and clears digest cron per site.
 - State data retention clearly in `readme.txt`.
 - If adding new options or cron hooks, update activator/deactivator/uninstall accordingly.
 

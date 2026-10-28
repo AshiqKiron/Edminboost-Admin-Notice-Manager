@@ -36,6 +36,7 @@ define( 'EDMINBOOST_ANM_PLUGIN_DOCS_URL', 'https://asphaltthemes.com/edminboost/
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-activator.php';
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-deactivator.php';
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-settings.php';
+require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-multisite.php';
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-stats.php';
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-rules.php';
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-inbox.php';

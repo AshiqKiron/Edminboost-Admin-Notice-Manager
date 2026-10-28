@@ -8,6 +8,14 @@
 
 	var data = window.edminboostAnmData || {};
 
+	function withRulesContext(payload) {
+		var next = payload || {};
+		if (data.rulesContext && data.rulesContext !== 'site') {
+			next.context = data.rulesContext;
+		}
+		return next;
+	}
+
 	function apiPost(action, payload) {
 		var body = new FormData();
 		body.append('action', action);
@@ -634,6 +642,207 @@
 		renderGeneralOptionsPreview();
 	}
 
+	function initWhiteLabelPreview() {
+		var root = document.querySelector('[data-edminboost-anm-white-label]');
+		if (!root) {
+			return;
+		}
+
+		var previewRoot = document.getElementById('edminboost-anm-white-label-preview');
+		var stage = root.querySelector('[data-edminboost-anm-white-label-preview-stage]');
+		var captionEl = root.querySelector('[data-edminboost-anm-white-label-preview-caption]');
+		var i18n = data.i18n || {};
+		var defaultDocsUrl = previewRoot && previewRoot.getAttribute('data-default-docs-url')
+			? previewRoot.getAttribute('data-default-docs-url')
+			: '';
+
+		var fieldIds = [
+			'edminboost-anm-white-label-enabled',
+			'edminboost-anm-white-label-menu-title',
+			'edminboost-anm-white-label-brand-name',
+			'edminboost-anm-white-label-logo-url',
+			'edminboost-anm-white-label-hide-brand',
+			'edminboost-anm-white-label-hide-docs',
+			'edminboost-anm-white-label-docs-url'
+		];
+
+		function readOptions() {
+			function val(id) {
+				var el = document.getElementById(id);
+				return el ? el : null;
+			}
+
+			var enabledEl = val('edminboost-anm-white-label-enabled');
+			var menuEl = val('edminboost-anm-white-label-menu-title');
+			var brandEl = val('edminboost-anm-white-label-brand-name');
+			var logoEl = val('edminboost-anm-white-label-logo-url');
+			var hideBrandEl = val('edminboost-anm-white-label-hide-brand');
+			var hideDocsEl = val('edminboost-anm-white-label-hide-docs');
+			var docsEl = val('edminboost-anm-white-label-docs-url');
+
+			return {
+				enabled: !!(enabledEl && enabledEl.checked),
+				menuTitle: menuEl ? menuEl.value.trim() : '',
+				brandName: brandEl ? brandEl.value.trim() : '',
+				logoUrl: logoEl ? logoEl.value.trim() : '',
+				hideBrand: !!(hideBrandEl && hideBrandEl.checked),
+				hideDocs: !!(hideDocsEl && hideDocsEl.checked),
+				docsUrl: docsEl ? docsEl.value.trim() : ''
+			};
+		}
+
+		function resolveMenuTitle(opts) {
+			var fallback = i18n.whiteLabelPreviewDefaultMenuTitle || 'Notice Manager';
+			if (!opts.enabled || !opts.menuTitle) {
+				return fallback;
+			}
+			return opts.menuTitle;
+		}
+
+		function resolveBrand(opts) {
+			var defaultBrand = i18n.whiteLabelPreviewDefaultBrand || 'Edminboost';
+			if (!opts.enabled) {
+				return { show: true, name: defaultBrand, logoUrl: '' };
+			}
+			if (opts.hideBrand) {
+				return { show: false, name: '', logoUrl: '' };
+			}
+			if (!opts.brandName && !opts.logoUrl) {
+				return { show: false, name: '', logoUrl: '' };
+			}
+			return {
+				show: true,
+				name: opts.brandName,
+				logoUrl: opts.logoUrl
+			};
+		}
+
+		function resolveDocs(opts) {
+			if (!opts.enabled) {
+				return { show: true, custom: false };
+			}
+			if (opts.hideDocs) {
+				return { show: false, custom: false };
+			}
+			return {
+				show: true,
+				custom: !!opts.docsUrl,
+				url: opts.docsUrl || defaultDocsUrl
+			};
+		}
+
+		function buildBrandHtml(brand) {
+			if (!brand.show) {
+				return '';
+			}
+			var logoHtml = brand.logoUrl
+				? '<img class="edminboost-anm-topbar__logo edminboost-anm-white-label-preview__logo" src="'
+					+ anmPreviewEscapeHtml(brand.logoUrl)
+					+ '" alt="" />'
+				: '';
+			var nameHtml = brand.name
+				? '<strong>' + anmPreviewEscapeHtml(brand.name) + '</strong>'
+				: '';
+			return '<div class="edminboost-anm-topbar__brand edminboost-anm-white-label-preview__brand">'
+				+ logoHtml + nameHtml + '</div>';
+		}
+
+		function renderWhiteLabelPreview() {
+			var opts = readOptions();
+			var menuTitle = resolveMenuTitle(opts);
+			var brand = resolveBrand(opts);
+			var docs = resolveDocs(opts);
+			var pluginName = i18n.whiteLabelPreviewPluginName || 'Edminboost - Admin Notice Manager';
+			var quickStatus = i18n.whiteLabelPreviewQuickStatus || 'Quick Status:';
+			var activeLabel = i18n.statusActive || 'Active';
+			var settingsLink = i18n.whiteLabelPreviewSettingsLink || 'Settings';
+			var docsLink = i18n.whiteLabelPreviewDocsLink || 'Docs';
+			var menuSection = i18n.whiteLabelPreviewMenuSection || 'Admin menu';
+			var dashboardSection = i18n.whiteLabelPreviewDashboardSection || 'Dashboard top bar';
+			var pluginsSection = i18n.whiteLabelPreviewPluginsSection || 'Plugins screen';
+			var docsMeta = '';
+
+			if (docs.show) {
+				docsMeta = ' | <span class="edminboost-anm-white-label-preview__meta-link">'
+					+ anmPreviewEscapeHtml(docsLink) + '</span>';
+			}
+
+			if (stage) {
+				stage.innerHTML = ''
+					+ '<div class="edminboost-anm-white-label-preview__block">'
+					+ '<p class="edminboost-anm-white-label-preview__label">' + anmPreviewEscapeHtml(menuSection) + '</p>'
+					+ '<div class="edminboost-anm-white-label-preview__menu" role="presentation">'
+					+ '<span class="edminboost-anm-white-label-preview__menu-item is-current">'
+					+ anmPreviewEscapeHtml(menuTitle)
+					+ '</span>'
+					+ '<span class="edminboost-anm-white-label-preview__menu-item is-muted">'
+					+ anmPreviewEscapeHtml(menuTitle)
+					+ '</span>'
+					+ '</div></div>'
+					+ '<div class="edminboost-anm-white-label-preview__block">'
+					+ '<p class="edminboost-anm-white-label-preview__label">' + anmPreviewEscapeHtml(dashboardSection) + '</p>'
+					+ '<div class="edminboost-anm-topbar edminboost-anm-white-label-preview__topbar">'
+					+ buildBrandHtml(brand)
+					+ '<div class="edminboost-anm-topbar__status">'
+					+ anmPreviewEscapeHtml(quickStatus)
+					+ ' <span class="edminboost-anm-status is-active">' + anmPreviewEscapeHtml(activeLabel) + '</span>'
+					+ '</div></div></div>'
+					+ '<div class="edminboost-anm-white-label-preview__block">'
+					+ '<p class="edminboost-anm-white-label-preview__label">' + anmPreviewEscapeHtml(pluginsSection) + '</p>'
+					+ '<div class="edminboost-anm-white-label-preview__plugin-row">'
+					+ '<strong class="edminboost-anm-white-label-preview__plugin-name">'
+					+ anmPreviewEscapeHtml(pluginName)
+					+ '</strong>'
+					+ '<p class="edminboost-anm-white-label-preview__plugin-meta">'
+					+ '<span class="edminboost-anm-white-label-preview__meta-link">'
+					+ anmPreviewEscapeHtml(settingsLink)
+					+ '</span>'
+					+ docsMeta
+					+ '</p></div></div>';
+			}
+
+			if (captionEl) {
+				var caption = '';
+				if (!opts.enabled) {
+					caption = i18n.whiteLabelPreviewCaptionDisabled || '';
+				} else if (opts.hideBrand) {
+					caption = i18n.whiteLabelPreviewCaptionBrandHidden || '';
+				} else if (!brand.show) {
+					caption = i18n.whiteLabelPreviewCaptionNoBrand || '';
+				}
+				if (opts.enabled && opts.hideDocs) {
+					caption = caption
+						? (caption + ' ' + (i18n.whiteLabelPreviewCaptionDocsHidden || ''))
+						: (i18n.whiteLabelPreviewCaptionDocsHidden || '');
+				} else if (opts.enabled && docs.show && docs.custom) {
+					var customHint = i18n.whiteLabelPreviewCaptionCustomDocs || '';
+					caption = caption ? (caption + ' ' + customHint) : customHint;
+				}
+				captionEl.textContent = caption;
+			}
+		}
+
+		fieldIds.forEach(function (id) {
+			var field = document.getElementById(id);
+			if (!field) {
+				return;
+			}
+			var eventName = field.type === 'checkbox' ? 'change' : 'input';
+			field.addEventListener(eventName, renderWhiteLabelPreview);
+		});
+
+		var settingsRoot = document.querySelector('[data-edminboost-anm-settings]');
+		if (settingsRoot) {
+			settingsRoot.addEventListener('edminboost-anm-settings-tab', function (event) {
+				if (event.detail && event.detail.tab === 'white_label') {
+					renderWhiteLabelPreview();
+				}
+			});
+		}
+
+		renderWhiteLabelPreview();
+	}
+
 	function initWrap() {
 		var wrap = document.querySelector('.edminboost-anm-wrap');
 		if (wrap) {
@@ -652,7 +861,7 @@
 			if (!node || !node.matches || !node.matches(selector)) {
 				return false;
 			}
-			if (node.closest('.edminboost-anm-notice-panel-preview, .edminboost-anm-display-experience-preview, .edminboost-anm-general-options-preview, #wpadminbar')) {
+			if (node.closest('.edminboost-anm-notice-panel-preview, .edminboost-anm-display-experience-preview, .edminboost-anm-general-options-preview, .edminboost-anm-white-label-preview, #wpadminbar')) {
 				return false;
 			}
 			return true;
@@ -728,6 +937,18 @@
 						status.classList.toggle('is-active', toggle.checked);
 						status.classList.toggle('is-inactive', !toggle.checked);
 					}
+					var blacklist = document.querySelector('[data-edminboost-anm-preset-blacklist]');
+					if (blacklist) {
+						if (toggle.checked) {
+							var count = result.data && typeof result.data.count === 'number' ? result.data.count : 0;
+							var label = (data.i18n && data.i18n.presetActiveBlacklist) || 'Active blacklist: %d phrases';
+							blacklist.textContent = '( ' + label.replace('%d', String(count)) + ' )';
+							blacklist.hidden = false;
+						} else {
+							blacklist.textContent = '';
+							blacklist.hidden = true;
+						}
+					}
 				});
 		});
 	}
@@ -751,6 +972,9 @@
 
 	function initRuleModal() {
 		var root = document.querySelector('[data-edminboost-anm-rules]');
+		if (root && root.getAttribute('data-edminboost-anm-rules-readonly') === '1') {
+			return;
+		}
 		if (!root) {
 			return;
 		}
@@ -758,7 +982,62 @@
 		var modal = document.getElementById('edminboost-anm-rule-modal');
 		var form = modal ? modal.querySelector('.edminboost-anm-rule-form') : null;
 		var title = document.getElementById('edminboost-anm-rule-modal-title');
+		var scheduleEnabledField = document.getElementById('edminboost-anm-rule-schedule-enabled');
+		var scheduleFieldsWrap = document.getElementById('edminboost-anm-rule-schedule-fields');
+		var scheduleStartField = document.getElementById('edminboost-anm-rule-schedule-start');
+		var scheduleEndField = document.getElementById('edminboost-anm-rule-schedule-end');
 		var i18n = data.i18n || {};
+
+		function syncRuleScheduleFieldsVisibility() {
+			if (!scheduleFieldsWrap || !scheduleEnabledField) {
+				return;
+			}
+			var show = scheduleEnabledField.checked;
+			scheduleFieldsWrap.hidden = !show;
+		}
+
+		function applyRuleScheduleToForm(schedule) {
+			var normalized = schedule && typeof schedule === 'object' ? schedule : {};
+			var enabled = !!normalized.enabled;
+			var days = Array.isArray(normalized.days) ? normalized.days : [];
+			var start = normalized.start || '09:00';
+			var end = normalized.end || '17:00';
+
+			if (scheduleEnabledField) {
+				scheduleEnabledField.checked = enabled;
+			}
+			if (form) {
+				form.querySelectorAll('input[name="schedule_days[]"]').forEach(function (checkbox) {
+					checkbox.checked = days.indexOf(checkbox.value) !== -1;
+				});
+			}
+			if (scheduleStartField) {
+				scheduleStartField.value = start;
+			}
+			if (scheduleEndField) {
+				scheduleEndField.value = end;
+			}
+			syncRuleScheduleFieldsVisibility();
+		}
+
+		function readRuleScheduleFromForm() {
+			var days = [];
+			if (form) {
+				form.querySelectorAll('input[name="schedule_days[]"]:checked').forEach(function (checkbox) {
+					days.push(checkbox.value);
+				});
+			}
+			return {
+				enabled: scheduleEnabledField ? scheduleEnabledField.checked : false,
+				days: days,
+				start: scheduleStartField ? scheduleStartField.value : '09:00',
+				end: scheduleEndField ? scheduleEndField.value : '17:00'
+			};
+		}
+
+		if (scheduleEnabledField) {
+			scheduleEnabledField.addEventListener('change', syncRuleScheduleFieldsVisibility);
+		}
 
 		function openModal(editData) {
 			if (!modal || !form) {
@@ -774,6 +1053,16 @@
 			form.querySelectorAll('input[name="match_type"]').forEach(function (radio) {
 				radio.checked = radio.value === matchType;
 			});
+
+			var schedule = editData.schedule;
+			if (typeof schedule === 'string' && schedule) {
+				try {
+					schedule = JSON.parse(schedule);
+				} catch (parseError) {
+					schedule = null;
+				}
+			}
+			applyRuleScheduleToForm(schedule);
 
 			if (title) {
 				title.textContent = editData.id ? (data.i18n && data.i18n.editRule) || 'Edit Filter Rule' : (data.i18n && data.i18n.createRule) || 'Create New Filter Rule';
@@ -820,7 +1109,8 @@
 					name: btn.dataset.name,
 					matchType: btn.dataset.matchType,
 					matchString: btn.dataset.matchString,
-					ruleAction: btn.dataset.ruleAction
+					ruleAction: btn.dataset.ruleAction,
+					schedule: btn.dataset.schedule
 				});
 			});
 		});
@@ -833,7 +1123,7 @@
 					message: i18n.confirmDelete || 'Are you sure you want to delete this rule?',
 					confirmText: i18n.confirmDeleteButton || 'Delete',
 					onConfirm: function () {
-						return apiPost('edminboost_anm_delete_rule', { id: link.dataset.id }).then(function (result) {
+						return apiPost('edminboost_anm_delete_rule', withRulesContext({ id: link.dataset.id })).then(function (result) {
 							if (!result.success) {
 								window.alert((result.data && result.data.message) || i18n.actionError || 'Action failed.');
 								return;
@@ -856,10 +1146,10 @@
 
 		root.querySelectorAll('.edminboost-anm-rule-toggle').forEach(function (toggle) {
 			toggle.addEventListener('change', function () {
-				apiPost('edminboost_anm_toggle_rule', {
+				apiPost('edminboost_anm_toggle_rule', withRulesContext({
 					id: toggle.dataset.id,
 					enabled: toggle.checked ? '1' : '0'
-				}).then(function (result) {
+				})).then(function (result) {
 					if (!result.success) {
 						toggle.checked = !toggle.checked;
 					}
@@ -871,14 +1161,19 @@
 			form.addEventListener('submit', function (event) {
 				event.preventDefault();
 				var matchTypeEl = form.querySelector('input[name="match_type"]:checked');
-				apiPost('edminboost_anm_save_rule', {
+				var schedulePayload = readRuleScheduleFromForm();
+				apiPost('edminboost_anm_save_rule', withRulesContext({
 					id: document.getElementById('edminboost-anm-rule-id').value,
 					name: document.getElementById('edminboost-anm-rule-name').value,
 					match_type: matchTypeEl ? matchTypeEl.value : 'keyword',
 					match_string: document.getElementById('edminboost-anm-rule-string').value,
 					rule_action: document.getElementById('edminboost-anm-rule-action').value,
-					enabled: '1'
-				}).then(function (result) {
+					enabled: '1',
+					schedule_enabled: schedulePayload.enabled ? '1' : '0',
+					schedule_start: schedulePayload.start,
+					schedule_end: schedulePayload.end,
+					schedule_days: schedulePayload.days
+				})).then(function (result) {
 					if (result.success) {
 						window.location.reload();
 						return;
@@ -947,6 +1242,7 @@
 		var readBtn = row.querySelector('.edminboost-anm-inbox-read');
 		row.classList.toggle('is-read', read);
 		if (readBtn) {
+			readBtn.classList.toggle('is-marked-read', read);
 			readBtn.disabled = read;
 			if (read) {
 				readBtn.setAttribute('aria-disabled', 'true');
@@ -969,6 +1265,16 @@
 				toggle.setAttribute('title', snoozeTooltip);
 			} else {
 				toggle.removeAttribute('title');
+			}
+			var daysEl = toggle.querySelector('.edminboost-anm-inbox-snooze-toggle__days');
+			if (daysEl) {
+				if (snoozed && durationKey) {
+					daysEl.textContent = durationKey === '7d' ? '7' : '1';
+					daysEl.hidden = false;
+				} else {
+					daysEl.textContent = '';
+					daysEl.hidden = true;
+				}
 			}
 		}
 		row.querySelectorAll('.edminboost-anm-inbox-snooze').forEach(function (btn) {
@@ -1189,15 +1495,12 @@
 				if (readBtn.disabled) {
 					return;
 				}
-				readBtn.disabled = true;
-				readBtn.setAttribute('aria-disabled', 'true');
 				apiPost('edminboost_anm_inbox_action', { inbox_action: 'read', id: readBtn.dataset.id }).then(function (result) {
 					if (result.success) {
 						setInboxReadState(readBtn.closest('tr'), true);
-					} else {
-						readBtn.disabled = false;
-						readBtn.removeAttribute('aria-disabled');
+						return;
 					}
+					window.alert((result.data && result.data.message) || (data.i18n && data.i18n.actionError) || 'Action failed.');
 				});
 				return;
 			}
@@ -1401,7 +1704,7 @@
 		function activate(slug) {
 			tabs.forEach(function (tab) {
 				var isActive = tab.dataset.tab === slug;
-				tab.classList.toggle('is-active', isActive);
+				tab.classList.toggle('nav-tab-active', isActive);
 				tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
 				tab.tabIndex = isActive ? 0 : -1;
 			});
@@ -2779,6 +3082,7 @@
 		initSettingsHelpTips();
 		initDisplayExperience();
 		initGeneralOptionsPreview();
+		initWhiteLabelPreview();
 		initResetHiddenNotices();
 		initNoticePanelPreview();
 	});

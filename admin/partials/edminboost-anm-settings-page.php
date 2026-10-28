@@ -13,7 +13,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$edminboost_anm_option_name = EDMINBOOST_ANM_Settings::OPTION_NAME;
+$edminboost_anm_option_name        = $edminboost_anm_option_name ?? EDMINBOOST_ANM_Settings::OPTION_NAME;
+$edminboost_anm_settings_group     = $edminboost_anm_settings_group ?? EDMINBOOST_ANM_Settings::SETTINGS_GROUP;
+$edminboost_anm_settings_readonly  = ! empty( $edminboost_anm_settings_readonly );
+$edminboost_anm_hide_multisite_tab = ! empty( $edminboost_anm_hide_multisite_tab );
 $edminboost_anm_roles       = array(
 	'editor'        => __( 'Editor', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'author'        => __( 'Author', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -32,12 +35,20 @@ $edminboost_anm_whitelist_words  = $edminboost_anm_word_filters['whitelist_words
 $edminboost_anm_settings_tabs  = array(
 	'general'       => __( 'General', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'notices'       => __( 'Notices', EDMINBOOST_ANM_TEXT_DOMAIN ),
-	'access'        => __( 'Access & visibility', EDMINBOOST_ANM_TEXT_DOMAIN ),
+	'access'        => __( 'Access', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'admin_bar'     => __( 'Admin bar', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'filtering'     => __( 'Filtering', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'security'      => __( 'Security & Shield', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'notifications' => __( 'Notifications', EDMINBOOST_ANM_TEXT_DOMAIN ),
-	'tools'         => __( 'Migration & Tools', EDMINBOOST_ANM_TEXT_DOMAIN ),
+	'white_label'   => __( 'White label', EDMINBOOST_ANM_TEXT_DOMAIN ),
+	'tools'         => __( 'Migration', EDMINBOOST_ANM_TEXT_DOMAIN ),
+);
+if ( ! $edminboost_anm_hide_multisite_tab && EDMINBOOST_ANM_Multisite::is_active() ) {
+	$edminboost_anm_settings_tabs['multisite'] = __( 'Multisite', EDMINBOOST_ANM_TEXT_DOMAIN );
+}
+$edminboost_anm_white_label = wp_parse_args(
+	$settings['white_label'] ?? array(),
+	EDMINBOOST_ANM_Settings::get_defaults()['white_label']
 );
 $edminboost_anm_manage_mode              = EDMINBOOST_ANM_Settings::get_manage_notices_mode();
 $edminboost_anm_display_presets          = EDMINBOOST_ANM_Settings::get_display_experience_presets();
@@ -60,14 +71,22 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 		<h1><?php esc_html_e( 'Settings', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h1>
 	</header>
 
-	<nav class="edminboost-anm-tabs edminboost-anm-settings-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Settings sections', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">
+	<?php if ( $edminboost_anm_settings_readonly ) : ?>
+		<div class="notice notice-warning">
+			<p>
+				<?php esc_html_e( 'These settings are managed by your network administrator. Contact a super admin to request changes.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+			</p>
+		</div>
+	<?php endif; ?>
+
+	<nav class="nav-tab-wrapper wp-clearfix edminboost-anm-settings-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Settings sections', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">
 		<?php foreach ( $edminboost_anm_settings_tabs as $edminboost_anm_tab_slug => $edminboost_anm_tab_label ) : ?>
 			<?php
 			$edminboost_anm_tab_is_active = $edminboost_anm_active_tab === $edminboost_anm_tab_slug;
 			?>
 			<button
 				type="button"
-				class="edminboost-anm-tabs__tab <?php echo $edminboost_anm_tab_is_active ? 'is-active' : ''; ?>"
+				class="nav-tab <?php echo $edminboost_anm_tab_is_active ? 'nav-tab-active' : ''; ?>"
 				id="<?php echo esc_attr( 'edminboost-anm-settings-tab-' . $edminboost_anm_tab_slug ); ?>"
 				role="tab"
 				data-tab="<?php echo esc_attr( $edminboost_anm_tab_slug ); ?>"
@@ -81,8 +100,9 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 	</nav>
 
 	<div class="edminboost-anm-settings-panels">
-	<form method="post" action="options.php" class="edminboost-anm-settings-form<?php echo 'tools' === $edminboost_anm_active_tab ? ' is-tab-tools' : ''; ?>">
-		<?php settings_fields( EDMINBOOST_ANM_Settings::SETTINGS_GROUP ); ?>
+	<form method="post" action="options.php" class="edminboost-anm-settings-form<?php echo 'tools' === $edminboost_anm_active_tab ? ' is-tab-tools' : ''; ?><?php echo $edminboost_anm_settings_readonly ? ' is-settings-readonly' : ''; ?>">
+		<?php settings_fields( $edminboost_anm_settings_group ); ?>
+		<fieldset <?php echo $edminboost_anm_settings_readonly ? 'disabled="disabled"' : ''; ?>>
 
 		<div
 			id="<?php echo esc_attr( 'edminboost-anm-settings-panel-general' ); ?>"
@@ -94,7 +114,7 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 		>
 		<div class="edminboost-anm-card edminboost-anm-display-experience-layout">
 			<h2 class="edminboost-anm-display-experience-layout__heading">
-				<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Choose how notices appear on the dashboard. Per-type rules live on the Notices tab; who is affected on Access & visibility; how to open the inbox on Admin bar.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+				<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Choose how notices appear on the dashboard. Per-type rules live on the Notices tab; who is affected on Access; how to open the inbox on Admin bar.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
 				<?php esc_html_e( 'Display experience', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
 			</h2>
 			<div class="edminboost-anm-display-experience-layout__columns">
@@ -368,7 +388,7 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 		$edminboost_anm_acl_role_tip    = __( 'Whether users with this role still see intercepted notices on the dashboard.', EDMINBOOST_ANM_TEXT_DOMAIN );
 		?>
 		<div class="edminboost-anm-card">
-			<h2 class="screen-reader-text"><?php esc_html_e( 'Access & visibility', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+			<h2 class="screen-reader-text"><?php esc_html_e( 'Access', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
 			<p class="description"><?php esc_html_e( 'Control which roles and individual accounts are affected by notice hiding. Role rules apply first; user rules refine who still gets interception.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 			<h3 class="edminboost-anm-settings-subheading"><?php esc_html_e( 'By role (ACL)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h3>
 			<table class="form-table edminboost-anm-acl-table" role="presentation">
@@ -1065,7 +1085,177 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 		</div>
 		</div>
 
-		<?php submit_button(); ?>
+		<div
+			id="<?php echo esc_attr( 'edminboost-anm-settings-panel-white_label' ); ?>"
+			class="edminboost-anm-tab-panel"
+			role="tabpanel"
+			data-tab="white_label"
+			aria-labelledby="<?php echo esc_attr( 'edminboost-anm-settings-tab-white_label' ); ?>"
+			<?php echo 'white_label' !== $edminboost_anm_active_tab ? ' hidden' : ''; ?>
+		>
+		<div class="edminboost-anm-card edminboost-anm-white-label-layout" data-edminboost-anm-white-label>
+			<h2><?php esc_html_e( 'Agency white label', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+			<p class="description"><?php esc_html_e( 'Rebrand the admin menu and dashboard header for client sites. Plugin headers on the Plugins screen are unchanged.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+			<div class="edminboost-anm-white-label-layout__columns">
+				<div class="edminboost-anm-white-label-layout__settings">
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'When enabled, custom menu and brand settings below replace the default Notice Manager and Edminboost labels in the admin UI.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<?php esc_html_e( 'White label mode', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+					</th>
+					<td>
+						<label for="edminboost-anm-white-label-enabled">
+							<input type="checkbox" id="edminboost-anm-white-label-enabled" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[white_label][enabled]" value="1" <?php checked( ! empty( $edminboost_anm_white_label['enabled'] ) ); ?> />
+							<?php esc_html_e( 'Enable white label branding', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</label>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Replaces the top-level admin menu label. Leave blank to keep “Notice Manager”.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<label for="edminboost-anm-white-label-menu-title"><?php esc_html_e( 'Admin menu title', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+					</th>
+					<td>
+						<input type="text" class="regular-text" id="edminboost-anm-white-label-menu-title" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[white_label][menu_title]" value="<?php echo esc_attr( $edminboost_anm_white_label['menu_title'] ?? '' ); ?>" placeholder="<?php esc_attr_e( 'Notice Manager', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" />
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Shown in the dashboard top bar when white label is on. Leave blank with no logo to hide the brand area.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<label for="edminboost-anm-white-label-brand-name"><?php esc_html_e( 'Dashboard brand name', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+					</th>
+					<td>
+						<input type="text" class="regular-text" id="edminboost-anm-white-label-brand-name" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[white_label][brand_name]" value="<?php echo esc_attr( $edminboost_anm_white_label['brand_name'] ?? '' ); ?>" />
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Optional logo image URL (HTTPS recommended). Shown beside the brand name on the dashboard.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<label for="edminboost-anm-white-label-logo-url"><?php esc_html_e( 'Dashboard logo URL', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+					</th>
+					<td>
+						<input type="url" class="large-text code" id="edminboost-anm-white-label-logo-url" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[white_label][logo_url]" value="<?php echo esc_attr( $edminboost_anm_white_label['logo_url'] ?? '' ); ?>" placeholder="https://" />
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Removes the Edminboost brand block from the dashboard top bar entirely.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<?php esc_html_e( 'Dashboard brand', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+					</th>
+					<td>
+						<label for="edminboost-anm-white-label-hide-brand">
+							<input type="checkbox" id="edminboost-anm-white-label-hide-brand" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[white_label][hide_brand]" value="1" <?php checked( ! empty( $edminboost_anm_white_label['hide_brand'] ) ); ?> />
+							<?php esc_html_e( 'Hide dashboard brand area', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</label>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Removes the Docs link from this plugin’s row on the Plugins screen.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<?php esc_html_e( 'Plugins screen', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+					</th>
+					<td>
+						<label for="edminboost-anm-white-label-hide-docs">
+							<input type="checkbox" id="edminboost-anm-white-label-hide-docs" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[white_label][hide_docs_link]" value="1" <?php checked( ! empty( $edminboost_anm_white_label['hide_docs_link'] ) ); ?> />
+							<?php esc_html_e( 'Hide Docs link', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</label>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">
+						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Optional replacement URL for the Docs link. Leave blank to use the default documentation URL.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+						<label for="edminboost-anm-white-label-docs-url"><?php esc_html_e( 'Custom Docs URL', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+					</th>
+					<td>
+						<input type="url" class="large-text code" id="edminboost-anm-white-label-docs-url" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[white_label][docs_url]" value="<?php echo esc_attr( $edminboost_anm_white_label['docs_url'] ?? '' ); ?>" placeholder="https://" />
+					</td>
+				</tr>
+			</table>
+				</div>
+				<aside class="edminboost-anm-white-label-layout__preview" aria-labelledby="edminboost-anm-white-label-preview-heading">
+					<div
+						id="edminboost-anm-white-label-preview"
+						class="edminboost-anm-white-label-preview edminboost-anm-display-experience-preview"
+						aria-live="polite"
+						data-default-docs-url="<?php echo esc_url( EDMINBOOST_ANM_PLUGIN_DOCS_URL ); ?>"
+					>
+						<h4 id="edminboost-anm-white-label-preview-heading" class="edminboost-anm-display-experience-preview__heading"><?php esc_html_e( 'Live preview', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h4>
+						<p class="description edminboost-anm-white-label-preview__hint"><?php esc_html_e( 'Updates as you edit. Sample layout only — not live admin data.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+						<div class="edminboost-anm-white-label-preview__stage" data-edminboost-anm-white-label-preview-stage></div>
+						<p class="edminboost-anm-display-experience-preview__caption description" data-edminboost-anm-white-label-preview-caption></p>
+					</div>
+				</aside>
+			</div>
+		</div>
+		</div>
+
+		<?php if ( isset( $edminboost_anm_settings_tabs['multisite'] ) ) : ?>
+		<div
+			id="<?php echo esc_attr( 'edminboost-anm-settings-panel-multisite' ); ?>"
+			class="edminboost-anm-tab-panel"
+			role="tabpanel"
+			data-tab="multisite"
+			aria-labelledby="<?php echo esc_attr( 'edminboost-anm-settings-tab-multisite' ); ?>"
+			<?php echo 'multisite' !== $edminboost_anm_active_tab ? ' hidden' : ''; ?>
+		>
+			<div class="edminboost-anm-card">
+				<h2><?php esc_html_e( 'Network configuration', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+				<?php
+				$edminboost_anm_ms_policy       = EDMINBOOST_ANM_Multisite::get_policy();
+				$edminboost_anm_ms_policy_label = EDMINBOOST_ANM_Multisite::get_policy_labels()[ $edminboost_anm_ms_policy ] ?? $edminboost_anm_ms_policy;
+				?>
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Policy', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<td><?php echo esc_html( $edminboost_anm_ms_policy_label ); ?></td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Site settings', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<td>
+							<?php
+							echo esc_html(
+								EDMINBOOST_ANM_Multisite::site_can_edit_settings()
+									? __( 'Site administrators can customize settings.', EDMINBOOST_ANM_TEXT_DOMAIN )
+									: __( 'Settings are locked to network defaults.', EDMINBOOST_ANM_TEXT_DOMAIN )
+							);
+							?>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Auto-rules', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+						<td>
+							<?php
+							if ( EDMINBOOST_ANM_Multisite::shares_network_rules() ) {
+								esc_html_e( 'Network auto-rules are applied on this site.', EDMINBOOST_ANM_TEXT_DOMAIN );
+							} else {
+								esc_html_e( 'Only site auto-rules apply.', EDMINBOOST_ANM_TEXT_DOMAIN );
+							}
+							echo ' ';
+							echo esc_html(
+								EDMINBOOST_ANM_Multisite::site_can_edit_rules()
+									? __( 'Site administrators may add site-specific rules.', EDMINBOOST_ANM_TEXT_DOMAIN )
+									: __( 'Site rule editing is disabled.', EDMINBOOST_ANM_TEXT_DOMAIN )
+							);
+							?>
+						</td>
+					</tr>
+				</table>
+				<?php if ( current_user_can( EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY ) ) : ?>
+					<p>
+						<a class="button button-secondary" href="<?php echo esc_url( EDMINBOOST_ANM_Multisite::get_network_admin_url() ); ?>">
+							<?php esc_html_e( 'Open network multisite settings', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</a>
+					</p>
+				<?php endif; ?>
+			</div>
+		</div>
+		<?php endif; ?>
+
+		</fieldset>
+		<?php if ( ! $edminboost_anm_settings_readonly ) : ?>
+			<?php submit_button(); ?>
+		<?php endif; ?>
 	</form>
 
 	<div
