@@ -36,10 +36,11 @@ admin/
   js/edminboost-anm-interceptor.js
   js/edminboost-anm-notices.js
   js/edminboost-anm-notice-inline.js
-  partials/edminboost-anm-{dashboard,inbox,rules,settings}-page.php
+  partials/edminboost-anm-{dashboard,inbox,rules,settings,billing}-page.php
   partials/edminboost-anm-inbox-table-rows.php
   partials/edminboost-anm-notice-panel-dropdown.php
   partials/edminboost-anm-network-policy-page.php
+  partials/edminboost-anm-multisite-policy-{fields,next-steps}.php
 languages/  # .pot, locale .po/.mo, optional build-translations.py
 uninstall.php  readme.txt  composer.json
 AGENTS.md   .cursor/rules/
@@ -53,7 +54,7 @@ AGENTS.md   .cursor/rules/
 - **Options API only** — no custom database tables.
 - **Stored options** (via `EDMINBOOST_ANM_Settings` constants): `edminboost_anm_settings`, `edminboost_anm_rules`, `edminboost_anm_inbox`, `edminboost_anm_stats`, `edminboost_anm_version`. All seeded on activation with `autoload => false`.
 - **Multisite sitemeta** (via `EDMINBOOST_ANM_Multisite`): `edminboost_anm_network` (policy), `edminboost_anm_network_settings` (default settings shape), `edminboost_anm_network_rules` (shared auto-rules). Seeded on network activation / first network admin visit; per-site options remain on each blog.
-- Global kill switch: `enabled` in settings — toggled from Dashboard Quick Status (`edminboost_anm_toggle_enabled`); omitted from Settings form save (`sanitize()` preserves existing value when `enabled` is not posted). Tabbed Settings save preserves `upsell_preset` and `word_filters` when those keys are omitted from POST; webhook URL is not cleared when webhook is disabled (`sanitize_webhook_settings()`).
+- Global kill switch: `enabled` in settings — toggled from Dashboard Quick Status (`edminboost_anm_toggle_enabled`); omitted from Settings form save (`sanitize()` preserves existing value when `enabled` is not posted). Tabbed Settings save preserves `upsell_preset` and `word_filters` when those keys are omitted from POST; digest/webhook sanitizers merge with stored values (`sanitize_digest_settings()`, `sanitize_webhook_settings()` — webhook URL kept when disabled or invalid posted URL).
 - **AJAX**: `EDMINBOOST_ANM_Ajax` — privileged `wp_ajax_*` actions (inbox list/sort, rules, capture, importer, user search, notice hide/reset hidden, digest preview, webhook preview, debug seeds) + `admin_post_edminboost_anm_export_rules`. Debug-only handlers use `verify_debug_request()`.
 - **Inbox list UI**: `EDMINBOOST_ANM_Admin::parse_inbox_list_args()`, `get_inbox_list_slice()`, `render_inbox_table_rows_html()` — shared by inbox page and `edminboost_anm_inbox_list` AJAX.
 - **Admin bar notice panel**: `EDMINBOOST_ANM_Notices` — registers `admin_bar_menu` early; node and assets gated by `is_enabled()`, capability, and `should_show_admin_bar_notice_panel()` (`notice_panel.enabled` — always true after Settings save; no separate Settings toggle). Admin bar tab configures style, position, badge, and colors only. Styles `link`, `bell_link`, `dropdown`, `dropdown_compact`; positions via `get_notice_panel_admin_bar_placement()`. Dropdown uses `edminboost-anm-notice-panel-dropdown.php`. Live settings mock via `initNoticePanelPreview()`. Dropdown JS via `edminboost-anm-notices.js` when style is dropdown (wp-admin or front-end admin bar). Enqueues on `admin_enqueue_scripts` and `wp_enqueue_scripts`; `dashicons` when the live panel renders.
@@ -61,7 +62,8 @@ AGENTS.md   .cursor/rules/
 - **Plugin admin screens**: `get_plugin_screen_notice_hide_css()` (inline on `edminboost-anm-admin` + `admin_head` via `hide_notices_on_plugin_screens()`) and `initHidePluginAdminNotices()` (MutationObserver + `.edminboost-anm-notice-hidden`) hide stray notices; CSS re-shows mocks under `.edminboost-anm-display-experience-preview` / `.edminboost-anm-general-options-preview` / admin bar preview. `EDMINBOOST_ANM_Debug` clears queued live-test transients when entering a plugin screen.
 - **Ad redirect blocker**: `EDMINBOOST_ANM_Ad_Redirects` — when `block_ad_redirects.enabled`, blocks admin requests and `wp_redirect` targets matching user-configured URL patterns (admin-only; no external calls).
 - **Cron**: `EDMINBOOST_ANM_Digest` — weekly digest when enabled; registers custom `weekly` interval via `cron_schedules` (`CRON_SCHEDULE`); `CRON_HOOK` `edminboost_anm_weekly_digest`; `send_weekday` slug + site timezone (`SEND_HOUR`, default 9:00 local); `sync_schedule()` / `ensure_schedule_if_needed()` on save and `init`; `get_preview()` returns structured `content`, plain `body`, and `next_send` label. Customizable subject, intro, footer (`{site_name}` token), optional stats and recent inbox sections; cleared on deactivate/uninstall.
-- **Multisite**: `EDMINBOOST_ANM_Multisite` — policies `per_site`, `network_defaults`, `network_locked`; optional site overrides for settings/rules; optional shared network auto-rules merged at runtime. Network admin: policy page, network default settings (reuses settings partial), network auto-rules (reuses rules partial with `rulesContext` `network`). Site Settings adds **Multisite** tab (status + links) when multisite is active. `EDMINBOOST_ANM_Settings::get()` merges network + site layers; locked policy uses network settings only. New sites: `EDMINBOOST_ANM_Multisite::maybe_seed_new_site()` on `wp_initialize_site`.
+- **Multisite**: `EDMINBOOST_ANM_Multisite` — policies `per_site`, `network_defaults`, `network_locked`; optional site overrides for settings/rules; optional shared network auto-rules merged at runtime. Network admin: policy page, network default settings (reuses settings partial), network auto-rules (reuses rules partial with `rulesContext` `network`). Policy fields + next-steps markup shared via `edminboost-anm-multisite-policy-fields.php` and `edminboost-anm-multisite-policy-next-steps.php` (network policy page + site Settings **Multisite** tab). Site Settings adds **Multisite** tab (status + links) when multisite is active. `EDMINBOOST_ANM_Settings::get()` merges network + site layers; locked policy uses network settings only. New sites: `EDMINBOOST_ANM_Multisite::maybe_seed_new_site()` on `wp_initialize_site`.
+- **Billing (plans UI)**: site admin submenu **Billing** — read-only Free vs Pro comparison table (`get_billing_comparison_rows()`, `render_billing_comparison_cell()`); upgrade link uses bootstrap constant `EDMINBOOST_ANM_PRO_URL`. Informational only — no license checks or feature gating in this plugin build (Pro separation is a follow-up).
 - **White label**: `settings.white_label` — optional admin menu title, dashboard brand/logo, hide brand/docs, custom docs URL; `EDMINBOOST_ANM_Settings::sanitize_white_label_settings()`; menu/docs helpers for admin UI.
 - **Rules**: match types `keyword`, `regex`, `css` — `html_matches_css_selector()` for class/id/tag.class on notice HTML; upsell suppression via `get_active_blacklist_phrases()` (custom phrases always; built-in preset when enabled). Site rules CRUD respects `EDMINBOOST_ANM_Multisite::site_can_edit_rules()`; network rules stored separately and merged when `share_network_rules` is on.
 - **Inbox**: snooze 1d/7d with toggle unsnooze (same duration or Snooze control) via `edminboost_anm_inbox_action`; `snooze_duration` key on stored notices; Read marks row and disables button (`is-read`).
@@ -80,6 +82,7 @@ Use `EDMINBOOST_ANM_Admin::PAGE_SLUG` (equals `EDMINBOOST_ANM_PLUGIN_SLUG`).
 | Inbox | `PAGE_SLUG . '-inbox'` | `render_inbox_page()` |
 | Rules | `PAGE_SLUG . '-rules'` | `render_rules_page()` |
 | Settings | `PAGE_SLUG . '-settings'` | `render_settings_page()` |
+| Billing | `PAGE_SLUG . '-billing'` | `render_billing_page()` |
 
 **Network admin** (multisite only; capability `EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY` — `manage_network_options`):
 
@@ -121,6 +124,7 @@ Project prefix: `edminboost_anm` (use `edminboost-anm` in slugs/handles). Distin
 - `edminboost_anm_wp_notice_presets` — filter WordPress core notice preset definitions (Rules page)
 - `edminboost_anm_digest_email` — filter digest subject/body before send or preview
 - `edminboost_anm_webhook_payload` — filter outbound webhook JSON payload
+- `edminboost_anm_billing_comparison` — filter Free vs Pro rows on the Billing page
 
 ## Scope & Change Discipline
 
@@ -132,4 +136,4 @@ Project prefix: `edminboost_anm` (use `edminboost-anm` in slugs/handles). Distin
 
 ## Constants (use, don't redefine)
 
-`EDMINBOOST_ANM_VERSION`, `EDMINBOOST_ANM_PLUGIN_FILE`, `EDMINBOOST_ANM_PLUGIN_DIR`, `EDMINBOOST_ANM_PLUGIN_URL`, `EDMINBOOST_ANM_PLUGIN_BASENAME`, `EDMINBOOST_ANM_PLUGIN_SLUG`, `EDMINBOOST_ANM_TEXT_DOMAIN`, `EDMINBOOST_ANM_PLUGIN_DOCS_URL`
+`EDMINBOOST_ANM_VERSION`, `EDMINBOOST_ANM_PLUGIN_FILE`, `EDMINBOOST_ANM_PLUGIN_DIR`, `EDMINBOOST_ANM_PLUGIN_URL`, `EDMINBOOST_ANM_PLUGIN_BASENAME`, `EDMINBOOST_ANM_PLUGIN_SLUG`, `EDMINBOOST_ANM_TEXT_DOMAIN`, `EDMINBOOST_ANM_PLUGIN_DOCS_URL`, `EDMINBOOST_ANM_PRO_URL`

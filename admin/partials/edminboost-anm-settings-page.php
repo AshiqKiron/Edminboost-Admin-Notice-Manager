@@ -1190,20 +1190,42 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 		</div>
 		</div>
 
-		<?php if ( isset( $edminboost_anm_settings_tabs['multisite'] ) ) : ?>
-		<div
-			id="<?php echo esc_attr( 'edminboost-anm-settings-panel-multisite' ); ?>"
-			class="edminboost-anm-tab-panel"
-			role="tabpanel"
-			data-tab="multisite"
-			aria-labelledby="<?php echo esc_attr( 'edminboost-anm-settings-tab-multisite' ); ?>"
-			<?php echo 'multisite' !== $edminboost_anm_active_tab ? ' hidden' : ''; ?>
-		>
+		</fieldset>
+		<?php if ( ! $edminboost_anm_settings_readonly ) : ?>
+			<?php submit_button(); ?>
+		<?php endif; ?>
+	</form>
+
+	<?php if ( isset( $edminboost_anm_settings_tabs['multisite'] ) ) : ?>
+	<div
+		id="<?php echo esc_attr( 'edminboost-anm-settings-panel-multisite' ); ?>"
+		class="edminboost-anm-tab-panel"
+		role="tabpanel"
+		data-tab="multisite"
+		aria-labelledby="<?php echo esc_attr( 'edminboost-anm-settings-tab-multisite' ); ?>"
+		<?php echo 'multisite' !== $edminboost_anm_active_tab ? ' hidden' : ''; ?>
+	>
+		<?php if ( current_user_can( EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY ) ) : ?>
+			<?php $edminboost_anm_network = EDMINBOOST_ANM_Multisite::get_policy_option_raw(); ?>
+			<form method="post" action="options.php" class="edminboost-anm-settings-form edminboost-anm-multisite-policy-form">
+				<?php settings_fields( EDMINBOOST_ANM_Multisite::NETWORK_POLICY_GROUP ); ?>
+				<div class="edminboost-anm-card">
+					<h2><?php esc_html_e( 'Multisite policy', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+					<p class="description">
+						<?php esc_html_e( 'These options apply to every site on the network. Changes are saved to network settings, not only this site.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+					</p>
+					<?php include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-multisite-policy-fields.php'; ?>
+				</div>
+				<?php include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-multisite-policy-next-steps.php'; ?>
+				<?php submit_button( __( 'Save multisite policy', EDMINBOOST_ANM_TEXT_DOMAIN ) ); ?>
+			</form>
+		<?php else : ?>
 			<div class="edminboost-anm-card">
 				<h2><?php esc_html_e( 'Network configuration', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
 				<?php
-				$edminboost_anm_ms_policy       = EDMINBOOST_ANM_Multisite::get_policy();
-				$edminboost_anm_ms_policy_label = EDMINBOOST_ANM_Multisite::get_policy_labels()[ $edminboost_anm_ms_policy ] ?? $edminboost_anm_ms_policy;
+				$edminboost_anm_ms_policy        = EDMINBOOST_ANM_Multisite::get_policy();
+				$edminboost_anm_ms_policy_labels = EDMINBOOST_ANM_Multisite::get_policy_labels();
+				$edminboost_anm_ms_policy_label  = $edminboost_anm_ms_policy_labels[ $edminboost_anm_ms_policy ] ?? $edminboost_anm_ms_policy_labels['per_site'];
 				?>
 				<table class="form-table" role="presentation">
 					<tr>
@@ -1241,22 +1263,10 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 						</td>
 					</tr>
 				</table>
-				<?php if ( current_user_can( EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY ) ) : ?>
-					<p>
-						<a class="button button-secondary" href="<?php echo esc_url( EDMINBOOST_ANM_Multisite::get_network_admin_url() ); ?>">
-							<?php esc_html_e( 'Open network multisite settings', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
-						</a>
-					</p>
-				<?php endif; ?>
 			</div>
-		</div>
 		<?php endif; ?>
-
-		</fieldset>
-		<?php if ( ! $edminboost_anm_settings_readonly ) : ?>
-			<?php submit_button(); ?>
-		<?php endif; ?>
-	</form>
+	</div>
+	<?php endif; ?>
 
 	<div
 		id="<?php echo esc_attr( 'edminboost-anm-settings-panel-tools' ); ?>"

@@ -15,6 +15,55 @@ if ( ! defined( 'ABSPATH' ) ) {
 class EDMINBOOST_ANM_Inbox {
 
 	/**
+	 * Allowed inbox list filter slugs.
+	 *
+	 * @var string[]
+	 */
+	const LIST_FILTERS = array( 'all', 'critical', 'snoozed', 'upsells' );
+
+	/**
+	 * Allowed notice type slugs for display and CSS modifiers.
+	 *
+	 * @var string[]
+	 */
+	const NOTICE_TYPE_SLUGS = array( 'critical', 'warning', 'upsell', 'success', 'info', 'error' );
+
+	/**
+	 * Max stored plain-text message length (bytes).
+	 *
+	 * @var int
+	 */
+	const MAX_MESSAGE_LENGTH = 10000;
+
+	/**
+	 * Max stored notice HTML length (bytes).
+	 *
+	 * @var int
+	 */
+	const MAX_HTML_LENGTH = 50000;
+
+	/**
+	 * Max HTML accepted from the JS capture endpoint (bytes).
+	 *
+	 * @var int
+	 */
+	const MAX_CAPTURE_HTML_BYTES = 100000;
+
+	/**
+	 * Request-level cache for inbox rows.
+	 *
+	 * @var array|null
+	 */
+	private static $all_notices_cache = null;
+
+	/**
+	 * Request-level cache for filter tab counts.
+	 *
+	 * @var array|null
+	 */
+	private static $counts_cache = null;
+
+	/**
 	 * Hash preference: show on the WordPress dashboard as usual.
 	 *
 	 * @var string
@@ -34,9 +83,15 @@ class EDMINBOOST_ANM_Inbox {
 	 * @return array
 	 */
 	public static function get_all() {
+		if ( null !== self::$all_notices_cache ) {
+			return self::$all_notices_cache;
+		}
+
 		$inbox = get_option( EDMINBOOST_ANM_Settings::INBOX_OPTION, array() );
 
-		return is_array( $inbox ) ? $inbox : array();
+		self::$all_notices_cache = is_array( $inbox ) ? $inbox : array();
+
+		return self::$all_notices_cache;
 	}
 
 	/**
@@ -46,7 +101,19 @@ class EDMINBOOST_ANM_Inbox {
 	 * @return bool
 	 */
 	public static function save_all( $notices ) {
+		self::clear_list_caches();
+
 		return update_option( EDMINBOOST_ANM_Settings::INBOX_OPTION, $notices, false );
+	}
+
+	/**
+	 * Clear request-level inbox list caches (after mutations).
+	 *
+	 * @return void
+	 */
+	public static function clear_list_caches() {
+		self::$all_notices_cache = null;
+		self::$counts_cache      = null;
 	}
 
 	/**
@@ -95,8 +162,9 @@ class EDMINBOOST_ANM_Inbox {
 	 */
 	public static function add( $data ) {
 		$message       = wp_strip_all_tags( $data['message'] ?? '' );
+		$message       = self::truncate_string( $message, self::MAX_MESSAGE_LENGTH );
 		$source_plugin = sanitize_text_field( $data['source_plugin'] ?? __( 'Unknown', EDMINBOOST_ANM_TEXT_DOMAIN ) );
-		$type          = sanitize_key( $data['type'] ?? 'info' );
+		$type          = self::sanitize_notice_type_slug( $data['type'] ?? 'info' );
 		$hash          = self::generate_hash( $message, $source_plugin );
 
 		foreach ( self::get_all() as $existing ) {
@@ -106,6 +174,7 @@ class EDMINBOOST_ANM_Inbox {
 		}
 
 		$html = isset( $data['html'] ) ? wp_kses_post( $data['html'] ) : '';
+		$html = self::truncate_string( $html, self::MAX_HTML_LENGTH );
 
 		$notice = array(
 			'id'             => 'notice_' . strtolower( wp_generate_password( 8, false ) ),
@@ -128,6 +197,58 @@ class EDMINBOOST_ANM_Inbox {
 	}
 
 	/**
+	 * Whether a notice row matches inbox list filters (shared by query and counts).
+	 *
+	 * @param array  $notice Notice row.
+	 * @param string $filter Filter slug.
+	 * @param int    $now    Current timestamp.
+	 * @param string $search Optional search string.
+	 * @return bool
+	 */
+	private static function notice_matches_list_filter( $notice, $filter, $now, $search = '' ) {
+		if ( 'archived' === ( $notice['status'] ?? '' ) ) {
+			return false;
+		}
+
+		if ( 'snoozed' === ( $notice['status'] ?? '' ) && (int) ( $notice['snoozed_until'] ?? 0 ) <= $now ) {
+			return true;
+		}
+
+		if ( 'snoozed' === ( $notice['status'] ?? '' ) && (int) ( $notice['snoozed_until'] ?? 0 ) > $now ) {
+			if ( 'snoozed' !== $filter && 'all' !== $filter ) {
+				return false;
+			}
+		}
+
+		switch ( $filter ) {
+			case 'critical':
+				if ( 'critical' !== ( $notice['type'] ?? '' ) && 'warning' !== ( $notice['type'] ?? '' ) ) {
+					return false;
+				}
+				break;
+			case 'snoozed':
+				if ( 'snoozed' !== ( $notice['status'] ?? '' ) || (int) ( $notice['snoozed_until'] ?? 0 ) <= $now ) {
+					return false;
+				}
+				break;
+			case 'upsells':
+				if ( 'upsell' !== ( $notice['type'] ?? '' ) ) {
+					return false;
+				}
+				break;
+		}
+
+		if ( '' !== $search ) {
+			$hay = strtolower( ( $notice['message'] ?? '' ) . ' ' . ( $notice['source_plugin'] ?? '' ) );
+			if ( false === strpos( $hay, $search ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Query inbox with filters.
 	 *
 	 * @param array $args Query arguments.
@@ -143,54 +264,22 @@ class EDMINBOOST_ANM_Inbox {
 			'order'    => 'desc',
 		);
 
-		$args    = wp_parse_args( $args, $defaults );
+		$args = wp_parse_args( $args, $defaults );
+
+		$args['filter'] = sanitize_key( $args['filter'] );
+		if ( ! in_array( $args['filter'], self::LIST_FILTERS, true ) ) {
+			$args['filter'] = 'all';
+		}
+
 		$notices = self::get_all();
 		$now     = time();
+		$search  = ! empty( $args['search'] ) ? strtolower( (string) $args['search'] ) : '';
+		$filter  = sanitize_key( $args['filter'] );
 
 		$notices = array_filter(
 			$notices,
-			static function ( $notice ) use ( $args, $now ) {
-				if ( 'archived' === ( $notice['status'] ?? '' ) ) {
-					return false;
-				}
-
-				if ( 'snoozed' === ( $notice['status'] ?? '' ) && (int) ( $notice['snoozed_until'] ?? 0 ) <= $now ) {
-					return true;
-				}
-
-				if ( 'snoozed' === ( $notice['status'] ?? '' ) && (int) ( $notice['snoozed_until'] ?? 0 ) > $now ) {
-					if ( 'snoozed' !== $args['filter'] && 'all' !== $args['filter'] ) {
-						return false;
-					}
-				}
-
-				switch ( $args['filter'] ) {
-					case 'critical':
-						if ( 'critical' !== ( $notice['type'] ?? '' ) && 'warning' !== ( $notice['type'] ?? '' ) ) {
-							return false;
-						}
-						break;
-					case 'snoozed':
-						if ( 'snoozed' !== ( $notice['status'] ?? '' ) || (int) ( $notice['snoozed_until'] ?? 0 ) <= $now ) {
-							return false;
-						}
-						break;
-					case 'upsells':
-						if ( 'upsell' !== ( $notice['type'] ?? '' ) ) {
-							return false;
-						}
-						break;
-				}
-
-				if ( ! empty( $args['search'] ) ) {
-					$search = strtolower( $args['search'] );
-					$hay    = strtolower( ( $notice['message'] ?? '' ) . ' ' . ( $notice['source_plugin'] ?? '' ) );
-					if ( false === strpos( $hay, $search ) ) {
-						return false;
-					}
-				}
-
-				return true;
+			static function ( $notice ) use ( $filter, $now, $search ) {
+				return self::notice_matches_list_filter( $notice, $filter, $now, $search );
 			}
 		);
 
@@ -241,22 +330,56 @@ class EDMINBOOST_ANM_Inbox {
 	}
 
 	/**
+	 * Count active inbox notices for the admin bar badge (no sort, single pass).
+	 *
+	 * @return int
+	 */
+	public static function get_active_count() {
+		if ( null !== self::$counts_cache ) {
+			return (int) ( self::$counts_cache['all'] ?? 0 );
+		}
+
+		$now   = time();
+		$count = 0;
+
+		foreach ( self::get_all() as $notice ) {
+			if ( self::notice_matches_list_filter( $notice, 'all', $now ) ) {
+				++$count;
+			}
+		}
+
+		return $count;
+	}
+
+	/**
 	 * Get filter tab counts.
 	 *
 	 * @return array
 	 */
 	public static function get_counts() {
-		$all      = self::query( array( 'filter' => 'all', 'per_page' => 9999 ) );
-		$critical = self::query( array( 'filter' => 'critical', 'per_page' => 9999 ) );
-		$snoozed  = self::query( array( 'filter' => 'snoozed', 'per_page' => 9999 ) );
-		$upsells  = self::query( array( 'filter' => 'upsells', 'per_page' => 9999 ) );
+		if ( null !== self::$counts_cache ) {
+			return self::$counts_cache;
+		}
 
-		return array(
-			'all'      => count( $all ),
-			'critical' => count( $critical ),
-			'snoozed'  => count( $snoozed ),
-			'upsells'  => count( $upsells ),
+		$now    = time();
+		$counts = array(
+			'all'      => 0,
+			'critical' => 0,
+			'snoozed'  => 0,
+			'upsells'  => 0,
 		);
+
+		foreach ( self::get_all() as $notice ) {
+			foreach ( array_keys( $counts ) as $filter ) {
+				if ( self::notice_matches_list_filter( $notice, $filter, $now ) ) {
+					++$counts[ $filter ];
+				}
+			}
+		}
+
+		self::$counts_cache = $counts;
+
+		return self::$counts_cache;
 	}
 
 	/**
@@ -498,9 +621,20 @@ class EDMINBOOST_ANM_Inbox {
 	 * @return int Number affected.
 	 */
 	public static function bulk_action( $ids, $action ) {
+		$action = sanitize_key( $action );
+		$allowed = array( 'read', 'snooze', 'archive' );
+		if ( ! in_array( $action, $allowed, true ) ) {
+			return 0;
+		}
+
 		$count = 0;
 
 		foreach ( (array) $ids as $id ) {
+			$id = sanitize_key( $id );
+			if ( '' === $id ) {
+				continue;
+			}
+
 			switch ( $action ) {
 				case 'read':
 					if ( self::mark_read( $id ) ) {
@@ -524,21 +658,61 @@ class EDMINBOOST_ANM_Inbox {
 	}
 
 	/**
+	 * Normalize a notice type slug for storage, labels, and CSS class names.
+	 *
+	 * @param string $type Type slug.
+	 * @return string
+	 */
+	public static function sanitize_notice_type_slug( $type ) {
+		$type = sanitize_key( $type );
+		if ( in_array( $type, self::NOTICE_TYPE_SLUGS, true ) ) {
+			return $type;
+		}
+
+		return 'info';
+	}
+
+	/**
+	 * Truncate a string to a maximum byte length (UTF-8 safe when mbstring is available).
+	 *
+	 * @param string $value Raw string.
+	 * @param int    $max   Maximum length in bytes.
+	 * @return string
+	 */
+	public static function truncate_string( $value, $max ) {
+		$value = (string) $value;
+		$max   = max( 0, (int) $max );
+
+		if ( $max <= 0 || strlen( $value ) <= $max ) {
+			return $value;
+		}
+
+		if ( function_exists( 'mb_strcut' ) ) {
+			return mb_strcut( $value, 0, $max, 'UTF-8' );
+		}
+
+		return substr( $value, 0, $max );
+	}
+
+	/**
 	 * Human-readable type label.
 	 *
 	 * @param string $type Type slug.
 	 * @return string
 	 */
 	public static function get_type_label( $type ) {
+		$type = self::sanitize_notice_type_slug( $type );
+
 		$labels = array(
 			'critical' => __( 'Warning (Critical)', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			'warning'  => __( 'Warning (Critical)', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			'upsell'   => __( 'Promotion (Upsell)', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			'success'  => __( 'Success', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			'info'     => __( 'Info', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'error'    => __( 'Error', EDMINBOOST_ANM_TEXT_DOMAIN ),
 		);
 
-		return $labels[ $type ] ?? ucfirst( $type );
+		return $labels[ $type ] ?? $labels['info'];
 	}
 
 	/**

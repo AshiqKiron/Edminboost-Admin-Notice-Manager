@@ -87,6 +87,27 @@ class EDMINBOOST_ANM_Ajax {
 	}
 
 	/**
+	 * Verify the current user may mutate auto-rules for the posted context.
+	 *
+	 * @return void
+	 */
+	private function verify_rules_mutation() {
+		$this->verify_request();
+
+		$context = sanitize_key( wp_unslash( $_POST['context'] ?? 'site' ) );
+		if ( 'network' === $context ) {
+			return;
+		}
+
+		if ( EDMINBOOST_ANM_Multisite::is_active() && ! EDMINBOOST_ANM_Multisite::site_can_edit_rules() ) {
+			wp_send_json_error(
+				array( 'message' => __( 'Auto-rules are managed by the network administrator.', EDMINBOOST_ANM_TEXT_DOMAIN ) ),
+				403
+			);
+		}
+	}
+
+	/**
 	 * Verify AJAX request is allowed for WP_DEBUG tooling.
 	 *
 	 * @return void
@@ -147,7 +168,7 @@ class EDMINBOOST_ANM_Ajax {
 	 * @return void
 	 */
 	public function handle_toggle_rule() {
-		$this->verify_request();
+		$this->verify_rules_mutation();
 
 		$id      = sanitize_key( wp_unslash( $_POST['id'] ?? '' ) );
 		$enabled = ! empty( $_POST['enabled'] );
@@ -168,7 +189,7 @@ class EDMINBOOST_ANM_Ajax {
 	 * @return void
 	 */
 	public function handle_save_rule() {
-		$this->verify_request();
+		$this->verify_rules_mutation();
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in verify_request().
 		$post = wp_unslash( $_POST );
@@ -199,7 +220,7 @@ class EDMINBOOST_ANM_Ajax {
 	 * @return void
 	 */
 	public function handle_delete_rule() {
-		$this->verify_request();
+		$this->verify_rules_mutation();
 
 		$id      = sanitize_key( wp_unslash( $_POST['id'] ?? '' ) );
 		$context = sanitize_key( wp_unslash( $_POST['context'] ?? 'site' ) );
@@ -228,7 +249,7 @@ class EDMINBOOST_ANM_Ajax {
 	 * @return void
 	 */
 	public function handle_convert_wp_preset() {
-		$this->verify_request();
+		$this->verify_rules_mutation();
 
 		$preset_id = sanitize_key( wp_unslash( $_POST['preset_id'] ?? '' ) );
 		$undo      = ! empty( $_POST['undo'] );
@@ -311,6 +332,13 @@ class EDMINBOOST_ANM_Ajax {
 				wp_send_json_success( array( 'read' => true ) );
 				return;
 			case 'snooze':
+				if ( '' === $id ) {
+					wp_send_json_error(
+						array(
+							'message' => __( 'Notice not found.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+						)
+					);
+				}
 				$duration_key = sanitize_key( wp_unslash( $_POST['duration'] ?? '1d' ) );
 				$duration_key = '7d' === $duration_key ? '7d' : '1d';
 				$seconds      = '7d' === $duration_key ? WEEK_IN_SECONDS : DAY_IN_SECONDS;
@@ -335,6 +363,13 @@ class EDMINBOOST_ANM_Ajax {
 				);
 				return;
 			case 'unsnooze':
+				if ( '' === $id ) {
+					wp_send_json_error(
+						array(
+							'message' => __( 'Notice not found.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+						)
+					);
+				}
 				EDMINBOOST_ANM_Inbox::unsnooze( $id );
 				wp_send_json_success(
 					array(
@@ -344,6 +379,21 @@ class EDMINBOOST_ANM_Ajax {
 				);
 				return;
 			case 'convert':
+				if ( '' === $id ) {
+					wp_send_json_error(
+						array(
+							'message' => __( 'Notice not found.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+						)
+					);
+				}
+				if ( EDMINBOOST_ANM_Multisite::is_active() && ! EDMINBOOST_ANM_Multisite::site_can_edit_rules() ) {
+					wp_send_json_error(
+						array(
+							'message' => __( 'Auto-rules are managed by the network administrator.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+						),
+						403
+					);
+				}
 				$result = EDMINBOOST_ANM_Rules::create_from_inbox( $id );
 				if ( is_wp_error( $result ) ) {
 					wp_send_json_error( array( 'message' => $result->get_error_message() ) );
@@ -356,6 +406,21 @@ class EDMINBOOST_ANM_Ajax {
 				);
 				return;
 			case 'unconvert':
+				if ( '' === $id ) {
+					wp_send_json_error(
+						array(
+							'message' => __( 'Notice not found.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+						)
+					);
+				}
+				if ( EDMINBOOST_ANM_Multisite::is_active() && ! EDMINBOOST_ANM_Multisite::site_can_edit_rules() ) {
+					wp_send_json_error(
+						array(
+							'message' => __( 'Auto-rules are managed by the network administrator.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+						),
+						403
+					);
+				}
 				$result = EDMINBOOST_ANM_Rules::unconvert_inbox( $id );
 				if ( is_wp_error( $result ) ) {
 					wp_send_json_error( array( 'message' => $result->get_error_message() ) );
@@ -367,6 +432,13 @@ class EDMINBOOST_ANM_Ajax {
 			case 'hide_for_all':
 			case 'hide_forever':
 			case 'panel_dismiss':
+				if ( '' === $id ) {
+					wp_send_json_error(
+						array(
+							'message' => __( 'Notice not found.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+						)
+					);
+				}
 				$result = EDMINBOOST_ANM_Inbox::apply_panel_display_choice( $id, $action );
 				if ( is_wp_error( $result ) ) {
 					wp_send_json_error( array( 'message' => $result->get_error_message() ) );
@@ -379,7 +451,11 @@ class EDMINBOOST_ANM_Ajax {
 				);
 				return;
 			case 'bulk':
-				$bulk = sanitize_key( wp_unslash( $_POST['bulk_action'] ?? '' ) );
+				$bulk    = sanitize_key( wp_unslash( $_POST['bulk_action'] ?? '' ) );
+				$allowed = array( 'read', 'snooze', 'archive' );
+				if ( ! in_array( $bulk, $allowed, true ) ) {
+					wp_send_json_error( array( 'message' => __( 'Invalid action.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
+				}
 				$count = EDMINBOOST_ANM_Inbox::bulk_action( $ids, $bulk );
 				wp_send_json_success( array( 'count' => $count ) );
 				return;
@@ -425,11 +501,13 @@ class EDMINBOOST_ANM_Ajax {
 
 			$results[] = array(
 				'id'    => (int) $user->ID,
-				'label' => sprintf(
-					/* translators: 1: display name, 2: login */
-					__( '%1$s (%2$s)', EDMINBOOST_ANM_TEXT_DOMAIN ),
-					$user->display_name,
-					$user->user_login
+				'label' => sanitize_text_field(
+					sprintf(
+						/* translators: 1: display name, 2: login */
+						__( '%1$s (%2$s)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+						$user->display_name,
+						$user->user_login
+					)
 				),
 			);
 		}
@@ -487,6 +565,10 @@ class EDMINBOOST_ANM_Ajax {
 		}
 
 		$html = wp_unslash( $_POST['html'] ?? '' );
+		if ( strlen( $html ) > EDMINBOOST_ANM_Inbox::MAX_CAPTURE_HTML_BYTES ) {
+			wp_send_json_error( array( 'message' => __( 'Notice payload too large.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
+		}
+
 		$html = wp_kses_post( $html );
 
 		$result = EDMINBOOST_ANM_Inbox::apply_inline_hide( $html, $scope );
@@ -513,7 +595,11 @@ class EDMINBOOST_ANM_Ajax {
 			wp_send_json_error( array( 'message' => __( 'Plugin disabled.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
 		}
 
-		$html   = wp_unslash( $_POST['html'] ?? '' );
+		$html = wp_unslash( $_POST['html'] ?? '' );
+		if ( strlen( $html ) > EDMINBOOST_ANM_Inbox::MAX_CAPTURE_HTML_BYTES ) {
+			wp_send_json_error( array( 'message' => __( 'Notice payload too large.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
+		}
+
 		$html   = wp_kses_post( $html );
 		$source = sanitize_text_field( wp_unslash( $_POST['source_plugin'] ?? '' ) );
 
@@ -551,14 +637,31 @@ class EDMINBOOST_ANM_Ajax {
 	 * @return void
 	 */
 	public function handle_import_rules() {
-		$this->verify_request();
+		$this->verify_rules_mutation();
 
 		if ( empty( $_FILES['import_file']['tmp_name'] ) ) {
 			wp_send_json_error( array( 'message' => __( 'No file uploaded.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
 		}
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		$upload = $_FILES['import_file'];
+		if ( ! empty( $upload['error'] ) && UPLOAD_ERR_OK !== (int) $upload['error'] ) {
+			wp_send_json_error( array( 'message' => __( 'Upload failed.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
+		}
+
+		$filename = isset( $upload['name'] ) ? sanitize_file_name( wp_unslash( $upload['name'] ) ) : '';
+		$filetype = wp_check_filetype( $filename, array( 'json' => 'application/json' ) );
+		if ( empty( $filetype['ext'] ) || 'json' !== $filetype['ext'] ) {
+			wp_send_json_error( array( 'message' => __( 'Please upload a JSON file.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
+		}
+
+		$tmp_name = wp_unslash( $upload['tmp_name'] );
+		if ( ! is_uploaded_file( $tmp_name ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid upload.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
+		}
+
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$json   = file_get_contents( wp_unslash( $_FILES['import_file']['tmp_name'] ) );
+		$json   = file_get_contents( $tmp_name );
 		$result = EDMINBOOST_ANM_Importer::import_json( $json );
 
 		if ( is_wp_error( $result ) ) {
@@ -678,14 +781,13 @@ class EDMINBOOST_ANM_Ajax {
 		$this->verify_request();
 
 		$settings = EDMINBOOST_ANM_Settings::get();
-		$defaults = EDMINBOOST_ANM_Settings::get_defaults();
 
 		if ( isset( $_POST['digest'] ) && is_array( $_POST['digest'] ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$digest_input = wp_unslash( $_POST['digest'] );
 			$settings['digest'] = EDMINBOOST_ANM_Settings::sanitize_digest_settings(
 				$digest_input,
-				$defaults['digest']
+				$settings['digest']
 			);
 		}
 
@@ -705,7 +807,12 @@ class EDMINBOOST_ANM_Ajax {
 		if ( isset( $_POST['webhook'] ) && is_array( $_POST['webhook'] ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$webhook_input = wp_unslash( $_POST['webhook'] );
-			$settings['webhook']['message'] = sanitize_textarea_field( $webhook_input['message'] ?? '' );
+			$settings['webhook'] = EDMINBOOST_ANM_Settings::sanitize_webhook_settings(
+				array(
+					'message' => $webhook_input['message'] ?? '',
+				),
+				$settings['webhook']
+			);
 		}
 
 		wp_send_json_success( EDMINBOOST_ANM_Webhook::get_preview( $settings ) );

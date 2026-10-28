@@ -300,7 +300,14 @@ class EDMINBOOST_ANM_Rules {
 			$context = 'site';
 		}
 
-		if ( 'site' === $context && class_exists( 'EDMINBOOST_ANM_Multisite' ) && ! EDMINBOOST_ANM_Multisite::site_can_edit_rules() ) {
+		if ( 'network' === $context ) {
+			if ( ! class_exists( 'EDMINBOOST_ANM_Multisite' ) || ! EDMINBOOST_ANM_Multisite::is_active() ) {
+				return new WP_Error( 'forbidden', __( 'Permission denied.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
+			}
+			if ( ! current_user_can( EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY ) ) {
+				return new WP_Error( 'forbidden', __( 'Permission denied.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
+			}
+		} elseif ( class_exists( 'EDMINBOOST_ANM_Multisite' ) && ! EDMINBOOST_ANM_Multisite::site_can_edit_rules() ) {
 			return new WP_Error( 'forbidden', __( 'Auto-rules are managed by the network administrator.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
 		}
 
@@ -377,7 +384,12 @@ class EDMINBOOST_ANM_Rules {
 			$context = 'site';
 		}
 
-		if ( 'site' === $context && class_exists( 'EDMINBOOST_ANM_Multisite' ) && ! EDMINBOOST_ANM_Multisite::site_can_edit_rules() ) {
+		if ( 'network' === $context ) {
+			if ( ! class_exists( 'EDMINBOOST_ANM_Multisite' ) || ! EDMINBOOST_ANM_Multisite::is_active()
+				|| ! current_user_can( EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY ) ) {
+				return false;
+			}
+		} elseif ( class_exists( 'EDMINBOOST_ANM_Multisite' ) && ! EDMINBOOST_ANM_Multisite::site_can_edit_rules() ) {
 			return false;
 		}
 
@@ -409,7 +421,12 @@ class EDMINBOOST_ANM_Rules {
 			$context = 'site';
 		}
 
-		if ( 'site' === $context && class_exists( 'EDMINBOOST_ANM_Multisite' ) && ! EDMINBOOST_ANM_Multisite::site_can_edit_rules() ) {
+		if ( 'network' === $context ) {
+			if ( ! class_exists( 'EDMINBOOST_ANM_Multisite' ) || ! EDMINBOOST_ANM_Multisite::is_active()
+				|| ! current_user_can( EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY ) ) {
+				return null;
+			}
+		} elseif ( class_exists( 'EDMINBOOST_ANM_Multisite' ) && ! EDMINBOOST_ANM_Multisite::site_can_edit_rules() ) {
 			return null;
 		}
 

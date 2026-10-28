@@ -1678,7 +1678,8 @@
 
 		var tabs = tablist.querySelectorAll('[role="tab"]');
 		var panels = root.querySelectorAll('.edminboost-anm-tab-panel');
-		var settingsForm = root.querySelector('.edminboost-anm-settings-form');
+		var settingsForms = root.querySelectorAll('.edminboost-anm-settings-form');
+		var primarySettingsForm = settingsForms.length ? settingsForms[0] : null;
 		var defaultTab = root.dataset.settingsTab || 'general';
 
 		function panelForTab(slug) {
@@ -1695,10 +1696,10 @@
 		}
 
 		function syncFormSubmitVisibility(slug) {
-			if (!settingsForm) {
+			if (!primarySettingsForm) {
 				return;
 			}
-			settingsForm.classList.toggle('is-tab-tools', slug === 'tools');
+			primarySettingsForm.classList.toggle('is-tab-tools', slug === 'tools' || slug === 'multisite');
 		}
 
 		function activate(slug) {
@@ -1758,14 +1759,17 @@
 			});
 		});
 
-		if (settingsForm) {
-			settingsForm.addEventListener('submit', function () {
-				var referer = settingsForm.querySelector('input[name="_wp_http_referer"]');
+		settingsForms.forEach(function (form) {
+			form.addEventListener('submit', function () {
+				var referer = form.querySelector('input[name="_wp_http_referer"]');
 				if (!referer) {
 					return;
 				}
 				var url = new URL(window.location.href);
 				var activeTab = root.dataset.settingsTab || 'general';
+				if (form.classList.contains('edminboost-anm-multisite-policy-form')) {
+					activeTab = 'multisite';
+				}
 				if (activeTab && activeTab !== 'general') {
 					url.searchParams.set('tab', activeTab);
 				} else {
@@ -1773,7 +1777,7 @@
 				}
 				referer.value = url.pathname + url.search;
 			});
-		}
+		});
 
 		activate(tabFromUrl());
 	}

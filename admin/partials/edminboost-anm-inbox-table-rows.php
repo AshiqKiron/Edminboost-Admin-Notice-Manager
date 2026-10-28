@@ -28,7 +28,8 @@ foreach ( $notices as $notice ) :
 		</th>
 		<td class="column-source" data-colname="<?php esc_attr_e( 'Source Plugin', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"><?php echo esc_html( $notice['source_plugin'] ?? '' ); ?></td>
 		<td class="column-message column-primary" data-colname="<?php esc_attr_e( 'Notice Message Preview', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"><?php echo esc_html( wp_html_excerpt( $notice['message'] ?? '', 60, '…' ) ); ?></td>
-		<td class="column-type" data-colname="<?php esc_attr_e( 'Type', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"><span class="edminboost-anm-badge edminboost-anm-badge--<?php echo esc_attr( $notice['type'] ?? 'info' ); ?>"><?php echo esc_html( EDMINBOOST_ANM_Inbox::get_type_label( $notice['type'] ?? 'info' ) ); ?></span></td>
+		<?php $edminboost_anm_notice_type = EDMINBOOST_ANM_Inbox::sanitize_notice_type_slug( $notice['type'] ?? 'info' ); ?>
+		<td class="column-type" data-colname="<?php esc_attr_e( 'Type', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>"><span class="edminboost-anm-badge edminboost-anm-badge--<?php echo esc_attr( $edminboost_anm_notice_type ); ?>"><?php echo esc_html( EDMINBOOST_ANM_Inbox::get_type_label( $edminboost_anm_notice_type ) ); ?></span></td>
 		<td class="edminboost-anm-actions column-actions" data-colname="<?php esc_attr_e( 'Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">
 			<button type="button" class="button button-small edminboost-anm-inbox-read<?php echo $edminboost_anm_is_read ? ' is-marked-read' : ''; ?>" data-id="<?php echo esc_attr( $notice['id'] ); ?>"<?php echo $edminboost_anm_is_read ? ' disabled aria-disabled="true"' : ''; ?>><?php esc_html_e( 'Read', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>
 			<div class="edminboost-anm-dropdown">

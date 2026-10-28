@@ -77,6 +77,7 @@ class EDMINBOOST_ANM_Plugin {
 	 */
 	public function run() {
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
+		add_action( 'plugins_loaded', array( 'EDMINBOOST_ANM_Multisite', 'register_hooks' ) );
 		add_action( 'admin_menu', array( $this->admin, 'register_menu' ) );
 		add_action( 'network_admin_menu', array( $this->admin, 'register_network_menu' ) );
 		add_action( 'admin_init', array( $this->admin, 'register_settings' ) );

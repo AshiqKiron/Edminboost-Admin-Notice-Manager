@@ -57,12 +57,14 @@ Yes. When uninstalled, all plugin options are removed from the database.
 == Changelog ==
 
 = 1.1.2 =
+* Admin: Billing page with Free vs Pro comparison table (Pro-only differentiators; regex/CSS auto-rules, Client Shield Mode, and block ad redirects stay on both plans).
 * Settings: rename the Access & visibility tab to Access.
 * Multisite: network admin screens for multisite policy, network default settings, and shared network auto-rules; each site keeps its own inbox and statistics.
 * Multisite: site Settings include a Multisite tab; site settings and Quick Status respect network lock and override permissions.
 * Settings (White label): agency branding — custom admin menu title, dashboard brand name and logo, hide dashboard brand or Docs link, optional custom Docs URL.
 
 = 1.1.1 =
+* Translations: bundled language packs for English, Bangla (Bengali), Hindi, Russian, Spanish, French, Arabic, Chinese (Simplified/Mandarin), and Chinese (Traditional).
 * Auto-Rules: optional scheduled rules — limit matching to selected weekdays and hours (site timezone); rules list shows schedule summary and an “Outside schedule” state when the rule is enabled but inactive for the current time.
 * Admin UI: responsive layouts for Dashboard, Inbox, Rules, and Settings on phones and tablets; WordPress list-table mobile rows for inbox and rules tables; admin bar notice dropdown clamps to the viewport.
 * Notice Inbox: pagination controls with AJAX sort/filter; column alignment; select-all, snooze menu, and URL state (including `orderby=type&order=desc`) stay in sync.

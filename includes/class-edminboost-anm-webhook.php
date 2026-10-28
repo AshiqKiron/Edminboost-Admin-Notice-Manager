@@ -35,11 +35,15 @@ class EDMINBOOST_ANM_Webhook {
 	public static function maybe_send( $notice ) {
 		$settings = EDMINBOOST_ANM_Settings::get();
 
-		if ( empty( $settings['webhook']['enabled'] ) || empty( $settings['webhook']['url'] ) ) {
+		if ( empty( $settings['webhook']['enabled'] ) ) {
 			return;
 		}
 
-		$url     = $settings['webhook']['url'];
+		$url = EDMINBOOST_ANM_Settings::sanitize_webhook_url( $settings['webhook']['url'] ?? '' );
+		if ( '' === $url ) {
+			return;
+		}
+
 		$payload = self::build_payload( $notice, $settings );
 
 		wp_remote_post(
@@ -74,8 +78,8 @@ class EDMINBOOST_ANM_Webhook {
 		}
 
 		$message = (string) ( $notice['message'] ?? '' );
-		$source  = (string) ( $notice['source_plugin'] ?? '' );
-		$type    = (string) ( $notice['type'] ?? 'info' );
+		$source  = sanitize_text_field( (string) ( $notice['source_plugin'] ?? '' ) );
+		$type    = EDMINBOOST_ANM_Inbox::sanitize_notice_type_slug( $notice['type'] ?? 'info' );
 
 		$payload = array(
 			'text'    => self::build_message_text( $notice, $settings ),

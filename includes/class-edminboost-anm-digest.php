@@ -66,6 +66,10 @@ class EDMINBOOST_ANM_Digest {
 	 * @return void
 	 */
 	public static function ensure_schedule_if_needed() {
+		if ( ! EDMINBOOST_ANM_Settings::is_enabled() ) {
+			return;
+		}
+
 		$settings = EDMINBOOST_ANM_Settings::get();
 
 		if ( empty( $settings['digest']['enabled'] ) ) {

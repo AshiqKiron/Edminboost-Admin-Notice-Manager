@@ -29,6 +29,12 @@ class EDMINBOOST_ANM_Notices {
 	 * @return void
 	 */
 	public function register_hooks() {
+		add_action( 'admin_head', array( $this, 'hide_notices_on_plugin_screens' ), 1 );
+
+		if ( ! EDMINBOOST_ANM_Settings::is_enabled() ) {
+			return;
+		}
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
@@ -39,12 +45,6 @@ class EDMINBOOST_ANM_Notices {
 		);
 		$placement = EDMINBOOST_ANM_Settings::get_notice_panel_admin_bar_placement( $panel['position'] ?? 'default' );
 		add_action( 'admin_bar_menu', array( $this, 'register_admin_bar_node' ), $placement['hook_priority'] );
-
-		add_action( 'admin_head', array( $this, 'hide_notices_on_plugin_screens' ), 1 );
-
-		if ( ! EDMINBOOST_ANM_Settings::is_enabled() ) {
-			return;
-		}
 
 		if ( EDMINBOOST_ANM_Settings::should_hide_dashboard_notices() ) {
 			add_action( 'admin_head', array( $this, 'hide_core_notices' ), 1 );
@@ -261,9 +261,8 @@ class EDMINBOOST_ANM_Notices {
 		);
 		$style      = $panel['style'] ?? 'link';
 		$position   = $panel['position'] ?? 'default';
-		$counts     = EDMINBOOST_ANM_Inbox::get_counts();
 		$inbox_url  = admin_url( 'admin.php?page=' . EDMINBOOST_ANM_Admin::PAGE_SLUG . '-inbox' );
-		$count_all  = (int) ( $counts['all'] ?? 0 );
+		$count_all  = EDMINBOOST_ANM_Inbox::get_active_count();
 		$meta_class = 'edminboost-anm-notices-trigger';
 
 		if ( EDMINBOOST_ANM_Settings::notice_panel_style_is_dropdown( $style ) ) {

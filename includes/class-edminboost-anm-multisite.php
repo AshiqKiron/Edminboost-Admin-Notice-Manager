@@ -87,6 +87,102 @@ class EDMINBOOST_ANM_Multisite {
 	}
 
 	/**
+	 * Register multisite-specific hooks.
+	 *
+	 * @return void
+	 */
+	public static function register_hooks() {
+		if ( ! self::is_active() ) {
+			return;
+		}
+
+		self::register_network_option_bridge( self::NETWORK_OPTION );
+		self::register_network_option_bridge( self::NETWORK_SETTINGS_OPTION );
+
+		add_filter(
+			'default_option_' . self::NETWORK_OPTION,
+			static function () {
+				return self::get_policy_defaults();
+			}
+		);
+	}
+
+	/**
+	 * Wire Settings API reads/writes for a network sitemeta option.
+	 *
+	 * @param string $option_name Option key stored in sitemeta.
+	 * @return void
+	 */
+	private static function register_network_option_bridge( $option_name ) {
+		add_filter(
+			'option_' . $option_name,
+			static function ( $value ) use ( $option_name ) {
+				return self::filter_network_option_from_sitemeta( $value, $option_name );
+			},
+			10,
+			1
+		);
+
+		add_filter(
+			'pre_update_option_' . $option_name,
+			static function ( $value, $old_value ) use ( $option_name ) {
+				return self::persist_network_option_to_sitemeta( $value, $old_value, $option_name );
+			},
+			10,
+			2
+		);
+	}
+
+	/**
+	 * Read network option values from sitemeta for Settings API forms.
+	 *
+	 * @param mixed  $value       Blog option value (unused when sitemeta exists).
+	 * @param string $option_name Option key.
+	 * @return mixed
+	 */
+	public static function filter_network_option_from_sitemeta( $value, $option_name ) {
+		if ( ! self::is_active() ) {
+			return $value;
+		}
+
+		$stored = get_site_option( $option_name, false );
+
+		if ( false !== $stored ) {
+			return $stored;
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Persist Settings API saves to sitemeta and skip per-blog storage.
+	 *
+	 * @param mixed  $value       Sanitized option value.
+	 * @param mixed  $old_value   Previous blog option value.
+	 * @param string $option_name Option key.
+	 * @return mixed
+	 */
+	public static function persist_network_option_to_sitemeta( $value, $old_value, $option_name ) {
+		if ( ! current_user_can( self::NETWORK_CAPABILITY ) ) {
+			return $old_value;
+		}
+
+		if ( self::NETWORK_OPTION === $option_name ) {
+			$value = self::normalize_policy_option( is_array( $value ) ? $value : array() );
+		} elseif ( ! is_array( $value ) ) {
+			$value = array();
+		}
+
+		update_site_option( $option_name, $value );
+
+		if ( false !== get_option( $option_name, false ) ) {
+			delete_option( $option_name );
+		}
+
+		return $old_value;
+	}
+
+	/**
 	 * Default network policy option values.
 	 *
 	 * @return array
@@ -116,7 +212,40 @@ class EDMINBOOST_ANM_Multisite {
 			$stored = array();
 		}
 
-		return wp_parse_args( $stored, self::get_policy_defaults() );
+		return self::normalize_policy_option( $stored );
+	}
+
+	/**
+	 * Normalize network policy option to the canonical stored shape.
+	 *
+	 * @param array $data Raw or partial policy values.
+	 * @return array
+	 */
+	public static function normalize_policy_option( $data ) {
+		if ( ! is_array( $data ) ) {
+			$data = array();
+		}
+
+		$defaults = self::get_policy_defaults();
+		$merged   = wp_parse_args( $data, $defaults );
+
+		$policy = sanitize_key( $merged['policy'] ?? $defaults['policy'] );
+		if ( ! in_array( $policy, self::POLICIES, true ) ) {
+			$policy = $defaults['policy'];
+		}
+
+		$output = array(
+			'policy'              => $policy,
+			'allow_site_settings' => ! empty( $merged['allow_site_settings'] ),
+			'allow_site_rules'    => ! empty( $merged['allow_site_rules'] ),
+			'share_network_rules' => ! empty( $merged['share_network_rules'] ),
+		);
+
+		if ( 'per_site' === $policy ) {
+			$output['share_network_rules'] = false;
+		}
+
+		return $output;
 	}
 
 	/**
@@ -324,24 +453,20 @@ class EDMINBOOST_ANM_Multisite {
 			$input = array();
 		}
 
-		$defaults = self::get_policy_defaults();
-		$output   = self::get_policy_option_raw();
-
-		$policy = sanitize_key( $input['policy'] ?? $output['policy'] ?? $defaults['policy'] );
-		if ( ! in_array( $policy, self::POLICIES, true ) ) {
-			$policy = $defaults['policy'];
+		if ( ! current_user_can( self::NETWORK_CAPABILITY ) ) {
+			return self::get_policy_option_raw();
 		}
 
-		$output['policy']              = $policy;
-		$output['allow_site_settings'] = ! empty( $input['allow_site_settings'] );
-		$output['allow_site_rules']    = ! empty( $input['allow_site_rules'] );
-		$output['share_network_rules'] = ! empty( $input['share_network_rules'] );
+		$current = self::get_policy_option_raw();
 
-		if ( 'per_site' === $policy ) {
-			$output['share_network_rules'] = false;
-		}
-
-		return $output;
+		return self::normalize_policy_option(
+			array(
+				'policy'              => $input['policy'] ?? $current['policy'],
+				'allow_site_settings' => ! empty( $input['allow_site_settings'] ),
+				'allow_site_rules'    => ! empty( $input['allow_site_rules'] ),
+				'share_network_rules' => ! empty( $input['share_network_rules'] ),
+			)
+		);
 	}
 
 	/**

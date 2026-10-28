@@ -40,7 +40,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 - Use Settings API for the main settings option (`register_setting`, `settings_fields`, `submit_button`). Rules/inbox use dedicated classes + AJAX where appropriate.
 - Enqueue assets with `EDMINBOOST_ANM_VERSION` as the version string.
 - Pass data to JS via `wp_localize_script()` — global `edminboostAnmData` from `EDMINBOOST_ANM_Admin::get_localized_data()`.
-- Page slugs: `EDMINBOOST_ANM_Admin::PAGE_SLUG` with `-inbox`, `-rules`, `-settings` suffixes.
+- Page slugs: `EDMINBOOST_ANM_Admin::PAGE_SLUG` with `-inbox`, `-rules`, `-settings`, `-billing` suffixes.
 - Inbox list: sanitize GET/POST list args via `EDMINBOOST_ANM_Admin::parse_inbox_list_args()`; paginate with `get_inbox_list_slice()` (20 per page). `EDMINBOOST_ANM_Inbox::query()` honors `page` / `per_page` after filtering.
 
 ## Class Wiring
@@ -118,6 +118,9 @@ Separate per-site options: `RULES_OPTION` (rule list), `INBOX_OPTION` (captured 
 | `edminboost-anm-rules-page.php` | Rules + WP preset conversion |
 | `edminboost-anm-settings-page.php` | Settings API form (site or network defaults) |
 | `edminboost-anm-network-policy-page.php` | Network multisite policy |
+| `edminboost-anm-multisite-policy-fields.php` | Shared multisite policy fields fragment |
+| `edminboost-anm-multisite-policy-next-steps.php` | Shared multisite policy next-steps links |
+| `edminboost-anm-billing-page.php` | Billing / Free vs Pro comparison (read-only) |
 | `edminboost-anm-notice-panel-dropdown.php` | Admin bar dropdown preview |
 
 `EDMINBOOST_ANM_Notices::DROPDOWN_PREVIEW_LIMIT` (8) caps dropdown preview items.
@@ -129,14 +132,15 @@ Separate per-site options: `RULES_OPTION` (rule list), `INBOX_OPTION` (captured 
 - Notice panel: `EDMINBOOST_ANM_Settings::get_notice_panel_*()` registries; `get_notice_panel_admin_bar_placement()`, `get_notice_panel_preview_layout()` (default position → `left`), `notice_panel_position_uses_left_admin_bar()`, `notice_panel_style_is_dropdown()`, `notice_panel_style_uses_bell()`, `format_notice_panel_badge_display_count()`, etc. `EDMINBOOST_ANM_Notices::build_notice_badge_markup()` mirrors badge rules for live admin bar; `enqueue_admin_bar_dropdown_script()` shared for wp-admin and front-end admin bar dropdown JS; `get_plugin_screen_notice_hide_css()` + `hide_notices_on_plugin_screens()` for plugin-page notice clutter (exceptions for settings preview mocks).
 - Inbox: `EDMINBOOST_ANM_Inbox::snooze()` / `unsnooze()`, `is_actively_snoozed()`, `get_snooze_duration_key()`, `mark_read()`.
 - Settings sanitize: update `upsell_preset` and `word_filters` only when present in `$input` (other tabs omit those keys).
-- Webhook save: `sanitize_webhook_settings()` keeps `url` when disabled (do not wipe stored URL on toggle-off).
+- Webhook save: `sanitize_webhook_settings( $input, $stored )` merges with stored webhook; keeps URL when disabled or when a posted URL is invalid; `sanitize_webhook_url()` restricts endpoints to http/https.
 - Admin routing: `EDMINBOOST_ANM_Admin::is_plugin_screen( $hook_suffix )` — screen id, optional hook suffix, or `$_GET['page']` contains `PAGE_SLUG`.
+- Billing: `EDMINBOOST_ANM_Admin::get_billing_comparison_rows()`, `render_billing_comparison_cell()`, `get_billing_page_url()`; filter `edminboost_anm_billing_comparison`. Bootstrap defines `EDMINBOOST_ANM_PRO_URL` for upgrade links (user-initiated external navigation only).
 - Digest: `EDMINBOOST_ANM_Digest::build_email_content()`, `format_email_body_plain()`, `build_email()`, `get_preview()` (structured `content`, plain `body`, `next_send`), `get_recipients()`, `SITE_NAME_TOKEN`, `add_cron_schedules()`, `sync_schedule()`, `sanitize_send_weekday()`, `get_next_send_timestamp()`; filter `edminboost_anm_digest_email`.
 - Rules: `save()` allows `match_type` `keyword`|`regex`|`css`; `html_matches_css_selector()`, `get_custom_blacklist_phrases()`, `get_active_blacklist_phrases()`; `context` `site`|`network` for storage; `get_all()` merges network rules when multisite sharing is enabled.
 - Multisite: `EDMINBOOST_ANM_Multisite::get_policy()`, `site_can_edit_settings()`, `site_can_edit_rules()`, `shares_network_rules()`, `merge_settings_layers()`, `is_network_plugin_screen()`.
 - White label: `sanitize_white_label_settings()`, `is_white_label_enabled()`, menu/brand/docs URL helpers on `EDMINBOOST_ANM_Settings`.
 - Webhook: `EDMINBOOST_ANM_Webhook::build_payload()`, `build_message_text()`, `get_preview()`, `get_preview_notice()`, `get_sample_notice()`; filter `edminboost_anm_webhook_payload`.
-- Sanitize helpers: `EDMINBOOST_ANM_Settings::sanitize_digest_settings()`, `sanitize_webhook_settings()` (Settings API save; digest preview uses full digest sanitizer; webhook preview AJAX sanitizes `message` only).
+- Sanitize helpers: `sanitize_digest_settings( $input, $stored )`, `sanitize_digest_recipients()`, `sanitize_webhook_settings( $input, $stored )`, `sanitize_webhook_url()` — Settings API `sanitize()` passes current `$output['digest']` / `$output['webhook']` as `$stored`; digest preview AJAX uses full digest sanitizer with stored merge; webhook preview AJAX uses `sanitize_webhook_settings()` with partial POST (message only in typical UI).
 
 - Document `@var` annotations at the top of partials.
 - Prefix partial-local variables with `$edminboost_anm_` to avoid collisions.

@@ -84,6 +84,6 @@ class EDMINBOOST_ANM_Activator {
 		add_filter( 'cron_schedules', array( 'EDMINBOOST_ANM_Digest', 'add_cron_schedules' ) );
 		EDMINBOOST_ANM_Digest::sync_schedule( $defaults );
 
-		set_transient( 'edminboost_anm_activation_redirect', 1, 30 );
+		EDMINBOOST_ANM_Admin::set_activation_redirect_transient();
 	}
 }

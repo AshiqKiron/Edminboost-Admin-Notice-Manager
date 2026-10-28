@@ -24,6 +24,13 @@ class EDMINBOOST_ANM_Admin {
 	const PAGE_SLUG = EDMINBOOST_ANM_PLUGIN_SLUG;
 
 	/**
+	 * Legacy activation redirect transient (pre–per-user redirect).
+	 *
+	 * @var string
+	 */
+	const ACTIVATION_REDIRECT_LEGACY_TRANSIENT = 'edminboost_anm_activation_redirect';
+
+	/**
 	 * Register the admin menu.
 	 *
 	 * @return void
@@ -76,6 +83,15 @@ class EDMINBOOST_ANM_Admin {
 			self::PAGE_SLUG . '-settings',
 			array( $this, 'render_settings_page' )
 		);
+
+		add_submenu_page(
+			self::PAGE_SLUG,
+			__( 'Billing', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			__( 'Billing', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			EDMINBOOST_ANM_Settings::CAPABILITY,
+			self::PAGE_SLUG . '-billing',
+			array( $this, 'render_billing_page' )
+		);
 	}
 
 	/**
@@ -93,6 +109,22 @@ class EDMINBOOST_ANM_Admin {
 				'default'           => EDMINBOOST_ANM_Settings::get_defaults(),
 			)
 		);
+
+		if ( EDMINBOOST_ANM_Multisite::is_active() ) {
+			EDMINBOOST_ANM_Multisite::seed_network_options();
+
+			register_setting(
+				EDMINBOOST_ANM_Multisite::NETWORK_POLICY_GROUP,
+				EDMINBOOST_ANM_Multisite::NETWORK_OPTION,
+				array(
+					'type'              => 'array',
+					'sanitize_callback' => array( 'EDMINBOOST_ANM_Multisite', 'sanitize_policy' ),
+					'default'           => EDMINBOOST_ANM_Multisite::get_policy_defaults(),
+					'show_in_rest'      => false,
+					'capability'        => EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY,
+				)
+			);
+		}
 	}
 
 	/**
@@ -163,6 +195,7 @@ class EDMINBOOST_ANM_Admin {
 				'sanitize_callback' => array( 'EDMINBOOST_ANM_Multisite', 'sanitize_policy' ),
 				'default'           => EDMINBOOST_ANM_Multisite::get_policy_defaults(),
 				'show_in_rest'      => false,
+				'capability'        => EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY,
 			)
 		);
 
@@ -174,6 +207,7 @@ class EDMINBOOST_ANM_Admin {
 				'sanitize_callback' => array( 'EDMINBOOST_ANM_Settings', 'sanitize_network_settings' ),
 				'default'           => EDMINBOOST_ANM_Settings::get_defaults(),
 				'show_in_rest'      => false,
+				'capability'        => EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY,
 			)
 		);
 	}
@@ -188,11 +222,15 @@ class EDMINBOOST_ANM_Admin {
 			return;
 		}
 
-		if ( ! get_transient( 'edminboost_anm_activation_redirect' ) ) {
+		$user_id = get_current_user_id();
+		$key     = self::get_activation_redirect_transient_key( $user_id );
+		$legacy  = get_transient( self::ACTIVATION_REDIRECT_LEGACY_TRANSIENT );
+
+		if ( ( '' === $key || false === get_transient( $key ) ) && false === $legacy ) {
 			return;
 		}
 
-		delete_transient( 'edminboost_anm_activation_redirect' );
+		self::clear_activation_redirect_transients( $user_id );
 
 		if ( isset( $_GET['activate-multi'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
@@ -200,6 +238,53 @@ class EDMINBOOST_ANM_Admin {
 
 		wp_safe_redirect( admin_url( 'admin.php?page=' . self::PAGE_SLUG ) );
 		exit;
+	}
+
+	/**
+	 * Transient key for a one-time post-activation redirect.
+	 *
+	 * @param int $user_id User ID (0 = current user).
+	 * @return string Empty when no user is available.
+	 */
+	public static function get_activation_redirect_transient_key( $user_id = 0 ) {
+		$user_id = $user_id > 0 ? (int) $user_id : get_current_user_id();
+
+		if ( $user_id < 1 ) {
+			return '';
+		}
+
+		return 'edminboost_anm_activation_redirect_' . $user_id;
+	}
+
+	/**
+	 * Queue a redirect to the plugin dashboard for the activating user.
+	 *
+	 * @return void
+	 */
+	public static function set_activation_redirect_transient() {
+		$key = self::get_activation_redirect_transient_key();
+
+		if ( '' !== $key ) {
+			set_transient( $key, 1, 30 );
+		}
+
+		delete_transient( self::ACTIVATION_REDIRECT_LEGACY_TRANSIENT );
+	}
+
+	/**
+	 * Clear activation redirect flags for a user (and legacy global flag).
+	 *
+	 * @param int $user_id User ID (0 = current user).
+	 * @return void
+	 */
+	public static function clear_activation_redirect_transients( $user_id = 0 ) {
+		$key = self::get_activation_redirect_transient_key( $user_id );
+
+		if ( '' !== $key ) {
+			delete_transient( $key );
+		}
+
+		delete_transient( self::ACTIVATION_REDIRECT_LEGACY_TRANSIENT );
 	}
 
 	/**
@@ -474,6 +559,9 @@ class EDMINBOOST_ANM_Admin {
 	 */
 	public static function parse_inbox_list_args( $source ) {
 		$filter  = sanitize_key( $source['filter'] ?? 'all' );
+		if ( ! in_array( $filter, EDMINBOOST_ANM_Inbox::LIST_FILTERS, true ) ) {
+			$filter = 'all';
+		}
 		$search  = sanitize_text_field( $source['s'] ?? '' );
 		$page    = max( 1, (int) ( $source['paged'] ?? $source['page'] ?? 1 ) );
 		$orderby = sanitize_key( $source['orderby'] ?? 'date' );
@@ -694,6 +782,190 @@ class EDMINBOOST_ANM_Admin {
 		$edminboost_anm_settings_readonly = ! EDMINBOOST_ANM_Multisite::site_can_edit_settings();
 
 		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-settings-page.php';
+	}
+
+	/**
+	 * Render the billing / plans page.
+	 *
+	 * @return void
+	 */
+	public function render_billing_page() {
+		if ( ! current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
+		}
+
+		$edminboost_anm_billing_rows = self::get_billing_comparison_rows();
+
+		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-billing-page.php';
+	}
+
+	/**
+	 * Admin URL for the billing page.
+	 *
+	 * @return string
+	 */
+	public static function get_billing_page_url() {
+		return admin_url( 'admin.php?page=' . self::PAGE_SLUG . '-billing' );
+	}
+
+	/**
+	 * Free vs Pro feature rows for the billing comparison table.
+	 *
+	 * Each row: feature (string), tip (string), free (bool|string), pro (bool|string).
+	 *
+	 * @return array<int, array{feature: string, tip: string, free: bool|string, pro: bool|string}>
+	 */
+	public static function get_billing_comparison_rows() {
+		$rows = array(
+			array(
+				'feature' => __( 'Dashboard & notice interception', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Central dashboard with intercept metrics, quick status, and a live feed of blocked notices.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Notice Inbox', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Review captured notices with search, filters, snooze, read state, and bulk actions.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Auto-Rules (keyword, regex, CSS)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Automatically hide or route notices using keyword, regular expression, or CSS selector rules.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Kill All Upsells preset', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'One-click suppression of common review requests, sale banners, and promotional upsell phrases.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Admin bar panel (styles, badge, colors)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Configure notice panel style, badge type, and custom colors in the WordPress admin bar.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Inline hide for me / hide for all', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Hide individual notices from the admin screen for yourself or for every administrator.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Critical Safety Guard', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Protect core security, fatal error, and SSL notices from being filtered by mistake.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Client Shield Mode', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Hide plugin and theme update nags from selected non-admin roles on the site.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Block ad redirects', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Stop plugins from opening promotional admin pages automatically after install or update.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Access control', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Limit which roles can use the plugin and who still sees native WordPress admin notices.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Word filters (spam & whitelist)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Extra spam phrases to block and whitelist words that should never be filtered.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Rules export', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Download your auto-rules as JSON for backup or use on another site.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'White label', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Customize the admin menu title, dashboard brand, logo, and documentation link for client sites.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => false,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Rule schedule', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Run auto-rules only on selected weekdays and hours using your site timezone.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => false,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Migration & import', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Import rules from JSON and migrate settings from supported third-party notice plugins.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => false,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Multisite', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Network policy, default settings, and optional shared auto-rules across all sites in the network.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => false,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Webhook', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Send JSON alert payloads to Slack, Discord, or any URL when new notices are captured.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => false,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Email digest', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Weekly summary email with optional stats and recent inbox notices to addresses you choose.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => false,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Panel position', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Place the admin bar notice panel in the left cluster, top-right slots, or beside the profile menu.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => false,
+				'pro'     => true,
+			),
+		);
+
+		/**
+		 * Filter Free vs Pro rows on the billing page.
+		 *
+		 * @param array<int, array{feature: string, tip: string, free: bool|string, pro: bool|string}> $rows Comparison rows.
+		 */
+		return apply_filters( 'edminboost_anm_billing_comparison', $rows );
+	}
+
+	/**
+	 * Render a billing comparison table cell (checkmark, dash, or text).
+	 *
+	 * @param bool|string $value Cell value.
+	 * @return string Safe HTML.
+	 */
+	public static function render_billing_comparison_cell( $value ) {
+		if ( true === $value ) {
+			return sprintf(
+				'<span class="edminboost-anm-billing-table__mark is-yes"><span class="screen-reader-text">%s</span><span class="dashicons dashicons-yes" aria-hidden="true"></span></span>',
+				esc_html__( 'Included', EDMINBOOST_ANM_TEXT_DOMAIN )
+			);
+		}
+
+		if ( false === $value ) {
+			return sprintf(
+				'<span class="edminboost-anm-billing-table__mark is-no"><span class="screen-reader-text">%s</span><span aria-hidden="true">—</span></span>',
+				esc_html__( 'Not included', EDMINBOOST_ANM_TEXT_DOMAIN )
+			);
+		}
+
+		return sprintf(
+			'<span class="edminboost-anm-billing-table__text">%s</span>',
+			esc_html( (string) $value )
+		);
 	}
 
 	/**

@@ -37,7 +37,7 @@ $edminboost_anm_panel_modifier = 'compact' === $edminboost_anm_panel_layout
 			<?php foreach ( $edminboost_anm_notices as $edminboost_anm_notice ) : ?>
 				<?php
 				$edminboost_anm_id      = $edminboost_anm_notice['id'] ?? '';
-				$edminboost_anm_type    = sanitize_key( $edminboost_anm_notice['type'] ?? 'info' );
+				$edminboost_anm_type    = EDMINBOOST_ANM_Inbox::sanitize_notice_type_slug( $edminboost_anm_notice['type'] ?? 'info' );
 				$edminboost_anm_when    = (int) ( $edminboost_anm_notice['intercepted_at'] ?? 0 );
 				$edminboost_anm_logged  = EDMINBOOST_ANM_Inbox::format_first_logged( $edminboost_anm_when );
 				$edminboost_anm_html    = $edminboost_anm_notice['html'] ?? '';

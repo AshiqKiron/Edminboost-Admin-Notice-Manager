@@ -17,6 +17,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class EDMINBOOST_ANM_Settings {
 
 	/**
+	 * Request-level cache for merged settings from get().
+	 *
+	 * @var array|null
+	 */
+	private static $merged_settings_cache = null;
+
+	/**
 	 * Settings option name.
 	 *
 	 * @var string
@@ -218,7 +225,18 @@ class EDMINBOOST_ANM_Settings {
 	 * @return bool
 	 */
 	public static function update_stored( $settings ) {
+		self::clear_merged_settings_cache();
+
 		return update_option( self::OPTION_NAME, $settings, false );
+	}
+
+	/**
+	 * Clear the request-level merged settings cache (after saves or tests).
+	 *
+	 * @return void
+	 */
+	public static function clear_merged_settings_cache() {
+		self::$merged_settings_cache = null;
 	}
 
 	/**
@@ -245,6 +263,10 @@ class EDMINBOOST_ANM_Settings {
 	 * @return array
 	 */
 	public static function get() {
+		if ( null !== self::$merged_settings_cache ) {
+			return self::$merged_settings_cache;
+		}
+
 		$settings = self::get_stored_raw();
 
 		if ( class_exists( 'EDMINBOOST_ANM_Multisite' ) && EDMINBOOST_ANM_Multisite::uses_network_layer() ) {
@@ -257,7 +279,9 @@ class EDMINBOOST_ANM_Settings {
 			}
 		}
 
-		return self::merge_settings( $settings );
+		self::$merged_settings_cache = self::merge_settings( $settings );
+
+		return self::$merged_settings_cache;
 	}
 
 	/**
@@ -542,11 +566,14 @@ class EDMINBOOST_ANM_Settings {
 			? $input['safety_guard']
 			: array();
 
+		$safety_mode = sanitize_key( $safety_input['mode'] ?? 'strict' );
+		if ( ! in_array( $safety_mode, array( 'strict', 'normal' ), true ) ) {
+			$safety_mode = 'strict';
+		}
+
 		$output['safety_guard'] = array(
 			'enabled' => ! empty( $safety_input['enabled'] ),
-			'mode'    => in_array( $safety_input['mode'] ?? 'strict', array( 'strict', 'normal' ), true )
-				? $safety_input['mode']
-				: 'strict',
+			'mode'    => $safety_mode,
 		);
 
 		$shield_input = isset( $input['client_shield'] ) && is_array( $input['client_shield'] )
@@ -574,13 +601,13 @@ class EDMINBOOST_ANM_Settings {
 			? $input['digest']
 			: array();
 
-		$output['digest'] = self::sanitize_digest_settings( $digest_input, $defaults['digest'] );
+		$output['digest'] = self::sanitize_digest_settings( $digest_input, $output['digest'] );
 
 		$webhook_input = isset( $input['webhook'] ) && is_array( $input['webhook'] )
 			? $input['webhook']
 			: array();
 
-		$output['webhook'] = self::sanitize_webhook_settings( $webhook_input, $defaults['webhook'] );
+		$output['webhook'] = self::sanitize_webhook_settings( $webhook_input, $output['webhook'] );
 
 		$redirect_input = isset( $input['block_ad_redirects'] ) && is_array( $input['block_ad_redirects'] )
 			? $input['block_ad_redirects']
@@ -1415,12 +1442,57 @@ class EDMINBOOST_ANM_Settings {
 	 * @param array $defaults Webhook defaults from get_defaults().
 	 * @return array
 	 */
-	public static function sanitize_webhook_settings( array $input, array $defaults ) {
+	public static function sanitize_webhook_settings( array $input, array $stored ) {
+		$stored = wp_parse_args( $stored, self::get_defaults()['webhook'] );
+
+		$url = $stored['url'];
+		if ( array_key_exists( 'url', $input ) ) {
+			$raw_url   = trim( (string) $input['url'] );
+			$sanitized = self::sanitize_webhook_url( $raw_url );
+			if ( '' !== $raw_url && '' === $sanitized ) {
+				$url = $stored['url'];
+			} else {
+				$url = $sanitized;
+			}
+		}
+
+		$message = array_key_exists( 'message', $input )
+			? sanitize_textarea_field( $input['message'] )
+			: (string) $stored['message'];
+
+		$enabled = array_key_exists( 'enabled', $input )
+			? ! empty( $input['enabled'] )
+			: ! empty( $stored['enabled'] );
+
 		return array(
-			'enabled' => ! empty( $input['enabled'] ),
-			'url'     => esc_url_raw( $input['url'] ?? '' ),
-			'message' => sanitize_textarea_field( $input['message'] ?? '' ),
+			'enabled' => $enabled,
+			'url'     => $url,
+			'message' => $message,
 		);
+	}
+
+	/**
+	 * Validate and sanitize a webhook endpoint URL (http/https only).
+	 *
+	 * @param string $url Raw URL.
+	 * @return string Sanitized URL or empty string when invalid.
+	 */
+	public static function sanitize_webhook_url( $url ) {
+		$url = esc_url_raw( trim( (string) $url ) );
+		if ( '' === $url ) {
+			return '';
+		}
+
+		$parsed = wp_parse_url( $url );
+		if ( empty( $parsed['scheme'] ) || ! in_array( strtolower( $parsed['scheme'] ), array( 'http', 'https' ), true ) ) {
+			return '';
+		}
+
+		if ( ! wp_http_validate_url( $url ) ) {
+			return '';
+		}
+
+		return $url;
 	}
 
 	/**
@@ -1544,22 +1616,49 @@ class EDMINBOOST_ANM_Settings {
 	 * @param array $defaults Digest defaults from get_defaults().
 	 * @return array
 	 */
-	public static function sanitize_digest_settings( array $input, array $defaults ) {
+	public static function sanitize_digest_settings( array $input, array $stored ) {
+		$stored = wp_parse_args( $stored, self::get_defaults()['digest'] );
+
 		$recent_count = isset( $input['recent_notices_count'] )
 			? absint( $input['recent_notices_count'] )
-			: (int) ( $defaults['recent_notices_count'] ?? 10 );
+			: (int) ( $stored['recent_notices_count'] ?? 10 );
+
+		$recipients = $stored['recipients'];
+		if ( array_key_exists( 'recipients', $input ) ) {
+			$recipients = self::sanitize_digest_recipients( $input['recipients'] );
+		}
 
 		return array(
-			'enabled'                => ! empty( $input['enabled'] ),
-			'recipients'             => sanitize_text_field( $input['recipients'] ?? $defaults['recipients'] ),
-			'send_weekday'           => EDMINBOOST_ANM_Digest::sanitize_send_weekday( $input['send_weekday'] ?? $defaults['send_weekday'] ),
-			'subject'                => sanitize_text_field( $input['subject'] ?? '' ),
-			'intro'                  => sanitize_textarea_field( $input['intro'] ?? '' ),
-			'include_stats'          => ! empty( $input['include_stats'] ),
-			'include_recent_notices' => ! empty( $input['include_recent_notices'] ),
+			'enabled'                => array_key_exists( 'enabled', $input ) ? ! empty( $input['enabled'] ) : ! empty( $stored['enabled'] ),
+			'recipients'             => $recipients,
+			'send_weekday'           => EDMINBOOST_ANM_Digest::sanitize_send_weekday( $input['send_weekday'] ?? $stored['send_weekday'] ),
+			'subject'                => array_key_exists( 'subject', $input ) ? sanitize_text_field( $input['subject'] ) : (string) $stored['subject'],
+			'intro'                  => array_key_exists( 'intro', $input ) ? sanitize_textarea_field( $input['intro'] ) : (string) $stored['intro'],
+			'include_stats'          => array_key_exists( 'include_stats', $input ) ? ! empty( $input['include_stats'] ) : ! empty( $stored['include_stats'] ),
+			'include_recent_notices' => array_key_exists( 'include_recent_notices', $input ) ? ! empty( $input['include_recent_notices'] ) : ! empty( $stored['include_recent_notices'] ),
 			'recent_notices_count'   => max( 1, min( 25, $recent_count ) ),
-			'footer'                 => sanitize_textarea_field( $input['footer'] ?? '' ),
+			'footer'                 => array_key_exists( 'footer', $input ) ? sanitize_textarea_field( $input['footer'] ) : (string) $stored['footer'],
 		);
+	}
+
+	/**
+	 * Sanitize comma-separated digest recipient emails.
+	 *
+	 * @param string $raw Raw recipients field.
+	 * @return string Comma-separated valid emails (may be empty).
+	 */
+	public static function sanitize_digest_recipients( $raw ) {
+		$parts = array_map( 'trim', explode( ',', sanitize_text_field( (string) $raw ) ) );
+		$valid = array();
+
+		foreach ( $parts as $email ) {
+			$email = sanitize_email( $email );
+			if ( '' !== $email ) {
+				$valid[] = $email;
+			}
+		}
+
+		return implode( ', ', array_unique( $valid ) );
 	}
 
 	/**
@@ -1721,6 +1820,10 @@ class EDMINBOOST_ANM_Settings {
 	public static function sanitize_network_settings( $input ) {
 		if ( ! class_exists( 'EDMINBOOST_ANM_Multisite' ) || ! EDMINBOOST_ANM_Multisite::is_active() ) {
 			return self::sanitize( $input );
+		}
+
+		if ( ! current_user_can( EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY ) ) {
+			return EDMINBOOST_ANM_Multisite::get_network_settings_raw();
 		}
 
 		return self::sanitize( $input, EDMINBOOST_ANM_Multisite::get_network_settings_raw() );

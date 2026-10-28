@@ -563,8 +563,8 @@ msgstr "सूचनाएँ"
 
 #: admin/partials/edminboost-anm-settings-page.php:35
 #: admin/partials/edminboost-anm-settings-page.php:371
-msgid "Access"
-msgstr "ऐक्सेस"
+msgid "Access & visibility"
+msgstr "ऐक्सेस और विज़िबिलिटी"
 
 #: admin/partials/edminboost-anm-settings-page.php:36
 #: admin/partials/edminboost-anm-settings-page.php:481
@@ -601,119 +601,132 @@ msgstr "सेटिंग सेक्शन"
 #: admin/partials/edminboost-anm-settings-page.php:97
 msgid ""
 "Choose how notices appear on the dashboard. Per-type rules live on the "
-"Notices tab; who is affected on Access; how to open the inbox "
+"Notices tab; who is affected on Access & visibility; how to open the inbox "
 "on Admin bar."
 msgstr ""
+"चुनें कि डैशबोर्ड पर नोटिस कैसे दिखाई देते हैं। प्रति - प्रकार के नियम नोटिस"
+" टैब पर लाइव होते हैं; एक्सेस और दृश्यता पर कौन प्रभावित होता है; एडमिन बार "
+"पर इनबॉक्स कैसे खोलें।"
 
 #: admin/partials/edminboost-anm-settings-page.php:98
 #: admin/partials/edminboost-anm-settings-page.php:109
 msgid "Display experience"
-msgstr ""
+msgstr "अनुभव दिखाएँ"
 
 #: admin/partials/edminboost-anm-settings-page.php:136
 msgid "Recommended"
-msgstr ""
+msgstr "अनुशंसित"
 
 #: admin/partials/edminboost-anm-settings-page.php:145
 msgid "Advanced display options"
-msgstr ""
+msgstr "उन्नत प्रदर्शन विकल्प"
 
 #: admin/partials/edminboost-anm-settings-page.php:146
 msgid ""
 "Fine-grained modes for power users. Hide all suppresses every notice without"
 " inbox capture unless a rule matches first."
 msgstr ""
+"बिजली उपयोगकर्ताओं के लिए सूक्ष्म - दानेदार मोड। जब तक कोई नियम पहले मेल "
+"नहीं खाता, तब तक इनबॉक्स कैप्चर के बिना सभी सूचनाओं को छिपाएं।"
 
 #: admin/partials/edminboost-anm-settings-page.php:148
 msgid "Advanced notice display mode"
-msgstr ""
+msgstr "एडवांस्ड नोटिस डिस्प्ले मोड"
 
 #: admin/partials/edminboost-anm-settings-page.php:168
 #: admin/partials/edminboost-anm-settings-page.php:242
 msgid "Live preview"
-msgstr ""
+msgstr "लाइव प्रीव्यू"
 
 #: admin/partials/edminboost-anm-settings-page.php:183
 msgid ""
 "Control update nags and restore notices hidden with Hide for me or Hide for "
 "all."
 msgstr ""
+"अपडेट को नियंत्रित करें और मेरे लिए छिपाएं या सभी के लिए छिपाएं के साथ छिपे "
+"हुए नोटिस को पुनर्स्थापित करें।"
 
 #: admin/partials/edminboost-anm-settings-page.php:184
 msgid "Update & hidden notices"
-msgstr ""
+msgstr "छिपे हुए नोटिस अपडेट करें"
 
 #: admin/partials/edminboost-anm-settings-page.php:191
 msgid ""
 "Hides plugin and theme update reminders. Safety Guard can still show urgent "
 "security alerts."
 msgstr ""
+"प्लगइन और थीम अपडेट रिमाइंडर छिपाता है। सुरक्षा गार्ड अभी भी तत्काल सुरक्षा "
+"अलर्ट दिखा सकते हैं।"
 
 #: admin/partials/edminboost-anm-settings-page.php:192
 msgid "Hide plugin & theme updates"
-msgstr ""
+msgstr "प्लगइन और थीम अपडेट छिपाएँ"
 
 #: admin/partials/edminboost-anm-settings-page.php:203
 msgid ""
 "Hides the WordPress update banner. Update anytime under Dashboard → Updates."
 msgstr ""
+"वर्डप्रेस अपडेट बैनर छिपाता है। डैशबोर्ड अपडेट के तहत किसी भी समय → अपडेट "
+"करें।"
 
 #: admin/partials/edminboost-anm-settings-page.php:204
 msgid "Hide WordPress update notice"
-msgstr ""
+msgstr "वर्डप्रेस अपडेट नोटिस छिपाएँ"
 
 #: admin/partials/edminboost-anm-settings-page.php:215
 msgid ""
 "Brings back notices you hid from the toolbar or from actions on each notice."
 msgstr ""
+"आपके द्वारा टूलबार से या प्रत्येक नोटिस पर की गई कार्रवाइयों से छिपे हुए "
+"नोटिस वापस लाता है।"
 
 #: admin/partials/edminboost-anm-settings-page.php:216
 msgid "Reset hidden notices"
-msgstr ""
+msgstr "छिपे हुए नोटिस रीसेट करें"
 
 #: admin/partials/edminboost-anm-settings-page.php:221
 msgid "Reset hidden notices scope"
-msgstr ""
+msgstr "छिपे हुए नोटिस का दायरा रीसेट करें"
 
 #: admin/partials/edminboost-anm-settings-page.php:224
 msgid "Me only"
-msgstr ""
+msgstr "केवल मैं"
 
 #: admin/partials/edminboost-anm-settings-page.php:228
 msgid "All users"
-msgstr ""
+msgstr "सभी उपयोक्ता छापें (a)"
 
 #: admin/partials/edminboost-anm-settings-page.php:232
 msgid "Reset"
-msgstr ""
+msgstr "रीसेट करें"
 
 #: admin/partials/edminboost-anm-settings-page.php:270
 msgid "Inbox"
-msgstr ""
+msgstr "इनबॉक्स"
 
 #: admin/partials/edminboost-anm-settings-page.php:271
 msgid "Hide"
-msgstr ""
+msgstr "छुपाएँ"
 
 #: admin/partials/edminboost-anm-settings-page.php:272
 msgid "Default"
-msgstr ""
+msgstr "डिफ़ॉल्ट"
 
 #: admin/partials/edminboost-anm-settings-page.php:275
 msgid "Success level notices"
-msgstr ""
+msgstr "सफलता स्तर के नोटिस"
 
 #: admin/partials/edminboost-anm-settings-page.php:276
 msgid "Error level notices"
-msgstr ""
+msgstr "गड़बड़ी के लेवल के नोटिस"
 
 #: admin/partials/edminboost-anm-settings-page.php:277
 msgid "Warning level notices"
-msgstr ""
+msgstr "चेतावनी स्तर के नोटिस"
 
 #: admin/partials/edminboost-anm-settings-page.php:278
 msgid "Information level notices"
-msgstr ""
+msgstr "सूचना स्तर की सूचनाएँ"
 
 #: admin/partials/edminboost-anm-settings-page.php:283
 msgid ""
@@ -722,10 +735,14 @@ msgid ""
 "plugin panel; Hide removes everywhere; Default keeps normal WordPress "
 "behavior."
 msgstr ""
+"केवल स्वच्छ डैशबोर्ड और टूलबार अनुभवों के लिए उपयोग किया जाता है (और उन्नत "
+"चयनित / कॉम्पैक्ट पैनल छिपाएं)। इनबॉक्स डैशबोर्ड पर छुपाता है और प्लगइन पैनल"
+" में दिखाता है; छुपाएं हर जगह हटा देता है; डिफ़ॉल्ट वर्डप्रेस व्यवहार को "
+"सामान्य रखता है।"
 
 #: admin/partials/edminboost-anm-settings-page.php:286
 msgid "Notice handling"
-msgstr ""
+msgstr "नोटिस हैंडलिंग"
 
 #: admin/partials/edminboost-anm-settings-page.php:287
 msgid ""
@@ -733,206 +750,236 @@ msgid ""
 " bar or Toolbar only (or matching advanced modes). Choose what happens to "
 "each notice type on the dashboard and in the admin bar panel."
 msgstr ""
+"यह तब लागू होता है जब सामान्य → प्रदर्शन अनुभव केवल डैशबोर्ड + इनबॉक्स / "
+"एडमिन बार या टूलबार को साफ़ करता है (या उन्नत मोड से मेल खाता है)। चुनें कि "
+"डैशबोर्ड और एडमिन बार पैनल में प्रत्येक नोटिस प्रकार के साथ क्या होता है।"
 
 #: admin/partials/edminboost-anm-settings-page.php:288
 msgid "Standard notices (severity levels)"
-msgstr ""
+msgstr "मानक नोटिस (गंभीरता के स्तर)"
 
 #: admin/partials/edminboost-anm-settings-page.php:310
 msgid "Non-standard notices"
-msgstr ""
+msgstr "गैर - मानक नोटिस"
 
 #: admin/partials/edminboost-anm-settings-page.php:311
 msgid ""
 "Notices from plugins and themes without a success, error, warning, or info "
 "class."
 msgstr ""
+"सफलता, त्रुटि, चेतावनी या जानकारी वर्ग के बिना प्लगइन्स और थीम से नोटिस।"
 
 #: admin/partials/edminboost-anm-settings-page.php:316
 msgid "No level notices"
-msgstr ""
+msgstr "कोई लेवल नोटिस नहीं"
 
 #: admin/partials/edminboost-anm-settings-page.php:328
 msgid ""
 "Skip interception for notices matching these jQuery-compatible selectors "
 "(comma-separated)."
 msgstr ""
+"इन jQuery - संगत चयनकर्ताओं (अल्पविराम से अलग) से मेल खाने वाली सूचनाओं के "
+"लिए अवरोधन छोड़ें।"
 
 #: admin/partials/edminboost-anm-settings-page.php:329
 msgid "CSS ignore selectors"
-msgstr ""
+msgstr "सीएसएस चयनकर्ताओं को अनदेखा करता है"
 
 #: admin/partials/edminboost-anm-settings-page.php:364
 msgid "Hide notifications from all users"
-msgstr ""
+msgstr "सभी यूज़र से नोटिफ़िकेशन छिपाएँ"
 
 #: admin/partials/edminboost-anm-settings-page.php:365
 msgid "Hide notifications only from these users"
-msgstr ""
+msgstr "सिर्फ़ इन यूज़र से नोटिफ़िकेशन छिपाएँ"
 
 #: admin/partials/edminboost-anm-settings-page.php:366
 msgid "Hide notifications to all users but not these"
-msgstr ""
+msgstr "सभी यूज़र के लिए नोटिफ़िकेशन छिपाएँ लेकिन ये नहीं"
 
 #: admin/partials/edminboost-anm-settings-page.php:368
 msgid ""
 "Whether users with this role still see intercepted notices on the dashboard."
 msgstr ""
+"क्या इस भूमिका वाले यूज़र को अभी भी डैशबोर्ड पर इंटरसेप्ट किए गए नोटिस दिखाई"
+" देते हैं।"
 
 #: admin/partials/edminboost-anm-settings-page.php:372
 msgid ""
 "Control which roles and individual accounts are affected by notice hiding. "
 "Role rules apply first; user rules refine who still gets interception."
 msgstr ""
+"नियंत्रित करें कि कौन सी भूमिकाएं और व्यक्तिगत खाते नोटिस छिपाने से प्रभावित"
+" होते हैं। भूमिका के नियम पहले लागू होते हैं; उपयोगकर्ता के नियम उन लोगों को"
+" परिष्कृत करते हैं जिन्हें अभी भी इंटरसेप्शन मिलता है।"
 
 #: admin/partials/edminboost-anm-settings-page.php:373
 msgid "By role (ACL)"
-msgstr ""
+msgstr "भूमिका के आधार पर (ACL)"
 
 #: admin/partials/edminboost-anm-settings-page.php:388
 msgid "Display notifications"
-msgstr ""
+msgstr "नोटिफ़िकेशन दिखाएँ"
 
 #: admin/partials/edminboost-anm-settings-page.php:389
 msgid "Do not display notifications"
-msgstr ""
+msgstr "अधिसूचना नहीं दिखाएँ"
 
 #: admin/partials/edminboost-anm-settings-page.php:395
 msgid "By user account"
-msgstr ""
+msgstr "यूज़र अकाउंट के आधार पर"
 
 #: admin/partials/edminboost-anm-settings-page.php:399
 msgid ""
 "Refine notice hiding per user account. Role ACL applies first; these options"
 " limit which accounts are affected."
 msgstr ""
+"हर यूज़र अकाउंट में छिपने की सूचना को रिफ़ाइन करें। रोल एसीएल पहले लागू होता"
+" है; ये विकल्प सीमित करते हैं कि कौन से खाते प्रभावित होते हैं।"
 
 #: admin/partials/edminboost-anm-settings-page.php:400
 #: admin/partials/edminboost-anm-settings-page.php:404
 msgid "Visibility"
-msgstr ""
+msgstr "दृश्यता"
 
 #: admin/partials/edminboost-anm-settings-page.php:433
 #: includes/class-edminboost-anm-admin.php:216
 msgid "Remove user"
-msgstr ""
+msgstr "उपयोक्ता मिटाएँ"
 
 #: admin/partials/edminboost-anm-settings-page.php:446
 msgid "select user(s)"
-msgstr ""
+msgstr "यूज़र(यूज़र) चुनें"
 
 #: admin/partials/edminboost-anm-settings-page.php:448
 msgid "Search users"
-msgstr ""
+msgstr "यूज़र खोजें"
 
 #: admin/partials/edminboost-anm-settings-page.php:484
 msgid "Admin bar panel"
-msgstr ""
+msgstr "एडमिन बार पैनल"
 
 #: admin/partials/edminboost-anm-settings-page.php:486
 msgid ""
 "Adds a WordPress admin bar entry so users can open captured notices without "
 "visiting the Inbox."
 msgstr ""
+"वर्डप्रेस एडमिन बार एंट्री जोड़ता है ताकि उपयोगकर्ता इनबॉक्स पर गए बिना "
+"कैप्चर किए गए नोटिस खोल सकें।"
 
 #: admin/partials/edminboost-anm-settings-page.php:487
 msgid "Configure how captured notices appear in the WordPress admin bar."
 msgstr ""
+"कॉन्फ़िगर करें कि वर्डप्रेस एडमिन बार में कैप्चर किए गए नोटिस कैसे दिखाई "
+"देते हैं।"
 
 #: admin/partials/edminboost-anm-settings-page.php:492
 msgid ""
 "Choose how the admin bar entry looks: text link, bell icon, or a dropdown "
 "panel with recent inbox notices."
 msgstr ""
+"चुनें कि एडमिन बार एंट्री कैसी दिखती है: टेक्स्ट लिंक, घंटी आइकन या हाल ही "
+"के इनबॉक्स नोटिस के साथ एक ड्रॉपडाउन पैनल।"
 
 #: admin/partials/edminboost-anm-settings-page.php:493
 msgid "Panel style"
-msgstr ""
+msgstr "पैनल शैली"
 
 #: admin/partials/edminboost-anm-settings-page.php:505
 msgid ""
 "How unread notices appear on the bell icon for bell and dropdown panel "
 "styles."
 msgstr ""
+"घंटी और ड्रॉपडाउन पैनल शैलियों के लिए घंटी आइकन पर अपठित नोटिस कैसे दिखाई "
+"देते हैं।"
 
 #: admin/partials/edminboost-anm-settings-page.php:506
 msgid "Unread indicator"
-msgstr ""
+msgstr "अपठित संकेतक"
 
 #: admin/partials/edminboost-anm-settings-page.php:518
 msgid ""
 "Colors apply to the bell badge, Howdy dot, dropdown count pill, and footer "
 "links."
 msgstr ""
+"बेल बैज, हाउडी डॉट, ड्रॉपडाउन काउंट पिल और फ़ूटर लिंक पर रंग लागू होते हैं।"
 
 #: admin/partials/edminboost-anm-settings-page.php:519
 #: admin/partials/edminboost-anm-settings-page.php:523
 msgid "Panel colors"
-msgstr ""
+msgstr "पैनल के रंग"
 
 #: admin/partials/edminboost-anm-settings-page.php:525
 msgid "Dot / badge"
-msgstr ""
+msgstr "डॉट / बैज"
 
 #: admin/partials/edminboost-anm-settings-page.php:529
 msgid "Badge number text"
-msgstr ""
+msgstr "बैज नंबर टेक्स्ट"
 
 #: admin/partials/edminboost-anm-settings-page.php:533
 msgid "Accent (count pill & links)"
-msgstr ""
+msgstr "एक्सेंट (गिनती की गोली और लिंक)"
 
 #: admin/partials/edminboost-anm-settings-page.php:537
 msgid "Link hover"
-msgstr ""
+msgstr "लिंक होवर"
 
 #: admin/partials/edminboost-anm-settings-page.php:541
 msgid "Open bell highlight"
-msgstr ""
+msgstr "बेल हाइलाइट खोलें"
 
 #: admin/partials/edminboost-anm-settings-page.php:549
 msgid ""
 "Choose where the panel appears in the WordPress admin bar — left cluster, "
 "top-right area, or beside the profile menu."
 msgstr ""
+"चुनें कि पैनल वर्डप्रेस एडमिन बार में कहाँ दिखाई देता है — बाएँ क्लस्टर, "
+"ऊपरी - दाएँ क्षेत्र, या प्रोफ़ाइल मेनू के बगल में।"
 
 #: admin/partials/edminboost-anm-settings-page.php:550
 msgid "Panel position"
-msgstr ""
+msgstr "पैनल की स्थिति"
 
 #: admin/partials/edminboost-anm-settings-page.php:564
 msgid "Panel preview"
-msgstr ""
+msgstr "पैनल पूर्वावलोकन"
 
 #: admin/partials/edminboost-anm-settings-page.php:565
 msgid ""
 "Updates as you change style, position, badge, and colors. Sample notices "
 "shown for layout only."
 msgstr ""
+"जैसे - जैसे आप स्टाइल, पोज़िशन, बैज और रंग बदलते हैं, वैसे - वैसे अपडेट होते"
+" जाते हैं। केवल लेआउट के लिए दिखाए गए सैंपल नोटिस।"
 
 #: admin/partials/edminboost-anm-settings-page.php:582
 msgid "Upsell blacklist"
-msgstr ""
+msgstr "अपसेल ब्लैकलिस्ट"
 
 #: admin/partials/edminboost-anm-settings-page.php:583
 msgid ""
 "Suppress review requests, promotional nags, and upsell notices that match "
 "these phrases."
 msgstr ""
+"इन वाक्यांशों से मेल खाने वाले समीक्षा अनुरोधों, प्रमोशनल नागों और अपसेल "
+"नोटिसों को दबाएँ।"
 
 #: admin/partials/edminboost-anm-settings-page.php:587
 msgid ""
 "Suppress review requests, promotional nags, and upsell notices that match "
 "built-in and custom phrases."
 msgstr ""
+"समीक्षा अनुरोधों, प्रमोशनल नागों और बिल्ट - इन और कस्टम वाक्यांशों से मेल "
+"खाने वाले अपसेल नोटिसों को दबाएं।"
 
 #: admin/partials/edminboost-anm-settings-page.php:588
 msgid "Upsell preset"
-msgstr ""
+msgstr "अपसेल प्रीसेट"
 
 #: admin/partials/edminboost-anm-settings-page.php:593
 msgid "Enable \"Kill All Upsells\" preset"
-msgstr ""
+msgstr "\"सभी अपसेल्स को मारें\" प्रीसेट सक्षम करें"
 
 #. translators: %d: built-in phrase count
 #: admin/partials/edminboost-anm-settings-page.php:603
@@ -942,85 +989,96 @@ msgid ""
 "built-in phrases apply when \"Kill All Upsells\" is enabled; duplicates are "
 "ignored."
 msgstr ""
+"प्रति पंक्ति एक वाक्यांश। कस्टम वाक्यांश हमेशा मिलान नोटिस को दबाते हैं। %d "
+"अंतर्निहित वाक्यांश तब लागू होते हैं जब \"सभी अपसेल्स को मार डालो\" सक्षम "
+"होता है; डुप्लिकेट को नजरअंदाज कर दिया जाता है।"
 
 #: admin/partials/edminboost-anm-settings-page.php:608
 msgid "Custom phrases"
-msgstr ""
+msgstr "कस्टम वाक्यांश"
 
 #: admin/partials/edminboost-anm-settings-page.php:611
 msgid "One phrase per line, e.g.&#10;try our pro version&#10;limited offer"
 msgstr ""
+"प्रति पंक्ति एक वाक्यांश, जैसे&#10;हमारे प्रो वर्ज़न सीमित ऑफ़र को "
+"आज़माएँ&#10;"
 
 #. translators: %d: custom phrase count
 #: admin/partials/edminboost-anm-settings-page.php:618
 #, php-format
 msgid "You have %d custom phrase(s)."
-msgstr ""
+msgstr "आपके पास %d कस्टम वाक्यांश हैं।"
 
 #: admin/partials/edminboost-anm-settings-page.php:631
 msgid "Spam words & whitelist"
-msgstr ""
+msgstr "स्पैम शब्द और श्वेतसूची"
 
 #: admin/partials/edminboost-anm-settings-page.php:635
 msgid ""
 "Notices containing any of these words (comma-separated) will not be shown on"
 " the dashboard."
 msgstr ""
+"इनमें से किसी भी शब्द (अल्पविराम से अलग) वाले नोटिस डैशबोर्ड पर नहीं दिखाए "
+"जाएँगे।"
 
 #: admin/partials/edminboost-anm-settings-page.php:636
 #: admin/partials/edminboost-anm-settings-page.php:639
 msgid "Spam words"
-msgstr ""
+msgstr "स्पैम के अवांछनीय शब्द"
 
 #: admin/partials/edminboost-anm-settings-page.php:645
 msgid "e.g. limited offer, buy now, rate us"
-msgstr ""
+msgstr "जैसे सीमित ऑफ़र, अभी खरीदें, हमें रेट करें"
 
 #: admin/partials/edminboost-anm-settings-page.php:647
 #: admin/partials/edminboost-anm-settings-page.php:664
 msgid "Enter words separated by commas."
-msgstr ""
+msgstr "अल्पविराम द्वारा अलग किए गए शब्द दर्ज करें।"
 
 #: admin/partials/edminboost-anm-settings-page.php:652
 msgid ""
 "Notices with any whitelist word stay on screen and are not intercepted by "
 "this plugin."
 msgstr ""
+"किसी भी श्वेतसूची शब्द के साथ नोटिस स्क्रीन पर रहते हैं और इस प्लगइन द्वारा "
+"इंटरसेप्ट नहीं किए जाते हैं।"
 
 #: admin/partials/edminboost-anm-settings-page.php:653
 #: admin/partials/edminboost-anm-settings-page.php:656
 msgid "Whitelist"
-msgstr ""
+msgstr "श्वेतसूची"
 
 #: admin/partials/edminboost-anm-settings-page.php:662
 msgid "e.g. security update, action required"
-msgstr ""
+msgstr "जैसे सुरक्षा अपडेट, आवश्यक कार्रवाई"
 
 #: admin/partials/edminboost-anm-settings-page.php:680
 msgid "Core Safety & Client Shield"
-msgstr ""
+msgstr "कोर सेफ्टी एंड क्लाइंट शील्ड"
 
 #: admin/partials/edminboost-anm-settings-page.php:685
 msgid "Critical Safety Guard"
-msgstr ""
+msgstr "क्रिटिकल सेफ्टी गार्ड"
 
 #: admin/partials/edminboost-anm-settings-page.php:690
 msgid ""
 "Protect WordPress core security alerts, PHP fatal errors, and SSL warnings "
 "from accidental filtering."
 msgstr ""
+"वर्डप्रेस कोर सुरक्षा अलर्ट, PHP घातक त्रुटियों और SSL चेतावनियों को आकस्मिक"
+" फ़िल्टरिंग से सुरक्षित रखें।"
 
 #: admin/partials/edminboost-anm-settings-page.php:692
 msgid "Safety guard"
-msgstr ""
+msgstr "सुरक्षा गार्ड"
 
 #: admin/partials/edminboost-anm-settings-page.php:697
 msgid "Enable strict protection"
-msgstr ""
+msgstr "सख्त सुरक्षा सक्षम करें"
 
 #: admin/partials/edminboost-anm-settings-page.php:701
 msgid "ENABLED (Strict Protection)"
-msgstr ""
+msgstr "सक्षम (सख्त सुरक्षा)"
 
 #: admin/partials/edminboost-anm-settings-page.php:711
 msgid "Client Shield Mode"
@@ -1914,8 +1972,9 @@ msgstr ""
 
 #: includes/class-edminboost-anm-settings.php:792
 msgid ""
-"Recommended. Hides the notices you configure under Notices, Access, and "
-"Auto-Rules, then collects them in the inbox and admin bar panel."
+"Recommended. Hides the notices you configure under Notices, Access & "
+"visibility, and Auto-Rules, then collects them in the inbox and admin bar "
+"panel."
 msgstr ""
 
 #: includes/class-edminboost-anm-settings.php:796

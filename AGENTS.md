@@ -43,10 +43,11 @@ admin/
   js/edminboost-anm-interceptor.js
   js/edminboost-anm-notices.js
   js/edminboost-anm-notice-inline.js
-  partials/edminboost-anm-{dashboard,inbox,rules,settings}-page.php
+  partials/edminboost-anm-{dashboard,inbox,rules,settings,billing}-page.php
   partials/edminboost-anm-inbox-table-rows.php
   partials/edminboost-anm-notice-panel-dropdown.php
   partials/edminboost-anm-network-policy-page.php
+  partials/edminboost-anm-multisite-policy-{fields,next-steps}.php
 languages/  # .pot, locale .po/.mo; optional build-translations.py
 uninstall.php  readme.txt  composer.json
 ```
@@ -54,7 +55,8 @@ uninstall.php  readme.txt  composer.json
 - Bootstrap defines constants, requires multisite helper, and calls `edminboost_anm_run_plugin()`.
 - `EDMINBOOST_ANM_Plugin::run()` wires i18n, site + network admin menu/settings/assets, `wp_initialize_site` seeding, and on `init`: notices, interceptor, AJAX, digest, ad redirects.
 - Settings: primary option via `EDMINBOOST_ANM_Settings` (Settings API group `edminboost_anm_settings_group`). Rules and inbox stored in separate per-site options. Tabbed settings UI (General, Notices, Access, Admin bar, Filtering, Security, Notifications, White label, Migration; **Multisite** tab on multisite sites). Network admin: multisite policy, network default settings (same partial), network auto-rules.
-- **Multisite**: policies `per_site` / `network_defaults` / `network_locked`; merged effective settings; optional shared network auto-rules; site edit gates via `site_can_edit_settings()` / `site_can_edit_rules()`.
+- **Multisite**: policies `per_site` / `network_defaults` / `network_locked`; merged effective settings; optional shared network auto-rules; site edit gates via `site_can_edit_settings()` / `site_can_edit_rules()`. Policy UI fields shared via `edminboost-anm-multisite-policy-fields.php` + `edminboost-anm-multisite-policy-next-steps.php` (network policy page and Settings **Multisite** tab).
+- **Billing**: admin **Billing** page — Free vs Pro comparison table (`get_billing_comparison_rows()`), filter `edminboost_anm_billing_comparison`, upgrade URL `EDMINBOOST_ANM_PRO_URL`. Informational/marketing only; no in-plugin license gating yet.
 - **White label**: agency menu title, dashboard brand/logo, docs link overrides (`settings.white_label`).
 - Options API only — no custom tables. No REST API.
 - AJAX for dashboard/rules/inbox (including `edminboost_anm_inbox_list` sort; inbox snooze toggle and read state), importer, capture, WP preset conversion, user search, notice hide/reset hidden; weekly digest via WP-Cron (`send_weekday`, custom `weekly` schedule); optional webhook (user URL preserved when disabled, off by default).
@@ -78,6 +80,7 @@ Use `EDMINBOOST_ANM_Admin::PAGE_SLUG` — never hardcode slug strings.
 | Inbox | `PAGE_SLUG . '-inbox'` | `render_inbox_page()` |
 | Rules | `PAGE_SLUG . '-rules'` | `render_rules_page()` |
 | Settings | `PAGE_SLUG . '-settings'` | `render_settings_page()` |
+| Billing | `PAGE_SLUG . '-billing'` | `render_billing_page()` |
 
 **Network admin** (multisite; `EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY`):
 
@@ -100,8 +103,8 @@ Registered in `EDMINBOOST_ANM_Ajax::register_hooks()` — all use `verify_reques
 | `edminboost_anm_search_users` | User picker for hiding-notifications settings |
 | `edminboost_anm_notice_hide` | Per-user or site-wide hide from inline UI or dropdown |
 | `edminboost_anm_reset_hidden_notices` | Reset hidden-notice preferences (user or site) |
-| `edminboost_anm_digest_preview` | Digest preview: to/from/subject, plain `body`, structured `content`, and `next_send` (unsaved `digest` fields including `send_weekday` sanitized server-side) |
-| `edminboost_anm_webhook_preview` | Webhook alert text and JSON payload preview using latest inbox notice or sample data (unsaved `webhook[message]` sanitized server-side) |
+| `edminboost_anm_digest_preview` | Digest preview: to/from/subject, plain `body`, structured `content`, and `next_send` (posted `digest` sanitized via `sanitize_digest_settings()` merged with stored digest) |
+| `edminboost_anm_webhook_preview` | Webhook alert text and JSON payload preview using latest inbox notice or sample data (posted fields sanitized via `sanitize_webhook_settings()` merged with stored webhook; preview UI typically posts unsaved `message` only) |
 | `edminboost_anm_seed_test_notices` / `edminboost_anm_trigger_test_notices` | `verify_debug_request()` |
 
 ## Extension Hooks
@@ -114,6 +117,7 @@ Registered in `EDMINBOOST_ANM_Ajax::register_hooks()` — all use `verify_reques
 - `edminboost_anm_wp_notice_presets` — filter WordPress core notice presets (Rules UI)
 - `edminboost_anm_digest_email` — filter digest subject/body before send or preview
 - `edminboost_anm_webhook_payload` — filter outbound webhook JSON payload
+- `edminboost_anm_billing_comparison` — filter Free vs Pro rows on the Billing page
 
 ## Cursor Rules
 

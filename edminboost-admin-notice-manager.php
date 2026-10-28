@@ -32,6 +32,7 @@ define( 'EDMINBOOST_ANM_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 define( 'EDMINBOOST_ANM_PLUGIN_SLUG', 'edminboost-admin-notice-manager' );
 define( 'EDMINBOOST_ANM_TEXT_DOMAIN', 'edminboost-admin-notice-manager' );
 define( 'EDMINBOOST_ANM_PLUGIN_DOCS_URL', 'https://asphaltthemes.com/edminboost/admin-notice-manager/docs' );
+define( 'EDMINBOOST_ANM_PRO_URL', 'https://asphaltthemes.com/edminboost/admin-notice-manager/pricing' );
 
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-activator.php';
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-deactivator.php';

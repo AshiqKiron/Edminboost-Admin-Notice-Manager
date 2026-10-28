@@ -12,6 +12,7 @@ msgstr ""
 "POT-Creation-Date: 2026-10-28T20:25:39+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: edminboost-admin-notice-manager\n"
 
 #. Plugin Name of the plugin
 #: edminboost-admin-notice-manager.php
