@@ -180,7 +180,7 @@
 				triggerClass += ' is-style-dropdown';
 			}
 			return '<span class="' + triggerClass + '">'
-				+ '<span class="ab-icon edminboost-anm-notice-panel-preview__bell-icon" aria-hidden="true"></span>'
+				+ '<span class="ab-icon dashicons dashicons-bell edminboost-anm-notice-panel-preview__bell-icon" aria-hidden="true"></span>'
 				+ anmPreviewBuildBadgeHtml(badgeStyle, count)
 				+ '</span>';
 		}
@@ -400,12 +400,10 @@
 					caption = i18n.generalOptionsPreviewCaptionHideCore || '';
 				} else if (hidePlugin) {
 					caption = i18n.generalOptionsPreviewCaptionHidePlugin || '';
-				} else {
-					caption = i18n.generalOptionsPreviewCaptionDefault || '';
 				}
 				var resetHint = resetScope === 'all_users'
 					? (i18n.generalOptionsPreviewCaptionResetAll || '')
-					: (i18n.generalOptionsPreviewCaptionResetMe || '');
+					: '';
 				if (resetHint) {
 					caption = caption ? (caption + ' ' + resetHint) : resetHint;
 				}
@@ -1459,7 +1457,6 @@
 		var presetInputs = root.querySelectorAll('.edminboost-anm-display-experience__input');
 		var presetOptions = root.querySelectorAll('.edminboost-anm-display-experience__option');
 		var advancedInputs = document.querySelectorAll('.edminboost-anm-display-experience-advanced__input');
-		var toolbarRow = document.querySelector('[data-edminboost-anm-toolbar-option-row]');
 
 		function presetSelectedForMode(mode) {
 			var selected = null;
@@ -1480,10 +1477,6 @@
 			advancedInputs.forEach(function (radio) {
 				radio.checked = radio.value === mode && !presetSelectedForMode(mode);
 			});
-
-			if (toolbarRow) {
-				toolbarRow.hidden = mode === 'show_all';
-			}
 		}
 
 		function setMode(mode) {
@@ -2073,7 +2066,6 @@
 		var settingsRoot = document.querySelector('[data-edminboost-anm-settings]');
 
 		var i18n = data.i18n || {};
-		var enabledCheckbox = document.getElementById('edminboost-anm-notice-panel');
 		var badgeSelect = document.getElementById('edminboost-anm-notice-panel-badge');
 		var positionSelect = document.getElementById('edminboost-anm-notice-panel-position');
 		var colorFields = {
@@ -2166,7 +2158,7 @@
 				triggerClass += ' is-style-dropdown';
 			}
 			return '<span class="' + triggerClass + '">'
-				+ '<span class="ab-icon edminboost-anm-notice-panel-preview__bell-icon" aria-hidden="true"></span>'
+				+ '<span class="ab-icon dashicons dashicons-bell edminboost-anm-notice-panel-preview__bell-icon" aria-hidden="true"></span>'
 				+ buildBadgeHtml(badgeStyle, 3, null, facebook)
 				+ '</span>';
 		}
@@ -2304,11 +2296,6 @@
 
 			applyPreviewColorVars(readColors());
 
-			if (enabledCheckbox && !enabledCheckbox.checked) {
-				stage.innerHTML = '<p class="edminboost-anm-notice-panel-preview__disabled">' + escapeHtml(i18n.noticePanelPreviewDisabled || 'Enable the admin bar panel to preview.') + '</p>';
-				return;
-			}
-
 			var style = styleSelect ? styleSelect.value : 'link';
 			var badgeStyle = badgeSelect ? badgeSelect.value : 'count';
 			var position = positionSelect ? positionSelect.value : 'default';
@@ -2374,7 +2361,6 @@
 			field.addEventListener('input', onPanelLayoutChange);
 		}
 
-		bindPanelField(enabledCheckbox);
 		bindPanelField(styleSelect);
 		bindPanelField(badgeSelect);
 		bindPanelField(positionSelect);

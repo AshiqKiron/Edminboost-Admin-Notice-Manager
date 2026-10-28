@@ -305,16 +305,6 @@
 	margin-top: 16px;
 }
 
-.edminboost-anm-notice-mode-legend {
-	margin: 12px 0 0;
-	padding-left: 1.2em;
-	max-width: 720px;
-}
-
-.edminboost-anm-notice-mode-legend li {
-	margin-bottom: 6px;
-}
-
 .edminboost-anm-notice-handling-table select {
 	min-width: 160px;
 }
@@ -1320,12 +1310,6 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	width: 200px;
 }
 
-.edminboost-anm-general-options-layout__toolbar {
-	margin-top: 8px;
-	padding-top: 8px;
-	border-top: 1px solid #dcdcde;
-}
-
 .edminboost-anm-general-options-preview__frame[data-hide-core="1"] .edminboost-anm-general-options-preview__notice--core,
 .edminboost-anm-general-options-preview__frame[data-hide-plugin="1"] .edminboost-anm-general-options-preview__notice--plugin {
 	display: none !important;
@@ -1924,13 +1908,16 @@ button.edminboost-anm-tabs__tab:focus-visible {
 
 #wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--dropdown .ab-icon:before,
 #wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--dropdown .edminboost-anm-fb-bell:before,
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--dropdown .dashicons-bell:before,
 #wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--bell .edminboost-anm-fb-bell:before,
 #wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--bell .ab-icon:before,
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--bell .dashicons-bell:before,
 #wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook .edminboost-anm-fb-bell:before,
-#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook .ab-icon:before {
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook .ab-icon:before,
+#wpadminbar #wp-admin-bar-edminboost-anm-notices.edminboost-anm-notices--facebook .dashicons-bell:before {
 	font-family: dashicons;
-	content: "\f478";
-	content: "\f478" / '';
+	content: "\f16d";
+	content: "\f16d" / '';
 	top: 0;
 }
 
@@ -2492,9 +2479,19 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	color: inherit;
 }
 
-.edminboost-anm-notice-panel-preview__trigger--bell .edminboost-anm-notice-panel-preview__bell-icon::before {
+#edminboost-anm-notice-panel-preview .edminboost-anm-notice-panel-preview__bell-icon:before,
+#edminboost-anm-notice-panel-preview .edminboost-anm-notice-panel-preview__bell-icon::before,
+.edminboost-anm-display-experience-preview .edminboost-anm-notice-panel-preview__bell-icon:before,
+.edminboost-anm-display-experience-preview .edminboost-anm-notice-panel-preview__bell-icon::before {
 	font-family: dashicons;
-	content: "\f478";
+	content: "\f16d";
+	display: inline-block;
+	line-height: 1;
+	font-weight: 400;
+	font-style: normal;
+	speak: never;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 .edminboost-anm-notice-panel-preview__mock-bar.is-dropdown-open .edminboost-anm-notice-panel-preview__trigger--bell.is-style-dropdown {

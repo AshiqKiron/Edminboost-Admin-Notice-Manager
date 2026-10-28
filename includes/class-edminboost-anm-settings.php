@@ -126,7 +126,6 @@ class EDMINBOOST_ANM_Settings {
 			'manage_notices_mode'                  => 'hide_selected',
 			'disable_plugin_update_notifications'  => false,
 			'disable_core_update_notifications'    => false,
-			'show_hidden_notices_in_toolbar'       => false,
 			'standard_admin_notices'     => self::get_standard_admin_notice_defaults(),
 			'non_standard_admin_notices' => array(
 				'no_level'             => 'inbox',
@@ -345,7 +344,6 @@ class EDMINBOOST_ANM_Settings {
 		$output['manage_notices_mode']                 = $manage_mode;
 		$output['disable_plugin_update_notifications'] = ! empty( $input['disable_plugin_update_notifications'] );
 		$output['disable_core_update_notifications']   = ! empty( $input['disable_core_update_notifications'] );
-		$output['show_hidden_notices_in_toolbar']      = ! empty( $input['show_hidden_notices_in_toolbar'] );
 		$output['hide_core_notices']                   = in_array( $manage_mode, array( 'hide_all', 'compact_panel' ), true );
 
 		$standard_input = isset( $input['standard_admin_notices'] ) && is_array( $input['standard_admin_notices'] )
@@ -396,7 +394,7 @@ class EDMINBOOST_ANM_Settings {
 			: array();
 
 		$output['notice_panel'] = array(
-			'enabled'     => ! empty( $panel_input['enabled'] ),
+			'enabled'     => true,
 			'style'       => $panel_style,
 			'position'    => $panel_position,
 			'badge_style' => $panel_badge_style,
@@ -475,13 +473,6 @@ class EDMINBOOST_ANM_Settings {
 		);
 
 		$output['notice_panel'] = wp_parse_args( $output['notice_panel'], $defaults['notice_panel'] );
-
-		if (
-			in_array( $manage_mode, array( 'hide_selected', 'compact_panel', 'hide_all' ), true )
-			|| ! empty( $output['show_hidden_notices_in_toolbar'] )
-		) {
-			$output['notice_panel']['enabled'] = true;
-		}
 
 		if ( class_exists( 'EDMINBOOST_ANM_Digest' ) ) {
 			EDMINBOOST_ANM_Digest::sync_schedule( $output );
@@ -871,17 +862,7 @@ class EDMINBOOST_ANM_Settings {
 			self::get_defaults()['notice_panel']
 		);
 
-		if ( ! empty( $panel['enabled'] ) ) {
-			return true;
-		}
-
-		if ( empty( $settings['show_hidden_notices_in_toolbar'] ) ) {
-			return false;
-		}
-
-		$mode = self::get_manage_notices_mode();
-
-		return in_array( $mode, array( 'hide_all', 'hide_selected', 'compact_panel' ), true );
+		return ! empty( $panel['enabled'] );
 	}
 
 	/**

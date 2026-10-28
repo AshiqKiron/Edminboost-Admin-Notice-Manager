@@ -1,6 +1,6 @@
 # Edminboost Admin Notice Manager — Agent Guide
 
-WordPress plugin that intercepts, filters, and organizes admin notices from a central dashboard. PHP 7.4+, WordPress 6.0+, GPL-3.0. Version **1.1.0** (changelog includes **1.1.1** feature set).
+WordPress plugin that intercepts, filters, and organizes admin notices from a central dashboard. PHP 7.4+, WordPress 6.0+, GPL-3.0. Version **1.1.1**.
 
 ## Quick Reference
 
@@ -55,8 +55,8 @@ languages/  uninstall.php  readme.txt  composer.json
 - **Ad redirects**: optional `block_ad_redirects` URL blocklist — admin-only redirect filtering via `EDMINBOOST_ANM_Ad_Redirects`.
 - **Inline notice controls**: `edminboost-anm-notice-inline.js` on non–plugin-screen wp-admin for “Hide for me” / “Hide for all”.
 - **Notifications previews**: Settings Notifications tab — two-column digest form + sticky structured email preview; live webhook text/JSON preview (no send on preview).
-- **Admin bar panel**: Styles `link`, `bell_link`, `dropdown`, `dropdown_compact`; six position slots; badge caps and dot/pulse/none; compact vs detailed dropdown markup. Assets on wp-admin and front-end admin bar when panel active (`EDMINBOOST_ANM_Notices`, `dashicons` for bell). Shared CSS overrides `#wpadminbar` global resets for panel/badges; settings preview mock matches live dropdown styling. Settings Admin bar tab: unified `initNoticePanelPreview()` (bell row sync, CSS var colors, realistic sample notices). Dropdown JS via `enqueue_admin_bar_dropdown_script()`.
-- **Settings UX**: Global **Enable** only on Dashboard Quick Status (not Settings save). General tab: two-column **Display experience** + **Update & hidden notices** with live previews (`initDisplayExperience`, `initGeneralOptionsPreview`, shared `anmPreview*` helpers); **Access & visibility** tab (ACL + user pickers); Notices tab for per-type handling; Admin bar tab panel preview. Enqueues `list-tables`, `dashicons`, and plugin-screen notice-hide inline CSS on plugin screens.
+- **Admin bar panel**: Always enabled when plugin is on (`notice_panel.enabled` on save); Admin bar tab is style/position/badge/colors only (no separate enable checkbox). Styles `link`, `bell_link`, `dropdown`, `dropdown_compact`; six position slots; badge caps and dot/pulse/none. Assets when `should_show_admin_bar_notice_panel()`. Settings preview via `initNoticePanelPreview()` (always renders mock). Dropdown JS via `enqueue_admin_bar_dropdown_script()`.
+- **Settings UX**: Global **Enable** only on Dashboard Quick Status (not Settings save). No **Hidden notices in toolbar** option (removed). General tab: two-column **Display experience** + **Update & hidden notices** live previews; **Access & visibility** (ACL + user pickers); **Notices** tab (short Inbox/Hide/Default selects); **Admin bar** tab panel preview. Enqueues `list-tables`, `dashicons`, plugin-screen notice-hide inline CSS on plugin screens.
 - **Plugin screens**: CSS + JS hide stray WP notices; settings preview mocks exempt; debug live-test queue cleared when visiting plugin screens.
 - **Dashboard**: Quick Status enable toggle reloads the page after successful AJAX save.
 

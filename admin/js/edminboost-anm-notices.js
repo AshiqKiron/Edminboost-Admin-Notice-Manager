@@ -21,12 +21,35 @@
 		}
 		trigger.removeAttribute('title');
 
+		function getPanelWidth() {
+			var measured = panel.offsetWidth;
+			if (measured) {
+				return measured;
+			}
+			return panel.classList.contains('edminboost-anm-notices-panel--detailed') ? 480 : 360;
+		}
+
 		function positionPanel() {
 			var rect = trigger.getBoundingClientRect();
+			var margin = 8;
+			var viewportWidth = window.innerWidth;
+			var maxPanelWidth = Math.max(margin * 2, viewportWidth - margin * 2);
+			var panelWidth = Math.min(getPanelWidth(), maxPanelWidth);
+			var left = rect.right - panelWidth;
+
+			if (left < margin) {
+				left = rect.left;
+			}
+			if (left + panelWidth > viewportWidth - margin) {
+				left = viewportWidth - margin - panelWidth;
+			}
+			left = Math.max(margin, left);
+
 			panel.style.position = 'fixed';
 			panel.style.top = rect.bottom + 'px';
-			panel.style.right = Math.max(8, window.innerWidth - rect.right) + 'px';
-			panel.style.left = 'auto';
+			panel.style.left = left + 'px';
+			panel.style.right = 'auto';
+			panel.style.maxWidth = maxPanelWidth + 'px';
 		}
 
 		function resetPanelPosition() {
@@ -34,6 +57,7 @@
 			panel.style.top = '';
 			panel.style.right = '';
 			panel.style.left = '';
+			panel.style.maxWidth = '';
 		}
 
 		function closePanel() {

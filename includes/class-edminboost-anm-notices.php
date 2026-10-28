@@ -341,7 +341,7 @@ class EDMINBOOST_ANM_Notices {
 	private function build_facebook_bell_title( $panel, $count_all ) {
 		$style       = $panel['style'] ?? 'link';
 		$badge_style = $panel['badge_style'] ?? 'count';
-		$title       = '<span class="ab-icon edminboost-anm-fb-bell" aria-hidden="true"></span>';
+		$title       = '<span class="ab-icon dashicons dashicons-bell edminboost-anm-fb-bell" aria-hidden="true"></span>';
 
 		$title .= $this->build_notice_badge_markup( $panel, $count_all );
 

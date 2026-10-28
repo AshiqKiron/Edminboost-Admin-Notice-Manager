@@ -4,7 +4,7 @@ Tags: admin, admin-notices, dashboard, admin-tools, notices
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -53,6 +53,10 @@ Yes. When uninstalled, all plugin options are removed from the database.
 == Changelog ==
 
 = 1.1.1 =
+* Admin bar dropdown: panel positioning stays within the viewport on narrow screens.
+* Admin bar bell styles: fixed bell trigger using the wrong Dashicon (now shows the bell icon in the toolbar and settings preview).
+* Settings (Admin bar): removed separate “Show notices in the WordPress admin bar” toggle; panel styling and placement settings apply whenever the admin bar panel is active for your display experience.
+* Settings (General): removed “Hidden notices in toolbar” option; use the Admin bar tab to control the notice panel.
 * Settings (General): removed duplicate Enable plugin toggle; use Dashboard Quick Status to turn interception on or off.
 * Plugin admin screens: hide WordPress admin notices (including debug test banners) so dashboard and settings layouts stay clean; live test notices still fire on the main Dashboard home as documented.
 * Settings (General): Display experience presets with live layout preview — leave notices on the dashboard, clean dashboard with inbox/admin bar (recommended), or toolbar-only; advanced section retains raw hide/show modes.
@@ -66,7 +70,7 @@ Yes. When uninstalled, all plugin options are removed from the database.
 * Settings (Access & visibility): ACL and per-user visibility — role-based display/hide plus hide from all, only selected users, or all except selected (user search picker).
 * Settings (General): Spam words and whitelist — comma-separated word lists to hide matching notices entirely or always show them on screen.
 * Settings (General): Block ad redirects — list admin URLs to block automatic post-install or promotional page loads (optional enable toggle).
-* Settings (General): manage admin notices mode (show all, hide all, hide selected, compact panel), disable plugin/core update notifications, show hidden notices in the admin toolbar, and reset hidden notice preferences per user or site-wide.
+* Settings (General): manage admin notices mode (show all, hide all, hide selected, compact panel), disable plugin/core update notifications, and reset hidden notice preferences per user or site-wide.
 * Visible admin notices: inline “Hide for me” and “Hide for all” actions (per-user or site-wide hash preferences; “Hide for all” can auto-create a rule).
 * Admin bar notification dropdown: full notice preview with “First logged”, “Display notice as normal”, “Hide for me”, and “Hide for all” actions.
 * Admin bar beside Howdy: Facebook-style bell icon with red count badge (replaces text “Admin notices” look); notification dropdown uses FB-like panel styling.

@@ -254,20 +254,6 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 					</div>
 				</aside>
 			</div>
-			<table class="form-table edminboost-anm-general-options-layout__toolbar" role="presentation">
-				<tr data-edminboost-anm-toolbar-option-row <?php echo 'show_all' === $edminboost_anm_manage_mode ? ' hidden' : ''; ?>>
-					<th scope="row">
-						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Keeps hidden notices in the admin bar so you can still open them.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
-						<label for="edminboost-anm-show-hidden-toolbar"><?php esc_html_e( 'Hidden notices in toolbar', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
-					</th>
-					<td>
-						<?php
-						$edminboost_anm_show_hidden_toolbar = ! empty( $settings['show_hidden_notices_in_toolbar'] );
-						?>
-						<input type="checkbox" id="edminboost-anm-show-hidden-toolbar" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[show_hidden_notices_in_toolbar]" value="1" <?php checked( $edminboost_anm_show_hidden_toolbar ); ?> />
-					</td>
-				</tr>
-			</table>
 		</div>
 		</div>
 
@@ -280,11 +266,6 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 			<?php echo 'notices' !== $edminboost_anm_active_tab ? ' hidden' : ''; ?>
 		>
 		<?php
-		$edminboost_anm_notice_modes = array(
-			'inbox'   => __( 'Hide from the WordPress dashboard and show them in the plugin\'s popup', EDMINBOOST_ANM_TEXT_DOMAIN ),
-			'hide'    => __( 'Hide them completely (do not show in the WordPress dashboard or in the plugin\'s popup)', EDMINBOOST_ANM_TEXT_DOMAIN ),
-			'default' => __( 'Do not do anything (they will appear on the WordPress dashboard as per usual)', EDMINBOOST_ANM_TEXT_DOMAIN ),
-		);
 		$edminboost_anm_notice_mode_labels = array(
 			'inbox'   => __( 'Inbox', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			'hide'    => __( 'Hide', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -304,11 +285,6 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 		<div class="edminboost-anm-card">
 			<h2><?php esc_html_e( 'Notice handling', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
 			<p class="description"><?php esc_html_e( 'Applies when General → Display experience is Clean dashboard + inbox / admin bar or Toolbar only (or matching advanced modes). Choose what happens to each notice type on the dashboard and in the admin bar panel.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
-			<ul class="edminboost-anm-notice-mode-legend description">
-				<?php foreach ( $edminboost_anm_notice_modes as $edminboost_anm_mode_slug => $edminboost_anm_mode_label ) : ?>
-					<li><strong><?php echo esc_html( $edminboost_anm_notice_mode_labels[ $edminboost_anm_mode_slug ] ?? $edminboost_anm_mode_slug ); ?>:</strong> <?php echo esc_html( $edminboost_anm_mode_label ); ?></li>
-				<?php endforeach; ?>
-			</ul>
 			<h3 class="edminboost-anm-settings-subheading"><?php esc_html_e( 'Standard notices (severity levels)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h3>
 			<table class="form-table edminboost-anm-notice-policy-table edminboost-anm-notice-handling-table" role="presentation">
 				<?php foreach ( $edminboost_anm_standard_levels as $edminboost_anm_level_slug => $edminboost_anm_level_label ) : ?>
@@ -323,8 +299,8 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 						</th>
 						<td>
 							<select id="<?php echo esc_attr( $edminboost_anm_field_id ); ?>" name="<?php echo esc_attr( $edminboost_anm_option_name . '[standard_admin_notices][' . $edminboost_anm_level_slug . ']' ); ?>">
-								<?php foreach ( $edminboost_anm_notice_modes as $edminboost_anm_mode_slug => $edminboost_anm_mode_label ) : ?>
-									<option value="<?php echo esc_attr( $edminboost_anm_mode_slug ); ?>" <?php selected( $edminboost_anm_level_mode, $edminboost_anm_mode_slug ); ?>><?php echo esc_html( $edminboost_anm_notice_mode_labels[ $edminboost_anm_mode_slug ] ?? $edminboost_anm_mode_slug ); ?></option>
+								<?php foreach ( $edminboost_anm_notice_mode_labels as $edminboost_anm_mode_slug => $edminboost_anm_mode_label ) : ?>
+									<option value="<?php echo esc_attr( $edminboost_anm_mode_slug ); ?>" <?php selected( $edminboost_anm_level_mode, $edminboost_anm_mode_slug ); ?>><?php echo esc_html( $edminboost_anm_mode_label ); ?></option>
 								<?php endforeach; ?>
 							</select>
 						</td>
@@ -341,8 +317,8 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 					</th>
 					<td>
 						<select id="edminboost-anm-non-standard-no-level" name="<?php echo esc_attr( $edminboost_anm_option_name . '[non_standard_admin_notices][no_level]' ); ?>">
-							<?php foreach ( $edminboost_anm_notice_modes as $edminboost_anm_mode_slug => $edminboost_anm_mode_label ) : ?>
-								<option value="<?php echo esc_attr( $edminboost_anm_mode_slug ); ?>" <?php selected( $edminboost_anm_no_level_mode, $edminboost_anm_mode_slug ); ?>><?php echo esc_html( $edminboost_anm_notice_mode_labels[ $edminboost_anm_mode_slug ] ?? $edminboost_anm_mode_slug ); ?></option>
+							<?php foreach ( $edminboost_anm_notice_mode_labels as $edminboost_anm_mode_slug => $edminboost_anm_mode_label ) : ?>
+								<option value="<?php echo esc_attr( $edminboost_anm_mode_slug ); ?>" <?php selected( $edminboost_anm_no_level_mode, $edminboost_anm_mode_slug ); ?>><?php echo esc_html( $edminboost_anm_mode_label ); ?></option>
 							<?php endforeach; ?>
 						</select>
 					</td>
@@ -505,19 +481,12 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 			<h2 class="screen-reader-text"><?php esc_html_e( 'Admin bar', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
 			<div class="edminboost-anm-notice-panel-layout__columns">
 			<div class="edminboost-anm-notice-panel-layout__settings">
+			<h2 class="edminboost-anm-settings-subheading"><?php esc_html_e( 'Admin bar panel', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+			<p class="description">
+				<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Adds a WordPress admin bar entry so users can open captured notices without visiting the Inbox.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+				<?php esc_html_e( 'Configure how captured notices appear in the WordPress admin bar.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+			</p>
 			<table class="form-table" role="presentation">
-				<tr>
-					<th scope="row">
-						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Adds a WordPress admin bar entry so users can open captured notices without visiting the Inbox.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
-						<?php esc_html_e( 'Admin bar panel', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
-					</th>
-					<td>
-						<label for="edminboost-anm-notice-panel">
-							<input type="checkbox" id="edminboost-anm-notice-panel" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[notice_panel][enabled]" value="1" <?php checked( ! empty( $settings['notice_panel']['enabled'] ) ); ?> />
-							<?php esc_html_e( 'Show notices in the WordPress admin bar', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
-						</label>
-					</td>
-				</tr>
 				<tr>
 					<th scope="row">
 						<?php echo EDMINBOOST_ANM_Admin::help_tip( __( 'Choose how the admin bar entry looks: text link, bell icon, or a dropdown panel with recent inbox notices.', EDMINBOOST_ANM_TEXT_DOMAIN ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
