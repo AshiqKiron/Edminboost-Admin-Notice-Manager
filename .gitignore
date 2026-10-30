@@ -10,3 +10,4 @@ node_modules/
 .phpunit.result.cache
 composer.lock
 package-lock.json
+dist/

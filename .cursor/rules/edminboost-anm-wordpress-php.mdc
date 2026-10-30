@@ -6,7 +6,13 @@ alwaysApply: false
 
 # WordPress PHP Conventions (ANM)
 
-See `edminboost-anm-compliance.mdc` for the security gate.
+See `edminboost-anm-compliance.mdc` for the security gate and `edminboost-anm-project.mdc` / `MONOREPO.md` for layout.
+
+## Monorepo paths
+
+- Shared PHP lives under `packages/core/includes/`; partials under `packages/core/admin/partials/`; `uninstall.php` at `packages/core/uninstall.php`.
+- Do not register hooks in edition bootstraps (`packages/free/`, `packages/pro/`, or root dev entry) beyond calling `edminboost_anm_register()` and `edminboost_anm_run_plugin()`.
+- `EDMINBOOST_ANM_PLUGIN_DIR` resolves to core in dev (`core_dir` override) or to the assembled plugin root in release zips — use it for all `require` / asset paths, never hardcode `packages/core` in runtime code shipped to users.
 
 ## File Header
 
@@ -45,10 +51,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ## Class Wiring
 
-- Bootstrap requires core classes; instantiate only via `edminboost_anm_run_plugin()`.
+- `packages/core/load.php` requires core classes; instantiate only via `edminboost_anm_run_plugin()` after `edminboost_anm_register()`.
 - `EDMINBOOST_ANM_Plugin` constructor: `Admin`, `Notices`, `Interceptor`, `Ajax`, `Digest`, `Ad_Redirects`.
 - Domain helpers (static or instantiated as needed): `EDMINBOOST_ANM_Settings`, `EDMINBOOST_ANM_Rules`, `EDMINBOOST_ANM_Inbox`, `EDMINBOOST_ANM_Stats`, `EDMINBOOST_ANM_Importer`, `EDMINBOOST_ANM_Webhook`, `EDMINBOOST_ANM_Ad_Redirects` (URL normalize/match helpers), `EDMINBOOST_ANM_Multisite` (network policy, merge layers, uninstall network-wide).
-- Bootstrap requires `class-edminboost-anm-multisite.php` (always loaded). Activation seeds options via `EDMINBOOST_ANM_Activator` (+ network sitemeta when network-activated); deactivation clears digest schedule; `wp_initialize_site` seeds new blogs via `EDMINBOOST_ANM_Plugin::handle_new_site()`.
+- `load.php` requires `class-edminboost-anm-multisite.php` (always loaded). Activation seeds options via `EDMINBOOST_ANM_Activator` (+ network sitemeta when network-activated); deactivation clears digest schedule; `wp_initialize_site` seeds new blogs via `EDMINBOOST_ANM_Plugin::handle_new_site()`.
+- Pro-only code: guard with `edminboost_anm_is_pro()`; optional future Free zip exclusions via `excludeFromCore` in `build/config.json`.
 
 ## Settings Option Shape (top-level keys)
 

@@ -6,7 +6,10 @@ WordPress plugin that intercepts, filters, and organizes admin notices from a ce
 
 | Item | Value |
 |------|-------|
-| Bootstrap | `edminboost-admin-notice-manager.php` |
+| Bootstrap (local dev) | Root `edminboost-admin-notice-manager.php` → `packages/core` |
+| Bootstrap (Free zip) | `packages/free/edminboost-admin-notice-manager.php` |
+| Bootstrap (Pro zip) | `packages/pro/edminboost-admin-notice-manager-pro.php` |
+| Build | `npm run build` → `dist/zips/*.zip` (see `MONOREPO.md`) |
 | Slug / text domain | `edminboost-admin-notice-manager` |
 | Class prefix | `EDMINBOOST_ANM_*` |
 | Function prefix | `edminboost_anm_*` |
@@ -19,8 +22,12 @@ WordPress plugin that intercepts, filters, and organizes admin notices from a ce
 ## Architecture
 
 ```
-edminboost-admin-notice-manager.php   # constants, requires, lifecycle hooks
-includes/
+edminboost-admin-notice-manager.php   # monorepo dev entry (optional core_dir override)
+packages/core/                        # shared source (includes, admin, languages, boot.php, load.php)
+packages/free/                        # Free overlay (bootstrap, readme.txt)
+packages/pro/                         # Pro overlay (bootstrap, readme.txt)
+build/                                # assemble + zip (build.mjs, config.json)
+includes/                             # under packages/core/
   class-edminboost-anm-plugin.php     # hook orchestrator
   class-edminboost-anm-admin.php      # menus, inbox list helpers, assets
   class-edminboost-anm-settings.php   # defaults, get, sanitize
@@ -48,11 +55,13 @@ admin/
   partials/edminboost-anm-notice-panel-dropdown.php
   partials/edminboost-anm-network-policy-page.php
   partials/edminboost-anm-multisite-policy-{fields,next-steps}.php
-languages/  # .pot, locale .po/.mo; optional build-translations.py
-uninstall.php  readme.txt  composer.json
+languages/  # under packages/core/ — .pot, locale .po/.mo; optional build-translations.py
+uninstall.php  # packages/core/
+readme.txt  # packages/free/ (+ packages/pro/ for Pro)
+composer.json  package.json  MONOREPO.md
 ```
 
-- Bootstrap defines constants, requires multisite helper, and calls `edminboost_anm_run_plugin()`.
+- Shared `packages/core/boot.php` + `load.php`; edition bootstraps call `edminboost_anm_register()` then `edminboost_anm_run_plugin()`. Pro sets `EDMINBOOST_ANM_IS_PRO` (see `edminboost_anm_is_pro()`).
 - `EDMINBOOST_ANM_Plugin::run()` wires i18n, site + network admin menu/settings/assets, `wp_initialize_site` seeding, and on `init`: notices, interceptor, AJAX, digest, ad redirects.
 - Settings: primary option via `EDMINBOOST_ANM_Settings` (Settings API group `edminboost_anm_settings_group`). Rules and inbox stored in separate per-site options. Tabbed settings UI (General, Notices, Access, Admin bar, Filtering, Security, Notifications, White label, Migration; **Multisite** tab on multisite sites). Network admin: multisite policy, network default settings (same partial), network auto-rules.
 - **Multisite**: policies `per_site` / `network_defaults` / `network_locked`; merged effective settings; optional shared network auto-rules; site edit gates via `site_can_edit_settings()` / `site_can_edit_rules()`. Policy UI fields shared via `edminboost-anm-multisite-policy-fields.php` + `edminboost-anm-multisite-policy-next-steps.php` (network policy page and Settings **Multisite** tab).
@@ -118,6 +127,7 @@ Registered in `EDMINBOOST_ANM_Ajax::register_hooks()` — all use `verify_reques
 - `edminboost_anm_digest_email` — filter digest subject/body before send or preview
 - `edminboost_anm_webhook_payload` — filter outbound webhook JSON payload
 - `edminboost_anm_billing_comparison` — filter Free vs Pro rows on the Billing page
+- `edminboost_anm_block_ad_redirect_activation_flags` — filter activation option suppressors when block ad redirects is enabled
 
 ## Cursor Rules
 
@@ -129,14 +139,15 @@ Persistent AI guidance lives in `.cursor/rules/`:
 | `edminboost-anm-standards.mdc` | Always — i18n, UX, performance, release |
 | `edminboost-anm-compliance.mdc` | Always — security and pre-ship checklist |
 | `edminboost-anm-wordpress-php.mdc` | `**/*.php` — PHP conventions |
-| `edminboost-anm-admin-assets.mdc` | `admin/**/*` — JS, CSS, partials |
+| `edminboost-anm-admin-assets.mdc` | `packages/core/admin/**/*` — JS, CSS, partials |
 
 ## Change Discipline
 
 - Admin-only plugin — limited front-end hooks for admin bar notice panel when the toolbar is visible.
 - Minimize diff scope; match existing file structure and style.
 - Add `index.php` silence files when creating new directories.
-- Update `readme.txt` changelog for user-facing changes; keep `.cursor/rules/` and `AGENTS.md` in sync when behavior or architecture changes.
-- Update `uninstall.php` (and deactivator for cron) when adding stored options or schedules; multisite uninstall uses `EDMINBOOST_ANM_Multisite::uninstall_all_sites()`.
+- Edit shared source under `packages/core/`; edition bootstraps in `packages/free/` and `packages/pro/`. Run `npm run build` for release zips (`dist/` is gitignored).
+- Update `packages/free/readme.txt` changelog for user-facing changes; keep `.cursor/rules/` and `AGENTS.md` in sync when behavior or architecture changes.
+- Update `packages/core/uninstall.php` (and deactivator for cron) when adding stored options or schedules; multisite uninstall uses `EDMINBOOST_ANM_Multisite::uninstall_all_sites()`.
 - New AJAX actions: register in `EDMINBOOST_ANM_Ajax`, use `verify_request()` (or `verify_debug_request()` for debug-only).
 - Shared inbox row markup: update `edminboost-anm-inbox-table-rows.php` once for both full page and AJAX list responses.

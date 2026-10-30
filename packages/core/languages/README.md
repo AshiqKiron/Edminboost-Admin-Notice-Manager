@@ -32,11 +32,15 @@ The codebase uses the `EDMINBOOST_ANM_TEXT_DOMAIN` constant, so `--ignore-domain
 
 ## Rebuild PO/MO files
 
-Optional dev dependency: `pip install polib deep-translator`
+Requires: `pip install polib`
+
+**Bundled strings (recommended):** edit or add `generated/<locale>.json` (msgid → msgstr, 424 keys), then:
 
 ```bash
-cd languages
-python3 build-translations.py
+cd packages/core/languages
+python3 apply_generated_json.py
 ```
 
-Machine-assisted strings are a starting point; community corrections via `.po` files are welcome.
+**Machine translation (optional):** `python3 build-translations.py` with `BACKEND=google` or `BACKEND=mymemory`. Online APIs may rate-limit; the script skips locales that are already complete. Use `LOCALES=hi_IN,ru_RU` to target specific languages.
+
+Community corrections via `.po` or `generated/*.json` are welcome.

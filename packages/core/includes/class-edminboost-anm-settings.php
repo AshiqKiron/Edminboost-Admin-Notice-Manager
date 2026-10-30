@@ -353,7 +353,7 @@ class EDMINBOOST_ANM_Settings {
 	 * @param array $settings Stored or empty settings.
 	 * @return array
 	 */
-	private static function merge_settings( $settings ) {
+	public static function merge_settings( $settings ) {
 		$defaults = self::get_defaults();
 		$merged   = wp_parse_args( $settings, $defaults );
 
@@ -609,14 +609,15 @@ class EDMINBOOST_ANM_Settings {
 
 		$output['webhook'] = self::sanitize_webhook_settings( $webhook_input, $output['webhook'] );
 
-		$redirect_input = isset( $input['block_ad_redirects'] ) && is_array( $input['block_ad_redirects'] )
-			? $input['block_ad_redirects']
-			: array();
+		if ( isset( $input['block_ad_redirects'] ) && is_array( $input['block_ad_redirects'] ) ) {
+			$redirect_input = $input['block_ad_redirects'];
+			$redirect_urls  = self::sanitize_block_ad_redirect_urls( $redirect_input['urls'] ?? array() );
 
-		$output['block_ad_redirects'] = array(
-			'enabled' => ! empty( $redirect_input['enabled'] ),
-			'urls'    => self::sanitize_block_ad_redirect_urls( $redirect_input['urls'] ?? array() ),
-		);
+			$output['block_ad_redirects'] = array(
+				'enabled' => ! empty( $redirect_input['enabled'] ) || ! empty( $redirect_urls ),
+				'urls'    => $redirect_urls,
+			);
+		}
 
 		$white_label_input = isset( $input['white_label'] ) && is_array( $input['white_label'] )
 			? $input['white_label']
@@ -1408,7 +1409,33 @@ class EDMINBOOST_ANM_Settings {
 		$settings = self::get();
 		$block    = $settings['block_ad_redirects'] ?? self::get_defaults()['block_ad_redirects'];
 
-		return ! empty( $block['enabled'] );
+		if ( ! empty( $block['enabled'] ) ) {
+			return true;
+		}
+
+		return self::block_ad_redirects_has_urls( $block );
+	}
+
+	/**
+	 * Whether the blocklist has at least one saved URL pattern.
+	 *
+	 * @param array $block block_ad_redirects settings slice.
+	 * @return bool
+	 */
+	public static function block_ad_redirects_has_urls( array $block ) {
+		$urls = $block['urls'] ?? array();
+
+		if ( ! is_array( $urls ) ) {
+			return false;
+		}
+
+		foreach ( $urls as $url ) {
+			if ( '' !== trim( (string) $url ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -1417,12 +1444,18 @@ class EDMINBOOST_ANM_Settings {
 	 * @return string[]
 	 */
 	public static function get_block_ad_redirect_patterns() {
-		if ( ! self::is_block_ad_redirects_enabled() ) {
+		if ( ! self::is_enabled() ) {
 			return array();
 		}
 
 		$settings = self::get();
-		$urls     = $settings['block_ad_redirects']['urls'] ?? array();
+		$block    = $settings['block_ad_redirects'] ?? self::get_defaults()['block_ad_redirects'];
+
+		if ( empty( $block['enabled'] ) && ! self::block_ad_redirects_has_urls( $block ) ) {
+			return array();
+		}
+
+		$urls = $block['urls'] ?? array();
 		$patterns = array();
 
 		foreach ( $urls as $url ) {

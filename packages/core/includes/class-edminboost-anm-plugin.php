@@ -95,7 +95,7 @@ class EDMINBOOST_ANM_Plugin {
 		add_action( 'init', array( $this->interceptor, 'register_hooks' ) );
 		add_action( 'init', array( $this->ajax, 'register_hooks' ) );
 		add_action( 'init', array( $this->digest, 'register_hooks' ) );
-		add_action( 'init', array( $this->ad_redirects, 'register_hooks' ) );
+		add_action( 'plugins_loaded', array( $this->ad_redirects, 'register_hooks' ), 0 );
 
 		if ( class_exists( 'EDMINBOOST_ANM_Debug' ) ) {
 			add_action( 'init', array( 'EDMINBOOST_ANM_Debug', 'register_hooks' ) );
@@ -111,7 +111,7 @@ class EDMINBOOST_ANM_Plugin {
 		load_plugin_textdomain(
 			EDMINBOOST_ANM_TEXT_DOMAIN,
 			false,
-			dirname( EDMINBOOST_ANM_PLUGIN_BASENAME ) . '/languages'
+			trailingslashit( plugin_basename( EDMINBOOST_ANM_PLUGIN_DIR ) ) . 'languages'
 		);
 	}
 

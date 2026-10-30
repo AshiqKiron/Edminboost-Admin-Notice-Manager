@@ -1,0 +1,2169 @@
+# Copyright (C) 2026 ashiquzzaman
+# This file is distributed under the GPL-3.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Edminboost - Admin Notice Manager 1.1.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/Edminboost - Admin Notice Manager\n"
+"POT-Creation-Date: 2026-10-28T20:25:39+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: French (fr_FR)\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Domain: edminboost-admin-notice-manager\n"
+"X-Generator: WP-CLI 2.12.0\n"
+
+#. Plugin Name of the plugin
+#: edminboost-admin-notice-manager.php
+msgid "Edminboost - Admin Notice Manager"
+msgstr "Edminboost - Gestionnaire des avis d'administration"
+
+#. Plugin URI of the plugin
+#: edminboost-admin-notice-manager.php
+msgid "https://asphaltthemes.com/edminboost/admin-notice-manager"
+msgstr "https://asphaltthemes.com/edminboost/admin-notice-manager"
+
+#. Description of the plugin
+#: edminboost-admin-notice-manager.php
+msgid ""
+"Manage, organize, and control WordPress admin notices from one central "
+"dashboard."
+msgstr ""
+"Gérer, organiser et contrôler les avis d'administration WordPress depuis un "
+"tableau de bord central."
+
+#. Author of the plugin
+#: edminboost-admin-notice-manager.php
+msgid "ashiquzzaman"
+msgstr "ashiquzzaman"
+
+#. Author URI of the plugin
+#: edminboost-admin-notice-manager.php
+msgid "https://asphaltthemes.com"
+msgstr "https://asphaltthemes.com"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:27
+msgid "Edminboost"
+msgstr "Edminboost"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:31
+msgid "Quick Status:"
+msgstr "État rapide :"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:33
+msgid "Toggle notice interception"
+msgstr "Basculer l'interception des avis"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:39
+#: includes/class-edminboost-anm-admin.php:204
+msgid "Active"
+msgstr "Activité"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:41
+#: includes/class-edminboost-anm-admin.php:205
+msgid "Inactive"
+msgstr "Inactif"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:50
+msgid "Total Notices Blocked (This Month)"
+msgstr "Total des avis bloqués (Ce mois)"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:54
+msgid "Top Spammer Plugin"
+msgstr "Plugin pour Spammer supérieur"
+
+#. translators: %d: hit count
+#: admin/partials/edminboost-anm-dashboard-page.php:61
+#: admin/partials/edminboost-anm-rules-page.php:48
+#, php-format
+msgid "%d hits"
+msgstr "%d résultats"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:69
+msgid "Active Auto-Rules"
+msgstr "Règles automatiques actives"
+
+#. translators: %d: number of active rules
+#: admin/partials/edminboost-anm-dashboard-page.php:75
+#, php-format
+msgid "%d Active"
+msgstr "%d actif"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:87
+msgid "One-Click \"Kill All Upsells\" Preset"
+msgstr "Préréglage d'un clic sur \"Tirer toutes les ventes\""
+
+#: admin/partials/edminboost-anm-dashboard-page.php:89
+msgid "Toggle upsell preset"
+msgstr "Toggle upsell preset"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:93
+msgid ""
+"Toggle ON to instantly suppress standard review requests, Black Friday nags,"
+" and promotional upsells."
+msgstr ""
+"Pour supprimer instantanément les demandes d'examen standard, Black Friday "
+"nags, et les ventes promotionnelles."
+
+#: admin/partials/edminboost-anm-dashboard-page.php:95
+msgid "Status:"
+msgstr "État :"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:97
+msgid "ENABLED"
+msgstr "RÉALISÉS"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:97
+msgid "DISABLED"
+msgstr "Personnes handicapées"
+
+#. translators: %d: phrase count
+#: admin/partials/edminboost-anm-dashboard-page.php:104
+#, php-format
+msgid "Active blacklist: %d phrases"
+msgstr "Liste noire active : %d phrases"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:117
+msgid "Debug: Generate Test Notices"
+msgstr "Débogue : produire des avis d'essai"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:118
+msgid "WP_DEBUG"
+msgstr "WP DEBUG"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:120
+msgid ""
+"Create sample notices for each inbox type (critical, warning, success, info,"
+" upsell). This panel is hidden when WP_DEBUG is off."
+msgstr ""
+"Créer des exemples d'avis pour chaque type de boîte de réception (critique, "
+"avertissement, succès, info, upsell). Ce panneau est caché lorsque WP DEBUG "
+"est désactivé."
+
+#: admin/partials/edminboost-anm-dashboard-page.php:123
+msgid "Error"
+msgstr "Erreur"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:124
+msgid "Warning"
+msgstr "Avertissement"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:125
+#: includes/class-edminboost-anm-inbox.php:421
+msgid "Success"
+msgstr "Succès"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:126
+#: includes/class-edminboost-anm-inbox.php:422
+msgid "Info"
+msgstr "Informations"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:127
+msgid "Upsell"
+msgstr "Vente"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:131
+msgid "Notice levels"
+msgstr "Niveaux de notification"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:150
+msgid "Add to Inbox"
+msgstr "Ajouter à la boîte de réception"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:153
+msgid "Trigger Live Notices"
+msgstr "Avis en direct de déclenchement"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:157
+msgid ""
+"“Add to Inbox” seeds the Notice Inbox directly. “Trigger Live Notices” "
+"redirects to the Dashboard home, fires real admin_notices output, and "
+"exercises PHP/JS interception (requires Quick Status to be active)."
+msgstr ""
+"Ajouter directement à la boîte de réception la boîte de réception Avis. Le "
+"logiciel Trigger Live Notices redirige vers la maison Dashboard, déclenche "
+"la sortie de l'administration notices réelles et exerce l'interception "
+"PHP/JS (qui nécessite un statut rapide pour être actif)."
+
+#: admin/partials/edminboost-anm-dashboard-page.php:165
+msgid "Plugin Spam Score (Top 5)"
+msgstr "Score du pourriel enfichable (Top 5)"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:172
+#: includes/class-edminboost-anm-inbox.php:98
+#: includes/class-edminboost-anm-interceptor.php:313
+msgid "Unknown"
+msgstr "Inconnu"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:184
+msgid "No intercepted notices yet. Stats will appear as notices are captured."
+msgstr ""
+"Pas encore d'avis interceptés. Les statistiques apparaîtront lorsque les "
+"avis seront saisis."
+
+#: admin/partials/edminboost-anm-dashboard-page.php:193
+msgid "Live Blocked Feed"
+msgstr "Nourriture bloquée vivante"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:195
+msgid "View more"
+msgstr "Afficher plus"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:199
+msgid "Recent blocked notices"
+msgstr "Avis bloqués récents"
+
+#: admin/partials/edminboost-anm-dashboard-page.php:211
+msgid "No recent blocked notices."
+msgstr "Aucun avis récent bloqué."
+
+#: admin/partials/edminboost-anm-inbox-page.php:58
+msgid "All"
+msgstr "Tous"
+
+#: admin/partials/edminboost-anm-inbox-page.php:59
+msgid "Critical"
+msgstr "Critique"
+
+#: admin/partials/edminboost-anm-inbox-page.php:60
+msgid "Snoozed"
+msgstr "Snoozé"
+
+#: admin/partials/edminboost-anm-inbox-page.php:61
+msgid "Upsells"
+msgstr "Les ventes"
+
+#: admin/partials/edminboost-anm-inbox-page.php:81
+msgid "Search notices"
+msgstr "Avis de recherche"
+
+#: admin/partials/edminboost-anm-inbox-page.php:82
+msgid "Search notices…"
+msgstr "Avis de recherche..."
+
+#: admin/partials/edminboost-anm-inbox-page.php:83
+msgid "Search"
+msgstr "Rechercher"
+
+#: admin/partials/edminboost-anm-inbox-page.php:87
+msgid "Inbox filters"
+msgstr "Filtres de boîte de réception"
+
+#: admin/partials/edminboost-anm-inbox-page.php:113
+#: admin/partials/edminboost-anm-inbox-page.php:127
+msgid "Select all"
+msgstr "Tout sélectionner"
+
+#: admin/partials/edminboost-anm-inbox-page.php:115
+#: admin/partials/edminboost-anm-inbox-page.php:129
+#: admin/partials/edminboost-anm-rules-page.php:90
+#: admin/partials/edminboost-anm-rules-page.php:115
+msgid "Source Plugin"
+msgstr "Plugin source"
+
+#: admin/partials/edminboost-anm-inbox-page.php:116
+#: admin/partials/edminboost-anm-inbox-page.php:130
+#: admin/partials/edminboost-anm-rules-page.php:91
+#: admin/partials/edminboost-anm-rules-page.php:116
+msgid "Notice Message Preview"
+msgstr "Prévisualiser le message"
+
+#: admin/partials/edminboost-anm-inbox-page.php:117
+#: admin/partials/edminboost-anm-inbox-page.php:131
+#: admin/partials/edminboost-anm-rules-page.php:92
+#: admin/partials/edminboost-anm-rules-page.php:117
+msgid "Type"
+msgstr "Type"
+
+#: admin/partials/edminboost-anm-inbox-page.php:119
+#: admin/partials/edminboost-anm-inbox-page.php:133
+#: admin/partials/edminboost-anm-rules-page.php:93
+#: admin/partials/edminboost-anm-rules-page.php:118
+#: admin/partials/edminboost-anm-settings-page.php:784
+#: admin/partials/edminboost-anm-settings-page.php:801
+msgid "Actions"
+msgstr "Actions"
+
+#: admin/partials/edminboost-anm-inbox-page.php:139
+msgid "No notices in the inbox yet. Intercepted notices will appear here."
+msgstr ""
+"Pas encore d'avis dans la boîte de réception. Des avis interceptés "
+"apparaîtront ici."
+
+#: admin/partials/edminboost-anm-inbox-page.php:146
+msgid "Bulk actions"
+msgstr "Actions en vrac"
+
+#: admin/partials/edminboost-anm-inbox-page.php:148
+msgid "Bulk Actions"
+msgstr "Actions en vrac"
+
+#: admin/partials/edminboost-anm-inbox-page.php:149
+msgid "Mark as Read"
+msgstr "Marquer comme lu"
+
+#: admin/partials/edminboost-anm-inbox-page.php:150
+#: admin/partials/edminboost-anm-inbox-table-rows.php:27
+msgid "Snooze"
+msgstr "Snooze"
+
+#: admin/partials/edminboost-anm-inbox-page.php:151
+msgid "Archive"
+msgstr "Archive"
+
+#: admin/partials/edminboost-anm-inbox-page.php:153
+msgid "Apply"
+msgstr "Appliquer"
+
+#. translators: 1: start number, 2: end number, 3: total count
+#: admin/partials/edminboost-anm-inbox-page.php:160
+#: includes/class-edminboost-anm-ajax.php:234
+#, php-format
+msgid "Showing %1$d–%2$d of %3$d notices"
+msgstr "Affichage des avis %1$d–%2$d de %3$d"
+
+#: admin/partials/edminboost-anm-inbox-table-rows.php:19
+msgid "Select notice"
+msgstr "Sélectionner l'avis"
+
+#: admin/partials/edminboost-anm-inbox-table-rows.php:25
+msgid "Read"
+msgstr "Lire"
+
+#: admin/partials/edminboost-anm-inbox-table-rows.php:29
+msgid "1 Day"
+msgstr "1 jour"
+
+#: admin/partials/edminboost-anm-inbox-table-rows.php:30
+msgid "7 Days"
+msgstr "7 jours"
+
+#: admin/partials/edminboost-anm-inbox-table-rows.php:33
+#: admin/partials/edminboost-anm-rules-page.php:106
+#: includes/class-edminboost-anm-admin.php:212
+msgid "Converted to rule. Click again to undo."
+msgstr "Converti en règle. Cliquez à nouveau pour annuler."
+
+#: admin/partials/edminboost-anm-inbox-table-rows.php:33
+#: admin/partials/edminboost-anm-rules-page.php:107
+msgid "Convert to Rule"
+msgstr "Convertir en Règle"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:26
+msgid "Admin notice inbox"
+msgstr "Boîte de notification Admin"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:28
+#: includes/class-edminboost-anm-admin.php:232
+msgid "Admin notices"
+msgstr "Avis administratifs"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:29
+#: includes/class-edminboost-anm-admin.php:245
+msgid "Close panel"
+msgstr "Fermer le panneau"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:31
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:34
+msgid "No intercepted notices yet. Browse wp-admin to capture nags here."
+msgstr ""
+"Pas encore d'avis interceptés. Naviguez sur wp-admin pour capturer les nags "
+"ici."
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:83
+#: includes/class-edminboost-anm-admin.php:246
+msgid "Dismiss from panel"
+msgstr "Rejet du groupe spécial"
+
+#. translators: %s: formatted date/time
+#. translators: %s: sample date/time for panel preview only
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:94
+#: includes/class-edminboost-anm-admin.php:249
+#, php-format
+msgid "First logged: %s"
+msgstr "Premier enregistrement : %s"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:102
+#: includes/class-edminboost-anm-admin.php:252
+msgid "Display notice as normal"
+msgstr "Afficher l'avis comme normal"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:106
+#: includes/class-edminboost-anm-admin.php:253
+#: includes/class-edminboost-anm-notices.php:121
+#: includes/class-edminboost-anm-notices.php:167
+msgid "Hide for me"
+msgstr "Cache-toi pour moi"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:110
+#: includes/class-edminboost-anm-admin.php:254
+#: includes/class-edminboost-anm-notices.php:122
+#: includes/class-edminboost-anm-notices.php:168
+msgid "Hide for all"
+msgstr "Cacher pour tous"
+
+#: admin/partials/edminboost-anm-notice-panel-dropdown.php:119
+#: includes/class-edminboost-anm-admin.php:233
+msgid "See all notifications"
+msgstr "Voir toutes les notifications"
+
+#: admin/partials/edminboost-anm-rules-page.php:20
+msgid "Auto-Rules & Keyword Filtering"
+msgstr "Règles automatiques et filtrage des mots clés"
+
+#: admin/partials/edminboost-anm-rules-page.php:21
+msgid "+ Add New Rule"
+msgstr "+ Ajouter une nouvelle règle"
+
+#: admin/partials/edminboost-anm-rules-page.php:29
+msgid "Rule Name / Pattern"
+msgstr "Nom et modèle de la règle"
+
+#: admin/partials/edminboost-anm-rules-page.php:30
+msgid "Target Type"
+msgstr "Type de cible"
+
+#: admin/partials/edminboost-anm-rules-page.php:31
+msgid "Hit Count"
+msgstr "Nombre de coups"
+
+#: admin/partials/edminboost-anm-rules-page.php:32
+msgid "Status / Actions"
+msgstr "État / Actions"
+
+#: admin/partials/edminboost-anm-rules-page.php:56
+msgid "Toggle rule"
+msgstr "Changer la règle"
+
+#: admin/partials/edminboost-anm-rules-page.php:65
+msgid "Edit"
+msgstr "Modifier"
+
+#: admin/partials/edminboost-anm-rules-page.php:66
+msgid "Delete"
+msgstr "Supprimer"
+
+#: admin/partials/edminboost-anm-rules-page.php:74
+msgid ""
+"No auto-rules yet. Add a rule or convert an inbox notice to get started."
+msgstr ""
+"Pas encore de règles automatiques. Ajouter une règle ou convertir une notice"
+" de boîte de réception pour commencer."
+
+#: admin/partials/edminboost-anm-rules-page.php:82
+msgid "Default WordPress Notices"
+msgstr "Avis WordPress par défaut"
+
+#: admin/partials/edminboost-anm-rules-page.php:83
+msgid ""
+"Common core admin notices you can convert into filter rules with one click."
+msgstr ""
+"Les avis d'administration de base communs vous pouvez convertir en règles de"
+" filtre en un clic."
+
+#: admin/partials/edminboost-anm-rules-page.php:102
+#: includes/class-edminboost-anm-interceptor.php:350
+#: includes/class-edminboost-anm-rules.php:583
+#: includes/class-edminboost-anm-rules.php:591
+#: includes/class-edminboost-anm-rules.php:599
+#: includes/class-edminboost-anm-rules.php:607
+#: includes/class-edminboost-anm-rules.php:615
+#: includes/class-edminboost-anm-rules.php:623
+msgid "WordPress Core"
+msgstr "WordPress Core"
+
+#: admin/partials/edminboost-anm-rules-page.php:128
+#: includes/class-edminboost-anm-admin.php:202
+msgid "Create New Filter Rule"
+msgstr "Créer une nouvelle règle de filtre"
+
+#: admin/partials/edminboost-anm-rules-page.php:132
+msgid "Rule Name:"
+msgstr "Nom de la règle :"
+
+#: admin/partials/edminboost-anm-rules-page.php:133
+msgid "e.g., Hide Feedback Nags"
+msgstr "Par exemple, masquer les Nags de rétroaction"
+
+#: admin/partials/edminboost-anm-rules-page.php:136
+msgid "Match Type:"
+msgstr "Type de correspondance & #160;:"
+
+#: admin/partials/edminboost-anm-rules-page.php:137
+msgid "Keyword Match"
+msgstr "Correspondance des mots clés"
+
+#: admin/partials/edminboost-anm-rules-page.php:138
+msgid "Regex Pattern"
+msgstr "Modèle Regex"
+
+#: admin/partials/edminboost-anm-rules-page.php:139
+#: includes/class-edminboost-anm-rules.php:564
+msgid "CSS Selector"
+msgstr "Sélecteur CSS"
+
+#: admin/partials/edminboost-anm-rules-page.php:142
+msgid "Match String:"
+msgstr "Chaîne de correspondance & #160;:"
+
+#: admin/partials/edminboost-anm-rules-page.php:143
+msgid "Please rate our plugin"
+msgstr "Veuillez noter notre plugin"
+
+#: admin/partials/edminboost-anm-rules-page.php:146
+msgid "Action:"
+msgstr "Mesures à prendre:"
+
+#: admin/partials/edminboost-anm-rules-page.php:148
+msgid "Auto-Dismiss & Route to Inbox Archive"
+msgstr "Rejet automatique & Route vers l'archive de boîte de réception"
+
+#: admin/partials/edminboost-anm-rules-page.php:149
+msgid "Auto-Dismiss Only"
+msgstr "Rejet automatique seulement"
+
+#: admin/partials/edminboost-anm-rules-page.php:150
+msgid "Route to Inbox Only"
+msgstr "Route vers la boîte de réception seulement"
+
+#: admin/partials/edminboost-anm-rules-page.php:154
+msgid "Save Rule"
+msgstr "Enregistrer la règle"
+
+#: admin/partials/edminboost-anm-rules-page.php:155
+msgid "Cancel"
+msgstr "Annuler"
+
+#: admin/partials/edminboost-anm-settings-page.php:18
+msgid "Editor"
+msgstr "Éditeur"
+
+#: admin/partials/edminboost-anm-settings-page.php:19
+msgid "Author"
+msgstr "Auteur"
+
+#: admin/partials/edminboost-anm-settings-page.php:20
+msgid "Shop Manager"
+msgstr "Gestionnaire de magasin"
+
+#: admin/partials/edminboost-anm-settings-page.php:21
+msgid "Administrator"
+msgstr "Administrateur"
+
+#: admin/partials/edminboost-anm-settings-page.php:33
+msgid "General"
+msgstr "Généralités"
+
+#: admin/partials/edminboost-anm-settings-page.php:34
+#: includes/class-edminboost-anm-admin.php:231
+#: includes/class-edminboost-anm-notices.php:326
+msgid "Notices"
+msgstr "Avis"
+
+#: admin/partials/edminboost-anm-settings-page.php:35
+#: admin/partials/edminboost-anm-settings-page.php:371
+msgid "Access"
+msgstr "Accès"
+
+#: admin/partials/edminboost-anm-settings-page.php:36
+#: admin/partials/edminboost-anm-settings-page.php:481
+msgid "Admin bar"
+msgstr "Barre administrative"
+
+#: admin/partials/edminboost-anm-settings-page.php:37
+msgid "Filtering"
+msgstr "Filtrage"
+
+#: admin/partials/edminboost-anm-settings-page.php:38
+msgid "Security & Shield"
+msgstr "Sécurité et bouclier"
+
+#: admin/partials/edminboost-anm-settings-page.php:39
+msgid "Notifications"
+msgstr "Notifications"
+
+#: admin/partials/edminboost-anm-settings-page.php:40
+msgid "Migration"
+msgstr "Migrations"
+
+#: admin/partials/edminboost-anm-settings-page.php:60
+#: includes/class-edminboost-anm-admin.php:71
+#: includes/class-edminboost-anm-admin.php:72
+#: includes/class-edminboost-anm-admin.php:286
+msgid "Settings"
+msgstr "Paramètres"
+
+#: admin/partials/edminboost-anm-settings-page.php:63
+msgid "Settings sections"
+msgstr "Configuration des sections"
+
+#: admin/partials/edminboost-anm-settings-page.php:97
+msgid ""
+"Choose how notices appear on the dashboard. Per-type rules live on the "
+"Notices tab; who is affected on Access; how to open the inbox on Admin bar."
+msgstr ""
+"Choisissez comment les avis apparaissent sur le tableau de bord. Règles par "
+"type en direct sur l'onglet Avis; qui est affecté sur Access; comment ouvrir"
+" la boîte de réception sur la barre Admin."
+
+#: admin/partials/edminboost-anm-settings-page.php:98
+#: admin/partials/edminboost-anm-settings-page.php:109
+msgid "Display experience"
+msgstr "Affichage de l'expérience"
+
+#: admin/partials/edminboost-anm-settings-page.php:136
+msgid "Recommended"
+msgstr "Recommandation"
+
+#: admin/partials/edminboost-anm-settings-page.php:145
+msgid "Advanced display options"
+msgstr "Options d'affichage avancées"
+
+#: admin/partials/edminboost-anm-settings-page.php:146
+msgid ""
+"Fine-grained modes for power users. Hide all suppresses every notice without"
+" inbox capture unless a rule matches first."
+msgstr ""
+"Modes à grain fin pour les utilisateurs de puissance. Cacher tous supprime "
+"chaque avis sans capture de boîte de réception à moins qu'une règle ne "
+"corresponde en premier."
+
+#: admin/partials/edminboost-anm-settings-page.php:148
+msgid "Advanced notice display mode"
+msgstr "Mode d'affichage des avis avancé"
+
+#: admin/partials/edminboost-anm-settings-page.php:168
+#: admin/partials/edminboost-anm-settings-page.php:242
+msgid "Live preview"
+msgstr "Aperçu en direct"
+
+#: admin/partials/edminboost-anm-settings-page.php:183
+msgid ""
+"Control update nags and restore notices hidden with Hide for me or Hide for "
+"all."
+msgstr ""
+"Contrôler les mises à jour et restaurer les avis cachés avec Cacher pour moi"
+" ou Cacher pour tous."
+
+#: admin/partials/edminboost-anm-settings-page.php:184
+msgid "Update & hidden notices"
+msgstr "Mettre à jour les avis cachés"
+
+#: admin/partials/edminboost-anm-settings-page.php:191
+msgid ""
+"Hides plugin and theme update reminders. Safety Guard can still show urgent "
+"security alerts."
+msgstr ""
+"Cacher les rappels de mise à jour du plugin et du thème. Les gardes de "
+"sécurité peuvent toujours afficher des alertes de sécurité urgentes."
+
+#: admin/partials/edminboost-anm-settings-page.php:192
+msgid "Hide plugin & theme updates"
+msgstr "Masquer les mises à jour du plugin & thème"
+
+#: admin/partials/edminboost-anm-settings-page.php:203
+msgid ""
+"Hides the WordPress update banner. Update anytime under Dashboard → Updates."
+msgstr ""
+"Cache la bannière de mise à jour WordPress. Mettre à jour à tout moment sous"
+" Dashboard → Mises à jour."
+
+#: admin/partials/edminboost-anm-settings-page.php:204
+msgid "Hide WordPress update notice"
+msgstr "Masquer l'avis de mise à jour WordPress"
+
+#: admin/partials/edminboost-anm-settings-page.php:215
+msgid ""
+"Brings back notices you hid from the toolbar or from actions on each notice."
+msgstr ""
+"Ramène les avis que vous avez cachés de la barre d'outils ou des actions sur"
+" chaque avis."
+
+#: admin/partials/edminboost-anm-settings-page.php:216
+msgid "Reset hidden notices"
+msgstr "Réinitialiser les avis cachés"
+
+#: admin/partials/edminboost-anm-settings-page.php:221
+msgid "Reset hidden notices scope"
+msgstr "Réinitialiser la portée des avis cachés"
+
+#: admin/partials/edminboost-anm-settings-page.php:224
+msgid "Me only"
+msgstr "Moi seulement"
+
+#: admin/partials/edminboost-anm-settings-page.php:228
+msgid "All users"
+msgstr "Tous les utilisateurs"
+
+#: admin/partials/edminboost-anm-settings-page.php:232
+msgid "Reset"
+msgstr "Réinitialiser"
+
+#: admin/partials/edminboost-anm-settings-page.php:270
+msgid "Inbox"
+msgstr "Boîte de réception"
+
+#: admin/partials/edminboost-anm-settings-page.php:271
+msgid "Hide"
+msgstr "Masquer"
+
+#: admin/partials/edminboost-anm-settings-page.php:272
+msgid "Default"
+msgstr "Par défaut"
+
+#: admin/partials/edminboost-anm-settings-page.php:275
+msgid "Success level notices"
+msgstr "Avis sur le niveau de réussite"
+
+#: admin/partials/edminboost-anm-settings-page.php:276
+msgid "Error level notices"
+msgstr "Avis de niveau d'erreur"
+
+#: admin/partials/edminboost-anm-settings-page.php:277
+msgid "Warning level notices"
+msgstr "Avertissements"
+
+#: admin/partials/edminboost-anm-settings-page.php:278
+msgid "Information level notices"
+msgstr "Avis de niveau d'information"
+
+#: admin/partials/edminboost-anm-settings-page.php:283
+msgid ""
+"Used for Clean dashboard and Toolbar only experiences (and advanced Hide "
+"selected / Compact panel). Inbox hides on the dashboard and shows in the "
+"plugin panel; Hide removes everywhere; Default keeps normal WordPress "
+"behavior."
+msgstr ""
+"Utilisé pour nettoyer le tableau de bord et la barre d'outils seulement des "
+"expériences (et avancé Cacher sélectionné / Panneau compact). La boîte de "
+"réception se cache sur le tableau de bord et s'affiche dans le panneau du "
+"plugin; Cacher supprime partout; Par défaut garde le comportement WordPress "
+"normal."
+
+#: admin/partials/edminboost-anm-settings-page.php:286
+msgid "Notice handling"
+msgstr "Traitement des avis"
+
+#: admin/partials/edminboost-anm-settings-page.php:287
+msgid ""
+"Applies when General → Display experience is Clean dashboard + inbox / admin"
+" bar or Toolbar only (or matching advanced modes). Choose what happens to "
+"each notice type on the dashboard and in the admin bar panel."
+msgstr ""
+"S'applique lorsque Général → L'expérience d'affichage est un tableau de bord"
+" propre + boîte de réception / barre d'administration ou barre d'outils "
+"seulement (ou des modes avancés correspondants). Choisissez ce qui arrive à "
+"chaque type d'avis sur le tableau de bord et dans le panneau de barre "
+"d'administration."
+
+#: admin/partials/edminboost-anm-settings-page.php:288
+msgid "Standard notices (severity levels)"
+msgstr "Avis standard (niveaux de gravité)"
+
+#: admin/partials/edminboost-anm-settings-page.php:310
+msgid "Non-standard notices"
+msgstr "Avis non standard"
+
+#: admin/partials/edminboost-anm-settings-page.php:311
+msgid ""
+"Notices from plugins and themes without a success, error, warning, or info "
+"class."
+msgstr ""
+"Avis de plugins et de thèmes sans succès, erreur, avertissement ou classe "
+"info."
+
+#: admin/partials/edminboost-anm-settings-page.php:316
+msgid "No level notices"
+msgstr "Aucun avis de niveau"
+
+#: admin/partials/edminboost-anm-settings-page.php:328
+msgid ""
+"Skip interception for notices matching these jQuery-compatible selectors "
+"(comma-separated)."
+msgstr ""
+"Passer l'interception pour les avis correspondant à ces sélecteurs jQuery-"
+"compatible (comma-séparés)."
+
+#: admin/partials/edminboost-anm-settings-page.php:329
+msgid "CSS ignore selectors"
+msgstr "CSS ignore les sélecteurs"
+
+#: admin/partials/edminboost-anm-settings-page.php:364
+msgid "Hide notifications from all users"
+msgstr "Cacher les notifications de tous les utilisateurs"
+
+#: admin/partials/edminboost-anm-settings-page.php:365
+msgid "Hide notifications only from these users"
+msgstr "Masquer les notifications uniquement de ces utilisateurs"
+
+#: admin/partials/edminboost-anm-settings-page.php:366
+msgid "Hide notifications to all users but not these"
+msgstr "Masquer les notifications à tous les utilisateurs mais pas celles-ci"
+
+#: admin/partials/edminboost-anm-settings-page.php:368
+msgid ""
+"Whether users with this role still see intercepted notices on the dashboard."
+msgstr ""
+"Indique si les utilisateurs avec ce rôle voient toujours des avis "
+"interceptés sur le tableau de bord."
+
+#: admin/partials/edminboost-anm-settings-page.php:372
+msgid ""
+"Control which roles and individual accounts are affected by notice hiding. "
+"Role rules apply first; user rules refine who still gets interception."
+msgstr ""
+"Contrôler les rôles et les comptes individuels touchés par la dissimulation "
+"des avis. Les règles du rôle s'appliquent d'abord; les règles de "
+"l'utilisateur précisent qui reçoit encore l'interception."
+
+#: admin/partials/edminboost-anm-settings-page.php:373
+msgid "By role (ACL)"
+msgstr "Par rôle (ACL)"
+
+#: admin/partials/edminboost-anm-settings-page.php:388
+msgid "Display notifications"
+msgstr "Afficher les notifications"
+
+#: admin/partials/edminboost-anm-settings-page.php:389
+msgid "Do not display notifications"
+msgstr "Ne pas afficher les notifications"
+
+#: admin/partials/edminboost-anm-settings-page.php:395
+msgid "By user account"
+msgstr "Par compte utilisateur"
+
+#: admin/partials/edminboost-anm-settings-page.php:399
+msgid ""
+"Refine notice hiding per user account. Role ACL applies first; these options"
+" limit which accounts are affected."
+msgstr ""
+"Affiner l'avis se cachant par compte utilisateur. Rôle L'ACL s'applique en "
+"premier; ces options limitent les comptes touchés."
+
+#: admin/partials/edminboost-anm-settings-page.php:400
+#: admin/partials/edminboost-anm-settings-page.php:404
+msgid "Visibility"
+msgstr "Visibilité"
+
+#: admin/partials/edminboost-anm-settings-page.php:433
+#: includes/class-edminboost-anm-admin.php:216
+msgid "Remove user"
+msgstr "Supprimer l' utilisateur"
+
+#: admin/partials/edminboost-anm-settings-page.php:446
+msgid "select user(s)"
+msgstr "sélectionner l'utilisateur(s)"
+
+#: admin/partials/edminboost-anm-settings-page.php:448
+msgid "Search users"
+msgstr "Utilisateurs de recherche"
+
+#: admin/partials/edminboost-anm-settings-page.php:484
+msgid "Admin bar panel"
+msgstr "Panneau de barre d'administration"
+
+#: admin/partials/edminboost-anm-settings-page.php:486
+msgid ""
+"Adds a WordPress admin bar entry so users can open captured notices without "
+"visiting the Inbox."
+msgstr ""
+"Ajoute une entrée de barre d'administration WordPress afin que les "
+"utilisateurs puissent ouvrir les avis capturés sans visiter la boîte de "
+"réception."
+
+#: admin/partials/edminboost-anm-settings-page.php:487
+msgid "Configure how captured notices appear in the WordPress admin bar."
+msgstr ""
+"Configurez comment les avis capturés apparaissent dans la barre "
+"d'administration WordPress."
+
+#: admin/partials/edminboost-anm-settings-page.php:492
+msgid ""
+"Choose how the admin bar entry looks: text link, bell icon, or a dropdown "
+"panel with recent inbox notices."
+msgstr ""
+"Choisissez l'apparence de l'entrée de la barre d'administration : lien "
+"texte, icône de cloche, ou un panneau déroulant avec des avis de boîte de "
+"réception récents."
+
+#: admin/partials/edminboost-anm-settings-page.php:493
+msgid "Panel style"
+msgstr "Style de panneau"
+
+#: admin/partials/edminboost-anm-settings-page.php:505
+msgid ""
+"How unread notices appear on the bell icon for bell and dropdown panel "
+"styles."
+msgstr ""
+"Comment les avis non lus apparaissent sur l'icône de cloche pour les styles "
+"de cloche et de panneau déroulant."
+
+#: admin/partials/edminboost-anm-settings-page.php:506
+msgid "Unread indicator"
+msgstr "Indicateur non lu"
+
+#: admin/partials/edminboost-anm-settings-page.php:518
+msgid ""
+"Colors apply to the bell badge, Howdy dot, dropdown count pill, and footer "
+"links."
+msgstr ""
+"Les couleurs s'appliquent à l'insigne de cloche, Howdy point, compte "
+"déroulant pilule, et les liens de pied de page."
+
+#: admin/partials/edminboost-anm-settings-page.php:519
+#: admin/partials/edminboost-anm-settings-page.php:523
+msgid "Panel colors"
+msgstr "Couleurs du panneau"
+
+#: admin/partials/edminboost-anm-settings-page.php:525
+msgid "Dot / badge"
+msgstr "Point / badge"
+
+#: admin/partials/edminboost-anm-settings-page.php:529
+msgid "Badge number text"
+msgstr "Numéro d'insigne texte"
+
+#: admin/partials/edminboost-anm-settings-page.php:533
+msgid "Accent (count pill & links)"
+msgstr "Accent (comprimé et liens)"
+
+#: admin/partials/edminboost-anm-settings-page.php:537
+msgid "Link hover"
+msgstr "Volée de liaison"
+
+#: admin/partials/edminboost-anm-settings-page.php:541
+msgid "Open bell highlight"
+msgstr "Ouverture de la cloche"
+
+#: admin/partials/edminboost-anm-settings-page.php:549
+msgid ""
+"Choose where the panel appears in the WordPress admin bar — left cluster, "
+"top-right area, or beside the profile menu."
+msgstr ""
+"Choisissez où le panneau apparaît dans la barre d'administration WordPress —"
+" cluster gauche, zone en haut à droite, ou à côté du menu profil."
+
+#: admin/partials/edminboost-anm-settings-page.php:550
+msgid "Panel position"
+msgstr "Position du panneau"
+
+#: admin/partials/edminboost-anm-settings-page.php:564
+msgid "Panel preview"
+msgstr "Aperçu du panneau"
+
+#: admin/partials/edminboost-anm-settings-page.php:565
+msgid ""
+"Updates as you change style, position, badge, and colors. Sample notices "
+"shown for layout only."
+msgstr ""
+"Mettre à jour lorsque vous changez de style, de position, de badge et de "
+"couleurs. Exemples d'avis présentés pour la mise en page seulement."
+
+#: admin/partials/edminboost-anm-settings-page.php:582
+msgid "Upsell blacklist"
+msgstr "Liste noire Upsell"
+
+#: admin/partials/edminboost-anm-settings-page.php:583
+msgid ""
+"Suppress review requests, promotional nags, and upsell notices that match "
+"these phrases."
+msgstr ""
+"Supprimez les demandes d'examen, les messages promotionnels et les avis de "
+"mise à jour qui correspondent à ces phrases."
+
+#: admin/partials/edminboost-anm-settings-page.php:587
+msgid ""
+"Suppress review requests, promotional nags, and upsell notices that match "
+"built-in and custom phrases."
+msgstr ""
+"Supprimez les demandes d'examen, les messages promotionnels et les avis de "
+"mise à jour qui correspondent aux phrases intégrées et personnalisées."
+
+#: admin/partials/edminboost-anm-settings-page.php:588
+msgid "Upsell preset"
+msgstr "Préréglage de la vente"
+
+#: admin/partials/edminboost-anm-settings-page.php:593
+msgid "Enable \"Kill All Upsells\" preset"
+msgstr "Activer le préréglage \"Kill All Upsells\""
+
+#. translators: %d: built-in phrase count
+#: admin/partials/edminboost-anm-settings-page.php:603
+#, php-format
+msgid ""
+"One phrase per line. Custom phrases always suppress matching notices. %d "
+"built-in phrases apply when \"Kill All Upsells\" is enabled; duplicates are "
+"ignored."
+msgstr ""
+"Une phrase par ligne. Les phrases personnalisées suppriment toujours les "
+"avis correspondants. Les phrases intégrées %d s'appliquent lorsque \"Kill "
+"All Upsells\" est activé ; les duplicatas sont ignorés."
+
+#: admin/partials/edminboost-anm-settings-page.php:608
+msgid "Custom phrases"
+msgstr "Expressions personnalisées"
+
+#: admin/partials/edminboost-anm-settings-page.php:611
+msgid "One phrase per line, e.g.&#10;try our pro version&#10;limited offer"
+msgstr ""
+"Une phrase par ligne, p.ex.&#10; essai notre version pro&#10; offre limitée"
+
+#. translators: %d: custom phrase count
+#: admin/partials/edminboost-anm-settings-page.php:618
+#, php-format
+msgid "You have %d custom phrase(s)."
+msgstr "Vous avez %d personal phrase(s)."
+
+#: admin/partials/edminboost-anm-settings-page.php:631
+msgid "Spam words & whitelist"
+msgstr "Pourriel & liste blanche"
+
+#: admin/partials/edminboost-anm-settings-page.php:635
+msgid ""
+"Notices containing any of these words (comma-separated) will not be shown on"
+" the dashboard."
+msgstr ""
+"Les avis contenant l'un de ces mots (comma-séparé) ne seront pas affichés "
+"sur le tableau de bord."
+
+#: admin/partials/edminboost-anm-settings-page.php:636
+#: admin/partials/edminboost-anm-settings-page.php:639
+msgid "Spam words"
+msgstr "Pourriels"
+
+#: admin/partials/edminboost-anm-settings-page.php:645
+msgid "e.g. limited offer, buy now, rate us"
+msgstr "Par exemple, offre limitée, acheter maintenant, nous évaluer"
+
+#: admin/partials/edminboost-anm-settings-page.php:647
+#: admin/partials/edminboost-anm-settings-page.php:664
+msgid "Enter words separated by commas."
+msgstr "Entrez les mots séparés par des virgules."
+
+#: admin/partials/edminboost-anm-settings-page.php:652
+msgid ""
+"Notices with any whitelist word stay on screen and are not intercepted by "
+"this plugin."
+msgstr ""
+"Les avis avec n'importe quel mot de liste blanche restent à l'écran et ne "
+"sont pas interceptés par ce plugin."
+
+#: admin/partials/edminboost-anm-settings-page.php:653
+#: admin/partials/edminboost-anm-settings-page.php:656
+msgid "Whitelist"
+msgstr "Liste blanche"
+
+#: admin/partials/edminboost-anm-settings-page.php:662
+msgid "e.g. security update, action required"
+msgstr "Mise à jour de sécurité, mesures à prendre"
+
+#: admin/partials/edminboost-anm-settings-page.php:680
+msgid "Core Safety & Client Shield"
+msgstr "Sécurité de base et bouclier client"
+
+#: admin/partials/edminboost-anm-settings-page.php:685
+msgid "Critical Safety Guard"
+msgstr "Garde de sécurité critique"
+
+#: admin/partials/edminboost-anm-settings-page.php:690
+msgid ""
+"Protect WordPress core security alerts, PHP fatal errors, and SSL warnings "
+"from accidental filtering."
+msgstr ""
+"Protéger les alertes de sécurité de base WordPress, les erreurs fatales PHP "
+"et les avertissements SSL du filtrage accidentel."
+
+#: admin/partials/edminboost-anm-settings-page.php:692
+msgid "Safety guard"
+msgstr "Garde de sécurité"
+
+#: admin/partials/edminboost-anm-settings-page.php:697
+msgid "Enable strict protection"
+msgstr "Activer une protection stricte"
+
+#: admin/partials/edminboost-anm-settings-page.php:701
+msgid "ENABLED (Strict Protection)"
+msgstr "ENABLE (Protection stricte)"
+
+#: admin/partials/edminboost-anm-settings-page.php:711
+msgid "Client Shield Mode"
+msgstr "Mode de bouclier client"
+
+#: admin/partials/edminboost-anm-settings-page.php:715
+msgid ""
+"Hide plugin and theme update notices and promotional nags from selected non-"
+"admin roles."
+msgstr ""
+"Cacher les avis de mise à jour de plugin et de thème et les nags "
+"promotionnels de certains rôles non administratifs."
+
+#: admin/partials/edminboost-anm-settings-page.php:718
+msgid "Client shield"
+msgstr "Protège-clients"
+
+#: admin/partials/edminboost-anm-settings-page.php:723
+msgid "Enable Client Shield Mode"
+msgstr "Activer le mode de bouclier client"
+
+#: admin/partials/edminboost-anm-settings-page.php:729
+msgid ""
+"Which roles receive the Client Shield experience when shield mode is "
+"enabled."
+msgstr ""
+"Quels rôles reçoivent l'expérience du bouclier client lorsque le mode "
+"bouclier est activé."
+
+#: admin/partials/edminboost-anm-settings-page.php:730
+msgid "Roles to shield"
+msgstr "Rôles à protéger"
+
+#: admin/partials/edminboost-anm-settings-page.php:757
+#: admin/partials/edminboost-anm-settings-page.php:763
+msgid "Block ad redirects"
+msgstr "Bloquer les redirections publicitaires"
+
+#: admin/partials/edminboost-anm-settings-page.php:762
+msgid ""
+"Block admin URLs that plugins open automatically after install or update "
+"(announcements, promotions, etc.)."
+msgstr ""
+"Block URLs admin que les plugins s'ouvrent automatiquement après "
+"l'installation ou la mise à jour (annonces, promotions, etc.)."
+
+#: admin/partials/edminboost-anm-settings-page.php:768
+msgid "Prevent listed admin URLs from loading automatically"
+msgstr "Empêcher le chargement automatique des URL d'administration listées"
+
+#: admin/partials/edminboost-anm-settings-page.php:774
+msgid "Blocked URLs"
+msgstr "URLs bloquées"
+
+#: admin/partials/edminboost-anm-settings-page.php:778
+msgid ""
+"Some plugins open a page automatically after installation or update to show "
+"announcements, promotions, or other information. Enter the URLs of those "
+"pages here to prevent them from opening automatically."
+msgstr ""
+"Certains plugins ouvrent une page automatiquement après l'installation ou la"
+" mise à jour pour afficher des annonces, des promotions ou d'autres "
+"informations. Saisissez les URL de ces pages ici pour les empêcher d'ouvrir "
+"automatiquement."
+
+#: admin/partials/edminboost-anm-settings-page.php:783
+#: admin/partials/edminboost-anm-settings-page.php:790
+#: admin/partials/edminboost-anm-settings-page.php:791
+#: admin/partials/edminboost-anm-settings-page.php:808
+msgid "URL to block"
+msgstr "URL à bloquer"
+
+#: admin/partials/edminboost-anm-settings-page.php:798
+#: admin/partials/edminboost-anm-settings-page.php:814
+msgid "e.g. admin.php?page=my-plugin-welcome"
+msgstr "Par exemple admin.php?page=mon-plugin-welcome"
+
+#: admin/partials/edminboost-anm-settings-page.php:802
+#: admin/partials/edminboost-anm-settings-page.php:820
+msgid "Remove"
+msgstr "Supprimer"
+
+#: admin/partials/edminboost-anm-settings-page.php:826
+msgid "Add URL"
+msgstr "Ajouter une URL"
+
+#: admin/partials/edminboost-anm-settings-page.php:844
+msgid "Notifications & Digests"
+msgstr "Notifications & Dossiers"
+
+#: admin/partials/edminboost-anm-settings-page.php:849
+msgid "Weekly \"Notice Diet\" Email Digest"
+msgstr "Digest d'email hebdomadaire \"Attention Diet\""
+
+#: admin/partials/edminboost-anm-settings-page.php:856
+msgid ""
+"Sends a weekly plain-text email summary of silenced notices via WordPress "
+"wp_mail()."
+msgstr ""
+"Envoie chaque semaine un résumé en texte clair des avis silencieux via "
+"WordPress wp mail()."
+
+#: admin/partials/edminboost-anm-settings-page.php:857
+msgid "Email digest"
+msgstr "Digest du courrier électronique"
+
+#: admin/partials/edminboost-anm-settings-page.php:862
+msgid ""
+"Send a weekly summary report to site admins detailing silenced notices."
+msgstr ""
+"Envoyer un rapport sommaire hebdomadaire aux administrateurs de site "
+"détaillant les avis silencieux."
+
+#: admin/partials/edminboost-anm-settings-page.php:868
+msgid "Comma-separated email addresses that receive the weekly digest."
+msgstr ""
+"Adresses électroniques séparées par des virgules qui reçoivent le digest "
+"hebdomadaire."
+
+#: admin/partials/edminboost-anm-settings-page.php:869
+msgid "Recipients"
+msgstr "Bénéficiaires"
+
+#: admin/partials/edminboost-anm-settings-page.php:877
+msgid "Leave blank to use the default subject line for the digest email."
+msgstr ""
+"Laisser en blanc pour utiliser la ligne d'objet par défaut pour l'email "
+"digest."
+
+#: admin/partials/edminboost-anm-settings-page.php:878
+msgid "Email subject"
+msgstr "Sujet du courriel"
+
+#. translators: %s: placeholder token
+#: admin/partials/edminboost-anm-settings-page.php:886
+#, php-format
+msgid "Leave blank for the default subject. Use %s for the site name."
+msgstr ""
+"Laisser en blanc pour le sujet par défaut. Utilisez %s pour le nom du site."
+
+#: admin/partials/edminboost-anm-settings-page.php:895
+msgid ""
+"Opening paragraph at the top of the digest. Leave blank for the default "
+"text."
+msgstr ""
+"Ouverture du paragraphe en haut du digest. Laisser vide pour le texte par "
+"défaut."
+
+#: admin/partials/edminboost-anm-settings-page.php:896
+msgid "Opening message"
+msgstr "Ouverture du message"
+
+#. translators: %s: placeholder token
+#: admin/partials/edminboost-anm-settings-page.php:904
+#, php-format
+msgid "Leave blank for the default opening line. Use %s for the site name."
+msgstr ""
+"Laisser vide pour la ligne d'ouverture par défaut. Utilisez %s pour le nom "
+"du site."
+
+#: admin/partials/edminboost-anm-settings-page.php:913
+msgid ""
+"Choose whether the email includes stats, recent inbox notices, or both."
+msgstr ""
+"Choisissez si le courriel inclut des statistiques, des avis de boîte de "
+"réception récents ou les deux."
+
+#: admin/partials/edminboost-anm-settings-page.php:914
+#: admin/partials/edminboost-anm-settings-page.php:918
+msgid "Email sections"
+msgstr "Sections des courriels"
+
+#: admin/partials/edminboost-anm-settings-page.php:921
+msgid "Include monthly blocked count and active auto-rules"
+msgstr "Inclure le nombre bloqué mensuel et les règles automatiques actives"
+
+#: admin/partials/edminboost-anm-settings-page.php:926
+msgid "Include recent intercepted notices from the inbox"
+msgstr "Inclure les avis interceptés récents de la boîte de réception"
+
+#: admin/partials/edminboost-anm-settings-page.php:933
+msgid ""
+"How many inbox notices to list when the recent notices section is enabled "
+"(1–25)."
+msgstr ""
+"Combien d'avis de boîte de réception à inscrire lorsque la section des avis "
+"récents est activée (1-25)."
+
+#: admin/partials/edminboost-anm-settings-page.php:934
+msgid "Recent notices limit"
+msgstr "Plafond des avis récents"
+
+#: admin/partials/edminboost-anm-settings-page.php:942
+msgid "Optional closing paragraph appended to the digest email."
+msgstr "Facultatif paragraphe de clôture annexé à l'email de digest."
+
+#: admin/partials/edminboost-anm-settings-page.php:943
+msgid "Closing message"
+msgstr "Message de clôture"
+
+#. translators: %s: placeholder token
+#: admin/partials/edminboost-anm-settings-page.php:951
+#, php-format
+msgid "Optional text appended to the email. Use %s for the site name."
+msgstr "Texte optionnel annexé au courriel. Utilisez %s pour le nom du site."
+
+#: admin/partials/edminboost-anm-settings-page.php:963
+msgid "Email preview"
+msgstr "Aperçu des courriels"
+
+#: admin/partials/edminboost-anm-settings-page.php:964
+#: admin/partials/edminboost-anm-settings-page.php:1028
+msgid "Refresh"
+msgstr "Actualiser"
+
+#: admin/partials/edminboost-anm-settings-page.php:966
+msgid ""
+"Updates as you edit. Matches the plain-text email WordPress sends each week."
+msgstr ""
+"Mettre à jour comme vous l'éditez. Correspond à l'email en texte clair que "
+"WordPress envoie chaque semaine."
+
+#: admin/partials/edminboost-anm-settings-page.php:970
+msgid "To"
+msgstr "Aux"
+
+#: admin/partials/edminboost-anm-settings-page.php:974
+msgid "From"
+msgstr "De"
+
+#: admin/partials/edminboost-anm-settings-page.php:990
+msgid ""
+"Opt-in: POST notice summaries to your URL when notices are captured. "
+"Disabled by default; no data is sent until enabled."
+msgstr ""
+"Opt-in: POST avis résumés à votre URL lorsque les avis sont capturés. "
+"Désactivé par défaut; aucune donnée n'est envoyée jusqu'à ce qu'elle soit "
+"activée."
+
+#: admin/partials/edminboost-anm-settings-page.php:991
+msgid "Webhook alerts"
+msgstr "Alertes Webhook"
+
+#: admin/partials/edminboost-anm-settings-page.php:996
+msgid "Enable webhook alert integration (opt-in external transmission)"
+msgstr "Activer l'intégration d'alerte webhook (opt-in transmission externe)"
+
+#: admin/partials/edminboost-anm-settings-page.php:1002
+msgid ""
+"HTTPS endpoint for JSON payloads (Slack, Discord, custom integrations)."
+msgstr ""
+"Paramètres HTTPS pour les charges utiles JSON (Slack, Discord, intégrations "
+"personnalisées)."
+
+#: admin/partials/edminboost-anm-settings-page.php:1003
+msgid "Webhook URL"
+msgstr "URL Webhook"
+
+#: admin/partials/edminboost-anm-settings-page.php:1011
+msgid ""
+"Plain-text alert for the JSON text field. Leave blank for the default; "
+"placeholders are listed below."
+msgstr ""
+"Alerte en texte clair pour le champ de texte JSON. Laisser en blanc pour la "
+"valeur par défaut; les détenteurs de place sont énumérés ci-dessous."
+
+#: admin/partials/edminboost-anm-settings-page.php:1012
+msgid "Alert message"
+msgstr "Message d'alerte"
+
+#: admin/partials/edminboost-anm-settings-page.php:1017
+msgid ""
+"Plain-text alert shown in the JSON `text` field (Slack/Discord). Leave blank"
+" for the default. Placeholders:"
+msgstr ""
+"Alerte en texte clair affichée dans le champ \"texte\" de JSON "
+"(Slack/Discord). Laisser en blanc pour la valeur par défaut. Titulaires:"
+
+#: admin/partials/edminboost-anm-settings-page.php:1027
+msgid "Alert preview"
+msgstr "Aperçu des alertes"
+
+#: admin/partials/edminboost-anm-settings-page.php:1030
+msgid ""
+"Updates as you edit. Placeholders are filled using your latest inbox notice "
+"or sample data."
+msgstr ""
+"Mettre à jour comme vous l'éditez. Les détenteurs de place sont remplis à "
+"l'aide de votre dernier avis de boîte de réception ou de données "
+"d'échantillon."
+
+#: admin/partials/edminboost-anm-settings-page.php:1033
+msgid "Alert text (`text` field)"
+msgstr "Texte d'alerte (champ «texte»)"
+
+#: admin/partials/edminboost-anm-settings-page.php:1035
+msgid "JSON payload"
+msgstr "Charge utile JSON"
+
+#: admin/partials/edminboost-anm-settings-page.php:1058
+msgid "Competitor Importer"
+msgstr "Importateur concurrent"
+
+#: admin/partials/edminboost-anm-settings-page.php:1062
+msgid ""
+"Import rules from legacy Admin Notices Manager–compatible plugins detected "
+"on this site."
+msgstr ""
+"Règles d'importation de l'ancien Admin Notice Manager – plugins compatibles "
+"détectés sur ce site."
+
+#: admin/partials/edminboost-anm-settings-page.php:1063
+msgid "Legacy import"
+msgstr "Importation historique"
+
+#: admin/partials/edminboost-anm-settings-page.php:1067
+msgid "Detected legacy plugin data. Click to import existing rules instantly."
+msgstr ""
+"Données du plugin détectées. Cliquez pour importer les règles existantes "
+"instantanément."
+
+#: admin/partials/edminboost-anm-settings-page.php:1070
+msgid ""
+"No legacy Admin Notices Manager data detected. You can still run the "
+"importer to seed default rules."
+msgstr ""
+"Aucune donnée du gestionnaire des avis administratifs n'a été détectée. Vous"
+" pouvez toujours exécuter l'importateur aux règles par défaut de semences."
+
+#: admin/partials/edminboost-anm-settings-page.php:1073
+msgid "Run One-Click Importer"
+msgstr "Lancez un seul clic Importateur"
+
+#: admin/partials/edminboost-anm-settings-page.php:1079
+msgid "Agency JSON Configuration"
+msgstr "Configuration JSON de l'Agence"
+
+#: admin/partials/edminboost-anm-settings-page.php:1083
+msgid "Download your rules as JSON for backup or deployment to client sites."
+msgstr ""
+"Téléchargez vos règles en tant que JSON pour la sauvegarde ou le déploiement"
+" sur les sites clients."
+
+#: admin/partials/edminboost-anm-settings-page.php:1084
+msgid "Export"
+msgstr "Exportations"
+
+#: admin/partials/edminboost-anm-settings-page.php:1088
+msgid "Export Rules (JSON)"
+msgstr "Règles d'exportation (JSON)"
+
+#: admin/partials/edminboost-anm-settings-page.php:1094
+msgid "Upload a JSON rules file exported from this plugin or another site."
+msgstr ""
+"Télécharger un fichier de règles JSON exporté depuis ce plugin ou un autre "
+"site."
+
+#: admin/partials/edminboost-anm-settings-page.php:1095
+msgid "Import"
+msgstr "Importation"
+
+#: admin/partials/edminboost-anm-settings-page.php:1100
+msgid "Import Rules"
+msgstr "Règles d'importation"
+
+#: includes/class-edminboost-anm-admin.php:33
+#: includes/class-edminboost-anm-admin.php:34
+msgid "Notice Manager"
+msgstr "Gestionnaire d'avis"
+
+#: includes/class-edminboost-anm-admin.php:44
+#: includes/class-edminboost-anm-admin.php:45
+#: includes/class-edminboost-anm-admin.php:258
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
+#: includes/class-edminboost-anm-admin.php:53
+#: includes/class-edminboost-anm-admin.php:54
+msgid "Notice Inbox"
+msgstr "Boîte de réception des avis"
+
+#: includes/class-edminboost-anm-admin.php:62
+#: includes/class-edminboost-anm-admin.php:63
+msgid "Auto-Rules"
+msgstr "Règles automatiques"
+
+#: includes/class-edminboost-anm-admin.php:194
+msgid "Settings saved."
+msgstr "Paramètres enregistrés."
+
+#: includes/class-edminboost-anm-admin.php:195
+msgid "Delete this rule?"
+msgstr "Supprimer cette règle ?"
+
+#: includes/class-edminboost-anm-admin.php:196
+msgid "Rule saved."
+msgstr "Règle sauvée."
+
+#: includes/class-edminboost-anm-admin.php:197
+msgid "Rule deleted."
+msgstr "Règle supprimée."
+
+#: includes/class-edminboost-anm-admin.php:198
+msgid "Import completed."
+msgstr "Importation terminée."
+
+#: includes/class-edminboost-anm-admin.php:199
+msgid "Import failed."
+msgstr "L'importation a échoué."
+
+#: includes/class-edminboost-anm-admin.php:200
+msgid "Action completed."
+msgstr "Action terminée."
+
+#: includes/class-edminboost-anm-admin.php:201
+msgid "Action failed."
+msgstr "L'action a échoué."
+
+#: includes/class-edminboost-anm-admin.php:203
+msgid "Edit Filter Rule"
+msgstr "Modifier la règle du filtre"
+
+#: includes/class-edminboost-anm-admin.php:206
+#, php-format
+msgid "Added %1$d test notices to the inbox (%2$d skipped as duplicates)."
+msgstr "Ajout des avis de test %1$d à la boîte de réception (%2$d en double)."
+
+#: includes/class-edminboost-anm-admin.php:207
+msgid "Could not seed test notices."
+msgstr "Impossible d'obtenir des avis de tests de semences."
+
+#: includes/class-edminboost-anm-admin.php:208
+msgid "Could not trigger live test notices."
+msgstr "Impossible de déclencher des avis de test en direct."
+
+#: includes/class-edminboost-anm-admin.php:209
+msgid "Select at least one notice level."
+msgstr "Sélectionnez au moins un niveau de préavis."
+
+#: includes/class-edminboost-anm-admin.php:210
+msgid "View Inbox"
+msgstr "Afficher la boîte de réception"
+
+#: includes/class-edminboost-anm-admin.php:211
+msgid "Converted to rule"
+msgstr "Converti en règle"
+
+#: includes/class-edminboost-anm-admin.php:213
+msgid "Already converted to a rule."
+msgstr "Déjà converti en règle."
+
+#: includes/class-edminboost-anm-admin.php:214
+msgid "Type at least 2 characters to search users."
+msgstr "Saisissez au moins 2 caractères pour rechercher les utilisateurs."
+
+#: includes/class-edminboost-anm-admin.php:215
+msgid "No users found."
+msgstr "Aucun utilisateur trouvé."
+
+#: includes/class-edminboost-anm-admin.php:217
+msgid "Hidden notices were reset."
+msgstr "Les avis cachés ont été réinitialisés."
+
+#: includes/class-edminboost-anm-admin.php:218
+msgid "Could not reset hidden notices."
+msgstr "Impossible de réinitialiser les avis cachés."
+
+#: includes/class-edminboost-anm-admin.php:219
+msgid "Reset hidden notice preferences for every user on this site?"
+msgstr "Réinitialiser les préférences de chaque utilisateur sur ce site ?"
+
+#: includes/class-edminboost-anm-admin.php:220
+#: includes/class-edminboost-anm-admin.php:227
+msgid "Loading preview…"
+msgstr "Chargement de l'aperçu..."
+
+#: includes/class-edminboost-anm-admin.php:221
+msgid "Could not load digest preview."
+msgstr "Impossible de charger l'aperçu digest."
+
+#: includes/class-edminboost-anm-admin.php:222
+#: includes/class-edminboost-anm-digest.php:198
+msgid "At a glance"
+msgstr "En un coup d'oeil"
+
+#: includes/class-edminboost-anm-admin.php:223
+#: includes/class-edminboost-anm-digest.php:213
+msgid "Recent intercepted notices"
+msgstr "Avis récemment interceptés"
+
+#: includes/class-edminboost-anm-admin.php:224
+#: includes/class-edminboost-anm-digest.php:216
+msgid "No intercepted notices in the inbox yet."
+msgstr "Aucun avis intercepté dans la boîte de réception."
+
+#: includes/class-edminboost-anm-admin.php:225
+msgid "Blocked this month"
+msgstr "Bloqué ce mois-ci"
+
+#: includes/class-edminboost-anm-admin.php:226
+msgid "Active auto-rules"
+msgstr "Règles automatiques actives"
+
+#: includes/class-edminboost-anm-admin.php:228
+msgid "Could not load webhook preview."
+msgstr "Impossible de charger l'aperçu webhook."
+
+#: includes/class-edminboost-anm-admin.php:229
+msgid "Sample notice"
+msgstr "Exemple d'avis"
+
+#: includes/class-edminboost-anm-admin.php:230
+msgid "Based on your latest inbox notice"
+msgstr "Basé sur votre dernier avis de boîte de réception"
+
+#: includes/class-edminboost-anm-admin.php:234
+msgid "Howdy, Admin"
+msgstr "Bonjour, Admin"
+
+#: includes/class-edminboost-anm-admin.php:235
+msgid "My Site"
+msgstr "Mon site"
+
+#: includes/class-edminboost-anm-admin.php:236
+msgid ""
+"There is a new version of Akismet Anti-spam available. View version 5.3.3 "
+"details or update now."
+msgstr ""
+"Une nouvelle version de Akismet Anti-spam est disponible. Voir la version "
+"5.3.3 détails ou mettre à jour maintenant."
+
+#: includes/class-edminboost-anm-admin.php:237
+msgid "Akismet Anti-spam"
+msgstr "Akismet Anti-spam"
+
+#: includes/class-edminboost-anm-admin.php:238
+msgid ""
+"Enjoying WPForms? Please leave us a review on WordPress.org — it only takes "
+"a minute."
+msgstr ""
+"Vous aimez WPForms? Laissez-nous un avis sur WordPress.org — cela ne prend "
+"qu'une minute."
+
+#: includes/class-edminboost-anm-admin.php:239
+msgid "WPForms"
+msgstr "WPForms"
+
+#: includes/class-edminboost-anm-admin.php:240
+msgid ""
+"Your license key expires in 14 days. Renew now to keep receiving updates and"
+" support."
+msgstr ""
+"Votre clé de licence expire dans 14 jours. Renouvelez maintenant pour "
+"continuer à recevoir les mises à jour et le soutien."
+
+#: includes/class-edminboost-anm-admin.php:241
+msgid "Advanced Custom Fields"
+msgstr "Champs personnalisés avancés"
+
+#: includes/class-edminboost-anm-admin.php:242
+#: includes/class-edminboost-anm-webhook.php:165
+msgid ""
+"Your license will expire in 3 days. Renew now to keep receiving updates and "
+"support."
+msgstr ""
+"Votre licence expirera dans 3 jours. Renouvelez maintenant pour continuer à "
+"recevoir les mises à jour et le soutien."
+
+#: includes/class-edminboost-anm-admin.php:243
+msgid ""
+"Thanks for using Yoast SEO! Could you take a moment to leave a five-star "
+"review on WordPress.org?"
+msgstr ""
+"Merci d'avoir utilisé Yoast SEO! Pourriez-vous prendre un moment pour "
+"laisser un commentaire cinq étoiles sur WordPress.org ?"
+
+#: includes/class-edminboost-anm-admin.php:244
+msgid "Yoast SEO"
+msgstr "Yoast SEO"
+
+#: includes/class-edminboost-anm-admin.php:250
+msgid "Mar 15, 2024 10:30 am"
+msgstr "15 mars, 2024 10h30"
+
+#: includes/class-edminboost-anm-admin.php:255
+msgid ""
+"Notices stay on the dashboard. Inbox and admin bar stay available for "
+"optional use."
+msgstr ""
+"Les avis restent sur le tableau de bord. Boîte de réception et barre "
+"d'administration restent disponibles pour une utilisation facultative."
+
+#: includes/class-edminboost-anm-admin.php:256
+msgid ""
+"Matching notices leave the dashboard and appear in the inbox and admin bar "
+"panel."
+msgstr ""
+"Les avis correspondants quittent le tableau de bord et apparaissent dans la "
+"boîte de réception et le panneau de barre d'administration."
+
+#: includes/class-edminboost-anm-admin.php:257
+msgid ""
+"Every notice is suppressed on the dashboard unless a rule allows it through."
+msgstr ""
+"Chaque avis est supprimé sur le tableau de bord à moins qu'une règle ne le "
+"permette."
+
+#: includes/class-edminboost-anm-admin.php:259
+msgid "Dashboard notice area is clear."
+msgstr "Le tableau de bord est clair."
+
+#: includes/class-edminboost-anm-admin.php:260
+msgid "No notices shown on the dashboard."
+msgstr "Pas d'avis sur le tableau de bord."
+
+#: includes/class-edminboost-anm-admin.php:261
+msgid "Matching notices appear in the inbox and admin bar panel above."
+msgstr ""
+"Les avis correspondants apparaissent dans la boîte de réception et le "
+"panneau de barre d'administration ci-dessus."
+
+#: includes/class-edminboost-anm-admin.php:262
+msgid "WordPress 6.7 is available. Please update now."
+msgstr "WordPress 6.7 est disponible. Veuillez mettre à jour."
+
+#: includes/class-edminboost-anm-admin.php:263
+msgid "Please activate your SEO plugin license to receive updates."
+msgstr ""
+"Veuillez activer votre licence de plugin SEO pour recevoir les mises à jour."
+
+#: includes/class-edminboost-anm-admin.php:264
+msgid "You have a new form submission waiting in your inbox."
+msgstr ""
+"Vous avez une nouvelle soumission de formulaire en attente dans votre boîte "
+"de réception."
+
+#: includes/class-edminboost-anm-admin.php:265
+msgid "There are updates available for 3 plugins. View details or update now."
+msgstr ""
+"Il y a des mises à jour disponibles pour 3 plugins. Afficher les détails ou "
+"mettre à jour maintenant."
+
+#: includes/class-edminboost-anm-admin.php:266
+msgid ""
+"Thanks for using Contact Form 7! Please leave us a review on WordPress.org."
+msgstr ""
+"Merci d'utiliser le formulaire de contact 7! Veuillez nous laisser un "
+"commentaire sur WordPress.org."
+
+#: includes/class-edminboost-anm-admin.php:267
+msgid "Hidden for you"
+msgstr "Caché pour toi"
+
+#: includes/class-edminboost-anm-admin.php:268
+msgid "The WordPress core update nag is hidden from the dashboard."
+msgstr "La mise à jour du noyau WordPress nag est cachée du tableau de bord."
+
+#: includes/class-edminboost-anm-admin.php:269
+msgid "Plugin and theme update nags are hidden from the dashboard."
+msgstr "Plugin et mise à jour de thème sont cachés dans le tableau de bord."
+
+#: includes/class-edminboost-anm-admin.php:270
+msgid "Core and plugin or theme update nags are hidden from the dashboard."
+msgstr ""
+"Le noyau et le plugin ou le thème mise à jour nags sont cachés du tableau de"
+" bord."
+
+#: includes/class-edminboost-anm-admin.php:271
+msgid "Reset clears hidden-notice preferences for every user on this site."
+msgstr ""
+"Réinitialiser efface les préférences de chaque utilisateur sur ce site."
+
+#: includes/class-edminboost-anm-admin.php:309
+msgid "Docs"
+msgstr "Docteurs"
+
+#: includes/class-edminboost-anm-admin.php:322
+#: includes/class-edminboost-anm-admin.php:412
+#: includes/class-edminboost-anm-admin.php:439
+#: includes/class-edminboost-anm-admin.php:463
+msgid "You do not have permission to access this page."
+msgstr "Vous n'avez pas la permission d'accéder à cette page."
+
+#: includes/class-edminboost-anm-ajax.php:60
+#: includes/class-edminboost-anm-ajax.php:639
+msgid "Permission denied."
+msgstr "Autorisation refusée."
+
+#: includes/class-edminboost-anm-ajax.php:73
+msgid "Debug tools are unavailable."
+msgstr "Les outils de débogage ne sont pas disponibles."
+
+#: includes/class-edminboost-anm-ajax.php:133
+#: includes/class-edminboost-anm-ajax.php:176
+msgid "Rule not found."
+msgstr "Règle non trouvée."
+
+#: includes/class-edminboost-anm-ajax.php:305
+#: includes/class-edminboost-anm-ajax.php:404
+#: includes/class-edminboost-anm-inbox.php:717
+#: includes/class-edminboost-anm-inbox.php:803
+msgid "Invalid action."
+msgstr "Action non valide."
+
+#. translators: 1: display name, 2: login
+#. translators: 1: action label, 2: notice count phrase
+#: includes/class-edminboost-anm-ajax.php:348
+#: includes/class-edminboost-anm-notices.php:359
+#: includes/class-edminboost-anm-settings.php:930
+#, php-format
+msgid "%1$s (%2$s)"
+msgstr "%1$s (%2$s)"
+
+#: includes/class-edminboost-anm-ajax.php:374
+msgid "You do not have permission to reset hidden notices for all users."
+msgstr ""
+"Vous n'avez pas la permission de réinitialiser les avis cachés pour tous les"
+" utilisateurs."
+
+#: includes/class-edminboost-anm-ajax.php:384
+msgid "Hidden notice preferences were reset for all users."
+msgstr ""
+"Les préférences des avis cachés ont été réinitialisées pour tous les "
+"utilisateurs."
+
+#: includes/class-edminboost-anm-ajax.php:385
+msgid "Hidden notice preferences were reset for your account."
+msgstr "Les préférences cachées ont été réinitialisées pour votre compte."
+
+#: includes/class-edminboost-anm-ajax.php:399
+#: includes/class-edminboost-anm-ajax.php:431
+msgid "Plugin disabled."
+msgstr "Plugin désactivé."
+
+#: includes/class-edminboost-anm-ajax.php:475
+msgid "No file uploaded."
+msgstr "Aucun fichier téléchargé."
+
+#: includes/class-edminboost-anm-ajax.php:525
+msgid "Enable notice interception first using Quick Status on the Dashboard."
+msgstr ""
+"Activer l'interception des avis d'abord en utilisant l'état rapide sur le "
+"tableau de bord."
+
+#: includes/class-edminboost-anm-ajax.php:583
+msgid ""
+"Select at least one notice level (error, warning, success, and others)."
+msgstr ""
+"Sélectionnez au moins un niveau de préavis (erreur, avertissement, succès, "
+"etc.)."
+
+#: includes/class-edminboost-anm-debug.php:149
+#: includes/class-edminboost-anm-debug.php:155
+#: includes/class-edminboost-anm-debug.php:161
+#: includes/class-edminboost-anm-debug.php:167
+#: includes/class-edminboost-anm-debug.php:173
+#: includes/class-edminboost-anm-debug.php:179
+msgid "ANM Test Notices"
+msgstr "Avis d'essai de l'ANM"
+
+#: includes/class-edminboost-anm-debug.php:204
+msgid "Debug: ANM Test Notices"
+msgstr "Débogue : Avis d'essai de l'ANM"
+
+#. translators: %s: short random token
+#: includes/class-edminboost-anm-debug.php:222
+#, php-format
+msgid "(run %s)"
+msgstr "(course %s)"
+
+#. translators: %s: short random token
+#: includes/class-edminboost-anm-debug.php:309
+#, php-format
+msgid "(live %s)"
+msgstr "(Live %s)"
+
+#: includes/class-edminboost-anm-debug.php:319
+msgid "Test Notice:"
+msgstr "Avis d'essai :"
+
+#. translators: %s: site name
+#: includes/class-edminboost-anm-digest.php:81
+#, php-format
+msgid "[%s] Weekly Notice Diet Digest"
+msgstr "[%s] Avis hebdomadaire Diet Digest"
+
+#. translators: %s: site name
+#: includes/class-edminboost-anm-digest.php:95
+#, php-format
+msgid "Weekly summary of silenced admin notices for %s."
+msgstr "Résumé hebdomadaire des avis d'administration silencieux pour %s."
+
+#. translators: %d: number of blocked notices
+#: includes/class-edminboost-anm-digest.php:201
+#, php-format
+msgid "Notices blocked this month: %d"
+msgstr "Avis bloqués ce mois-ci : %d"
+
+#. translators: %d: number of active rules
+#: includes/class-edminboost-anm-digest.php:206
+#, php-format
+msgid "Active auto-rules: %d"
+msgstr "Règles automatiques actives : %d"
+
+#. translators: 1: list number, 2: notice source
+#: includes/class-edminboost-anm-digest.php:223
+#, php-format
+msgid "%1$d. %2$s"
+msgstr "%1$d. %2$s"
+
+#: includes/class-edminboost-anm-importer.php:61
+msgid "No legacy plugin data detected."
+msgstr "Aucune donnée de plugin ancienne détectée."
+
+#: includes/class-edminboost-anm-importer.php:176
+msgid "Invalid JSON file."
+msgstr "Dossier JSON non valide."
+
+#: includes/class-edminboost-anm-inbox.php:418
+#: includes/class-edminboost-anm-inbox.php:419
+msgid "Warning (Critical)"
+msgstr "Avertissement (critique)"
+
+#: includes/class-edminboost-anm-inbox.php:420
+msgid "Promotion (Upsell)"
+msgstr "Promotion (vente)"
+
+#: includes/class-edminboost-anm-inbox.php:694
+msgid "Could not identify this notice."
+msgstr "Impossible d'identifier cet avis."
+
+#: includes/class-edminboost-anm-inbox.php:730
+#: includes/class-edminboost-anm-inbox.php:777
+#: includes/class-edminboost-anm-rules.php:722
+#: includes/class-edminboost-anm-rules.php:764
+msgid "Notice not found."
+msgstr "Avis non trouvé."
+
+#: includes/class-edminboost-anm-inbox.php:734
+msgid "This notice cannot be hidden."
+msgstr "Cette notice ne peut être cachée."
+
+#: includes/class-edminboost-anm-notices.php:120
+#: includes/class-edminboost-anm-notices.php:166
+msgid "Could not update this notice. Please try again."
+msgstr "Impossible de mettre à jour cet avis. Veuillez réessayer."
+
+#: includes/class-edminboost-anm-notices.php:353
+msgid "Open notifications"
+msgstr "Notifications ouvertes"
+
+#: includes/class-edminboost-anm-notices.php:354
+msgid "View notice inbox"
+msgstr "Afficher la boîte de réception des avis"
+
+#. translators: %d: notice count
+#: includes/class-edminboost-anm-notices.php:363
+#: includes/class-edminboost-anm-notices.php:395
+#, php-format
+msgid "%d notice"
+msgid_plural "%d notices"
+msgstr[0] "%d notices"
+msgstr[1] "%d notices"
+
+#: includes/class-edminboost-anm-rules.php:178
+msgid "Rule name and match string are required."
+msgstr "Le nom de la règle et la chaîne de correspondance sont requis."
+
+#: includes/class-edminboost-anm-rules.php:317
+msgid "Upsell Preset"
+msgstr "Préréglage de la vente"
+
+#: includes/class-edminboost-anm-rules.php:562
+msgid "Keyword (String Match)"
+msgstr "Mot-clé (correspondance de maintien)"
+
+#: includes/class-edminboost-anm-rules.php:563
+msgid "Wildcard / Regex"
+msgstr "Wildcard / Regex"
+
+#: includes/class-edminboost-anm-rules.php:579
+msgid "WordPress update available"
+msgstr "Mise à jour WordPress disponible"
+
+#: includes/class-edminboost-anm-rules.php:580
+msgid "WordPress 6.7 is available! Please update now."
+msgstr "WordPress 6.7 est disponible ! Veuillez mettre à jour."
+
+#: includes/class-edminboost-anm-rules.php:587
+msgid "Outdated PHP version"
+msgstr "Version PHP obsolète"
+
+#: includes/class-edminboost-anm-rules.php:588
+msgid "Your site is running an outdated version of PHP."
+msgstr "Votre site gère une version obsolète de PHP."
+
+#: includes/class-edminboost-anm-rules.php:595
+msgid "Site Health critical issues"
+msgstr "Les questions essentielles de santé du site"
+
+#: includes/class-edminboost-anm-rules.php:596
+msgid ""
+"Your site has critical issues that should be addressed as soon as possible."
+msgstr ""
+"Votre site a des questions cruciales qui devraient être abordées dès que "
+"possible."
+
+#: includes/class-edminboost-anm-rules.php:603
+msgid "Automatic update failed"
+msgstr "La mise à jour automatique a échoué"
+
+#: includes/class-edminboost-anm-rules.php:604
+msgid "An automated WordPress update has failed to complete."
+msgstr "Une mise à jour WordPress automatisée a échoué."
+
+#: includes/class-edminboost-anm-rules.php:611
+msgid "Database upgrade required"
+msgstr "Mise à niveau nécessaire de la base de données"
+
+#: includes/class-edminboost-anm-rules.php:612
+msgid "WordPress database upgrade required."
+msgstr "Mise à jour de la base de données WordPress requise."
+
+#: includes/class-edminboost-anm-rules.php:619
+msgid "Cookies blocked notice"
+msgstr "Avis de blocage des cookies"
+
+#: includes/class-edminboost-anm-rules.php:620
+msgid "Cookies are blocked or not supported by your browser."
+msgstr "Les cookies sont bloqués ou non pris en charge par votre navigateur."
+
+#: includes/class-edminboost-anm-rules.php:693
+msgid "Unknown notice preset."
+msgstr "Préréglage de l'avis inconnu."
+
+#: includes/class-edminboost-anm-rules.php:697
+#: includes/class-edminboost-anm-rules.php:726
+msgid "This notice is already converted to a rule."
+msgstr "Cet avis est déjà converti en règle."
+
+#. translators: %s: notice source plugin name
+#: includes/class-edminboost-anm-rules.php:735
+#, php-format
+msgid "Rule from %s"
+msgstr "Règle de %s"
+
+#: includes/class-edminboost-anm-rules.php:789
+msgid "No rule exists for this notice preset."
+msgstr "Aucune règle n'existe pour cet avis prédéfini."
+
+#: includes/class-edminboost-anm-settings.php:771
+msgid "Show all"
+msgstr "Afficher tout"
+
+#: includes/class-edminboost-anm-settings.php:772
+msgid "Hide all"
+msgstr "Cacher tout"
+
+#: includes/class-edminboost-anm-settings.php:773
+msgid "Hide selected"
+msgstr "Masquer la sélection"
+
+#: includes/class-edminboost-anm-settings.php:774
+msgid "Compact panel"
+msgstr "Panneau compact"
+
+#: includes/class-edminboost-anm-settings.php:786
+msgid "Leave notices on the dashboard"
+msgstr "Laisser des avis sur le tableau de bord"
+
+#: includes/class-edminboost-anm-settings.php:787
+msgid ""
+"WordPress behaves as usual. The plugin stays available for inbox, rules, and"
+" reports without changing how notices appear on screen."
+msgstr ""
+"WordPress se comporte comme d'habitude. Le plugin reste disponible pour la "
+"boîte de réception, les règles et les rapports sans changer la façon dont "
+"les avis apparaissent à l'écran."
+
+#: includes/class-edminboost-anm-settings.php:791
+msgid "Clean dashboard + inbox / admin bar"
+msgstr "Tableau de bord propre + boîte de réception / barre d'administration"
+
+#: includes/class-edminboost-anm-settings.php:792
+msgid ""
+"Recommended. Hides the notices you configure under Notices, Access, and "
+"Auto-Rules, then collects them in the inbox and admin bar panel."
+msgstr ""
+"Recommandé. Cacher les avis que vous configurez sous Notices, Access et "
+"Auto-Rules, puis les collecter dans la boîte de réception et le panneau de "
+"barre d'administration."
+
+#: includes/class-edminboost-anm-settings.php:796
+msgid "Toolbar only"
+msgstr "Barre d'outils seulement"
+
+#: includes/class-edminboost-anm-settings.php:797
+msgid ""
+"Hides the dashboard notice area entirely. Open captured notices from the "
+"admin bar panel or the plugin inbox."
+msgstr ""
+"Cache entièrement la zone d'affichage du tableau de bord. Ouvrez les avis "
+"capturés depuis le panneau de barre d'administration ou la boîte de "
+"réception du plugin."
+
+#: includes/class-edminboost-anm-settings.php:981
+msgid "Text link with count"
+msgstr "Lien texte avec nombre"
+
+#: includes/class-edminboost-anm-settings.php:982
+msgid "Bell icon (opens inbox)"
+msgstr "Icône Bell (ouvre la boîte de réception)"
+
+#: includes/class-edminboost-anm-settings.php:983
+msgid "Notification dropdown — detailed cards"
+msgstr "Bulletin de notification — cartes détaillées"
+
+#: includes/class-edminboost-anm-settings.php:984
+msgid "Notification dropdown — compact list"
+msgstr "Déclaration déroulante — liste compacte"
+
+#: includes/class-edminboost-anm-settings.php:1004
+msgid "Default admin bar slot"
+msgstr "Fente par défaut de la barre d'administration"
+
+#: includes/class-edminboost-anm-settings.php:1005
+msgid "Left bar, after site name"
+msgstr "Barre de gauche, après le nom du site"
+
+#: includes/class-edminboost-anm-settings.php:1006
+msgid "Left bar, after updates"
+msgstr "Barre gauche, après mises à jour"
+
+#: includes/class-edminboost-anm-settings.php:1007
+msgid "Top-right area, first item"
+msgstr "Secteur supérieur droit, premier élément"
+
+#: includes/class-edminboost-anm-settings.php:1008
+msgid "Top right, before “Howdy” profile menu"
+msgstr "En haut à droite, avant le menu de profil"
+
+#: includes/class-edminboost-anm-settings.php:1009
+msgid "Top right, after “Howdy” profile menu"
+msgstr "En haut à droite, après le menu de profil"
+
+#: includes/class-edminboost-anm-settings.php:1113
+msgid "Number badge"
+msgstr "Numéro badge"
+
+#: includes/class-edminboost-anm-settings.php:1114
+msgid "Number badge (9+ cap)"
+msgstr "Numéro badge (9+ bouchon)"
+
+#: includes/class-edminboost-anm-settings.php:1115
+msgid "Number badge (99+ cap)"
+msgstr "Numéro badge (99+ bouchon)"
+
+#: includes/class-edminboost-anm-settings.php:1116
+msgid "Dot only (no count)"
+msgstr "Point seulement (pas de nombre)"
+
+#: includes/class-edminboost-anm-settings.php:1117
+msgid "Pulsing dot (no count)"
+msgstr "Point de pulsation (sans nombre)"
+
+#: includes/class-edminboost-anm-settings.php:1118
+msgid "Hidden (no visual indicator)"
+msgstr "Caché (pas d'indicateur visuel)"
+
+#: includes/class-edminboost-anm-stats.php:137
+msgid "None yet"
+msgstr "Aucune"
+
+#: includes/class-edminboost-anm-webhook.php:61
+msgid "[Edminboost ANM] Intercepted notice from {source}: {message_excerpt}"
+msgstr "[Edminboost AMN] Avis intercepté de {source} : {message excerpt}"
+
+#: includes/class-edminboost-anm-webhook.php:164
+msgid "Example Plugin"
+msgstr "Exemple de greffon"

@@ -1,0 +1,19 @@
+{
+	"distDir": "dist",
+	"zipDir": "dist/zips",
+	"corePackage": "packages/core",
+	"editions": {
+		"free": {
+			"overlay": "free",
+			"folder": "edminboost-admin-notice-manager",
+			"zipNameTemplate": "edminboost-admin-notice-manager-{version}.zip",
+			"excludeFromCore": []
+		},
+		"pro": {
+			"overlay": "pro",
+			"folder": "edminboost-admin-notice-manager-pro",
+			"zipNameTemplate": "edminboost-admin-notice-manager-pro-{version}.zip",
+			"excludeFromCore": []
+		}
+	}
+}

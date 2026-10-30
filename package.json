@@ -1,0 +1,14 @@
+{
+	"name": "edminboost-admin-notice-manager-monorepo",
+	"private": true,
+	"description": "Build Free and Pro WordPress plugin zips from packages/core + edition overlays.",
+	"scripts": {
+		"build": "node build/build.mjs",
+		"build:free": "node build/build.mjs --edition=free",
+		"build:pro": "node build/build.mjs --edition=pro",
+		"clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
+	},
+	"engines": {
+		"node": ">=18"
+	}
+}

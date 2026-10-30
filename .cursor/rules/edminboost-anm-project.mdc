@@ -7,13 +7,17 @@ alwaysApply: true
 
 WordPress admin notice management plugin. PHP 7.4+, WordPress 6.0+, GPL-3.0. Current release: **1.1.1**.
 
-See `edminboost-anm-standards.mdc`, `edminboost-anm-compliance.mdc`, `edminboost-anm-wordpress-php.mdc`, `edminboost-anm-admin-assets.mdc`.
+See `edminboost-anm-standards.mdc`, `edminboost-anm-compliance.mdc`, `edminboost-anm-wordpress-php.mdc`, `edminboost-anm-admin-assets.mdc`, `MONOREPO.md`.
 
 ## Directory Layout
 
 ```
-edminboost-admin-notice-manager.php   # bootstrap + constants
-includes/
+edminboost-admin-notice-manager.php   # monorepo dev entry → packages/core
+packages/core/                        # boot.php, load.php, includes/, admin/, languages/, uninstall.php
+packages/free/                        # Free bootstrap + readme.txt
+packages/pro/                         # Pro bootstrap + readme.txt
+build/                                # npm run build → dist/ + zips (see MONOREPO.md)
+includes/                             # under packages/core/
   class-edminboost-anm-plugin.php     # hook orchestrator
   class-edminboost-anm-admin.php      # menus, settings UI, assets
   class-edminboost-anm-settings.php   # options, defaults, sanitize
@@ -41,15 +45,26 @@ admin/
   partials/edminboost-anm-notice-panel-dropdown.php
   partials/edminboost-anm-network-policy-page.php
   partials/edminboost-anm-multisite-policy-{fields,next-steps}.php
-languages/  # .pot, locale .po/.mo, optional build-translations.py
-uninstall.php  readme.txt  composer.json
-AGENTS.md   .cursor/rules/
+languages/  # under packages/core/
+uninstall.php  # under packages/core/
+readme.txt  # packages/free/ (assembled into Free zip)
+composer.json  package.json  MONOREPO.md
+AGENTS.md   .cursor/rules/   MONOREPO.md
+dist/       # build output (gitignored; do not edit — run npm run build)
 ```
+
+## Monorepo
+
+- **Canonical source**: edit PHP, admin assets, languages, and `uninstall.php` under `packages/core/` only. Do not duplicate logic at the repo root except the dev bootstrap file.
+- **Dev entry**: root `edminboost-admin-notice-manager.php` requires `packages/core/boot.php`, calls `edminboost_anm_register()` with `core_dir` / `core_url` pointing at `packages/core`, then `edminboost_anm_run_plugin()`.
+- **Release editions**: `packages/free/` and `packages/pro/` each ship a thin bootstrap + `readme.txt`; build merges core + overlay into flat plugin trees under `dist/` (see `MONOREPO.md`, `build/config.json`).
+- **Edition flags**: Free sets `EDMINBOOST_ANM_IS_PRO` false (slug `edminboost-admin-notice-manager`); Pro sets it true (slug `edminboost-admin-notice-manager-pro`). Gate Pro-only behavior with `edminboost_anm_is_pro()` (defined in `packages/core/load.php`).
+- **Text domain**: `EDMINBOOST_ANM_TEXT_DOMAIN` is always `edminboost-admin-notice-manager` (shared `.pot` / locales under `packages/core/languages/`), even when `EDMINBOOST_ANM_PLUGIN_SLUG` is the Pro directory name.
 
 ## Architecture
 
-- Bootstrap defines constants, requires core classes, registers activation/deactivation hooks, calls `edminboost_anm_run_plugin()`. Loads `EDMINBOOST_ANM_Debug` only when `WP_DEBUG` is true.
-- Bootstrap filename equals `EDMINBOOST_ANM_PLUGIN_SLUG . '.php'`.
+- Edition bootstrap calls `edminboost_anm_register( $plugin_file, $edition )` in `packages/core/boot.php` — defines constants, sets `EDMINBOOST_ANM_PLUGIN_DIR` / `URL` to core (or assembled root), requires `load.php`, registers activation/deactivation on the edition main file. Then `edminboost_anm_run_plugin()` instantiates `EDMINBOOST_ANM_Plugin`. Loads `EDMINBOOST_ANM_Debug` only when `WP_DEBUG` is true.
+- Edition main filename equals `EDMINBOOST_ANM_PLUGIN_SLUG . '.php'` (Free vs Pro bootstrap names differ).
 - `EDMINBOOST_ANM_Plugin::run()` wires i18n, site + network admin menu/settings/assets, `wp_initialize_site` seeding, and on `init`: notices, interceptor, AJAX, digest, ad redirects (+ debug when loaded).
 - **Options API only** — no custom database tables.
 - **Stored options** (via `EDMINBOOST_ANM_Settings` constants): `edminboost_anm_settings`, `edminboost_anm_rules`, `edminboost_anm_inbox`, `edminboost_anm_stats`, `edminboost_anm_version`. All seeded on activation with `autoload => false`.
@@ -103,7 +118,8 @@ Project prefix: `edminboost_anm` (use `edminboost-anm` in slugs/handles). Distin
 | Kind | Pattern | Example |
 |------|---------|---------|
 | Constants | `EDMINBOOST_ANM_*` | `EDMINBOOST_ANM_VERSION` |
-| Plugin slug / text domain | `edminboost-admin-notice-manager` | `EDMINBOOST_ANM_PLUGIN_SLUG` |
+| Plugin slug (edition) | `edminboost-admin-notice-manager` or `…-pro` | `EDMINBOOST_ANM_PLUGIN_SLUG` |
+| Text domain (shared) | `edminboost-admin-notice-manager` | `EDMINBOOST_ANM_TEXT_DOMAIN` |
 | Classes | `EDMINBOOST_ANM_{Name}` | `EDMINBOOST_ANM_Admin` |
 | Functions | `edminboost_anm_{action}` | `edminboost_anm_run_plugin()` |
 | Options | `edminboost_anm_{key}` | `edminboost_anm_inbox` |
@@ -112,7 +128,7 @@ Project prefix: `edminboost_anm` (use `edminboost-anm` in slugs/handles). Distin
 | JS global (localized) | `edminboostAnmData` | plugin screens + interceptor |
 | AJAX nonce action | `edminboost_anm_admin` | via `get_localized_data()` |
 
-`EDMINBOOST_ANM_TEXT_DOMAIN` must match `EDMINBOOST_ANM_PLUGIN_SLUG`.
+`EDMINBOOST_ANM_TEXT_DOMAIN` is fixed across editions; do not tie it to the Pro plugin slug.
 
 ## Extension Hooks
 
@@ -125,15 +141,17 @@ Project prefix: `edminboost_anm` (use `edminboost-anm` in slugs/handles). Distin
 - `edminboost_anm_digest_email` — filter digest subject/body before send or preview
 - `edminboost_anm_webhook_payload` — filter outbound webhook JSON payload
 - `edminboost_anm_billing_comparison` — filter Free vs Pro rows on the Billing page
+- `edminboost_anm_block_ad_redirect_activation_flags` — filter activation option suppressors when block ad redirects is enabled
 
 ## Scope & Change Discipline
 
 - Admin-only plugin — limited front-end hooks for admin bar notice panel assets when the toolbar is visible.
 - Minimize diff scope; match existing file structure and coding style.
 - Add `index.php` silence files when creating new directories.
-- Update `readme.txt` changelog for user-facing changes.
-- Update `uninstall.php` when adding new stored options or cron hooks (include multisite sitemeta in `EDMINBOOST_ANM_Multisite::uninstall_all_sites()` when applicable).
+- Update `packages/free/readme.txt` (and `packages/pro/readme.txt` when Pro copy differs) changelog for user-facing changes; run `npm run build` before shipping zips from `dist/zips/`.
+- Update `packages/core/uninstall.php` when adding new stored options or cron hooks (include multisite sitemeta in `EDMINBOOST_ANM_Multisite::uninstall_all_sites()` when applicable).
+- Keep `AGENTS.md` and `.cursor/rules/` aligned when architecture or workflows change.
 
 ## Constants (use, don't redefine)
 
-`EDMINBOOST_ANM_VERSION`, `EDMINBOOST_ANM_PLUGIN_FILE`, `EDMINBOOST_ANM_PLUGIN_DIR`, `EDMINBOOST_ANM_PLUGIN_URL`, `EDMINBOOST_ANM_PLUGIN_BASENAME`, `EDMINBOOST_ANM_PLUGIN_SLUG`, `EDMINBOOST_ANM_TEXT_DOMAIN`, `EDMINBOOST_ANM_PLUGIN_DOCS_URL`, `EDMINBOOST_ANM_PRO_URL`
+`EDMINBOOST_ANM_VERSION`, `EDMINBOOST_ANM_IS_PRO`, `EDMINBOOST_ANM_PLUGIN_FILE`, `EDMINBOOST_ANM_PLUGIN_DIR`, `EDMINBOOST_ANM_PLUGIN_URL`, `EDMINBOOST_ANM_PLUGIN_BASENAME`, `EDMINBOOST_ANM_PLUGIN_SLUG`, `EDMINBOOST_ANM_TEXT_DOMAIN`, `EDMINBOOST_ANM_PLUGIN_DOCS_URL`, `EDMINBOOST_ANM_PRO_URL`

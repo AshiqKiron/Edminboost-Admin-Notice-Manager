@@ -57,6 +57,7 @@ Yes. When uninstalled, all plugin options are removed from the database.
 == Changelog ==
 
 = 1.1.2 =
+* Security: block ad redirects intercept post-activation welcome redirects (options/transients, wp_redirect, and known admin_init hooks), keep you on the Plugins screen when appropriate, and accept bare `page` slugs in the blocklist.
 * Admin: Billing page with Free vs Pro comparison table (Pro-only differentiators; regex/CSS auto-rules, Client Shield Mode, and block ad redirects stay on both plans).
 * Settings: rename the Access & visibility tab to Access.
 * Multisite: network admin screens for multisite policy, network default settings, and shared network auto-rules; each site keeps its own inbox and statistics.

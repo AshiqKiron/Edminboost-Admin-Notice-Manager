@@ -32,7 +32,7 @@ See `edminboost-anm-project.mdc`, `edminboost-anm-standards.mdc`, `edminboost-an
 
 - No obfuscated code, undisclosed telemetry, or hidden external requests.
 - No tracking or analytics to vendor servers. Docs link is user-initiated only.
-- **Webhook** (`settings.webhook`): disabled by default; user supplies URL; sends notice summary JSON via `wp_remote_post` only when enabled. Document in `readme.txt`.
+- **Webhook** (`settings.webhook`): disabled by default; user supplies URL; sends notice summary JSON via `wp_remote_post` only when enabled. Document in edition `readme.txt` (`packages/free/readme.txt`).
 - **Digest**: uses `wp_mail()` to configured recipients — no third-party email API.
 - No spammy readme or deceptive behavior.
 - Any new remote integration must be documented, justified, and opt-in.

@@ -1,14 +1,16 @@
 ---
 description: Admin JS, CSS, and partial conventions for Edminboost Admin Notice Manager
-globs: "admin/**/*.{js,css,php}"
+globs: "packages/core/admin/**/*.{js,css,php}"
 alwaysApply: false
 ---
 
 # Admin Assets (ANM)
 
+Source paths below are under `packages/core/admin/` (assembled to `admin/` at plugin root in release builds).
+
 ## JavaScript
 
-### `admin/js/edminboost-anm-admin.js`
+### `packages/core/admin/js/edminboost-anm-admin.js`
 
 - Wrap in an IIFE with `'use strict'`.
 - Scope DOM queries to `.edminboost-anm-wrap` or plugin-specific selectors.
@@ -32,13 +34,13 @@ alwaysApply: false
 - No jQuery unless WordPress already loads it for the screen.
 - Use `DOMContentLoaded` for initialization.
 
-### `admin/js/edminboost-anm-interceptor.js`
+### `packages/core/admin/js/edminboost-anm-interceptor.js`
 
 - Loaded on all wp-admin when plugin is enabled (`EDMINBOOST_ANM_Interceptor::enqueue_interceptor_script()`).
 - Observes/captures admin notices and POSTs to `edminboost_anm_capture_notice`.
 - Uses localized `edminboostAnmData` (same nonce action as admin UI).
 
-### `admin/js/edminboost-anm-notices.js`
+### `packages/core/admin/js/edminboost-anm-notices.js`
 
 - Loaded when admin bar panel is shown, style is dropdown (`dropdown`, `dropdown_compact`), and user has capability — in wp-admin or on the front end when `is_admin_bar_showing()` (via `EDMINBOOST_ANM_Notices::enqueue_admin_bar_dropdown_script()`).
 - Targets `#wp-admin-bar-edminboost-anm-notices` — toggles `#edminboost-anm-notices-panel` with `aria-expanded`, click-outside close, Escape key.
@@ -46,7 +48,7 @@ alwaysApply: false
 - Panel row actions (hide for me/all, display as normal) use localized `edminboostAnmNotices` (`ajaxUrl`, `nonce`, `badgeStyle`, `i18n`). Markup from `edminboost-anm-notice-panel-dropdown.php` via admin bar `meta.html` (`$edminboost_anm_panel_layout` `detailed`|`compact`); hide buttons wrap label text in `.edminboost-anm-notices-panel__action-label`.
 - After hide actions, `updateBadgeCount()` respects `badgeStyle` (dot/none/capped counts via `formatBadgeDisplayCount`).
 
-### `admin/js/edminboost-anm-notice-inline.js`
+### `packages/core/admin/js/edminboost-anm-notice-inline.js`
 
 - Loaded on wp-admin when plugin enabled and user has `EDMINBOOST_ANM_Settings::CAPABILITY`, **except** on plugin screens (`! EDMINBOOST_ANM_Admin::is_plugin_screen()`).
 - Injects `.edminboost-anm-notice-inline-actions` on eligible `.notice` / `.update-nag` nodes; respects `edminboostAnmNoticeInline.cssIgnoreSelectors` from settings.
@@ -88,7 +90,7 @@ alwaysApply: false
 }
 ```
 
-## CSS (`admin/css/edminboost-anm-admin.css`)
+## CSS (`packages/core/admin/css/edminboost-anm-admin.css`)
 
 - Prefix all selectors with `.edminboost-anm-` to avoid admin conflicts.
 - Layout: `.edminboost-anm-wrap`, `.edminboost-anm-hero`, `.edminboost-anm-card`, `.edminboost-anm-status`.
@@ -100,7 +102,7 @@ alwaysApply: false
 - Admin bar: `.edminboost-anm-notices--open`, `.edminboost-anm-notices-badge`, `.edminboost-anm-howdy-dot`.
 - Live admin bar dropdown lives under `#wpadminbar` — WordPress `#wpadminbar *` resets affect badges, panel copy, and dashicons. Use scoped `#wpadminbar .edminboost-anm-notices-panel` / `#wp-admin-bar-edminboost-anm-notices .edminboost-anm-notices-badge` overrides (`box-sizing`, `line-height: 1`, flex badge layout, dashicons `:before` reset). Hide actions use `.edminboost-anm-notices-panel__action--hide` with `.edminboost-anm-notices-panel__action-label` (underlined text + dashicon). Keep settings mock (`.edminboost-anm-notice-panel-preview*`) aligned with live badge and action styling.
 
-## Partials (`admin/partials/`)
+## Partials (`packages/core/admin/partials/`)
 
 | File | Purpose |
 |------|---------|
