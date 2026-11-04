@@ -32,6 +32,35 @@ $edminboost_anm_word_filters     = wp_parse_args(
 );
 $edminboost_anm_spam_words       = $edminboost_anm_word_filters['spam_words'] ?? array();
 $edminboost_anm_whitelist_words  = $edminboost_anm_word_filters['whitelist_words'] ?? array();
+$edminboost_anm_inbox_ui         = wp_parse_args(
+	$settings['inbox_ui'] ?? array(),
+	EDMINBOOST_ANM_Settings::get_defaults()['inbox_ui']
+);
+$edminboost_anm_channel_mutes    = wp_parse_args(
+	$settings['channel_mutes'] ?? array(),
+	EDMINBOOST_ANM_Settings::get_defaults()['channel_mutes']
+);
+$edminboost_anm_fn_settings      = wp_parse_args(
+	$settings['feature_notifications'] ?? array(),
+	EDMINBOOST_ANM_Settings::get_defaults()['feature_notifications']
+);
+$edminboost_anm_severity_policy  = wp_parse_args(
+	$settings['severity_policy'] ?? array(),
+	EDMINBOOST_ANM_Settings::get_defaults()['severity_policy']
+);
+$edminboost_anm_alert_routing    = wp_parse_args(
+	$settings['alert_routing'] ?? array(),
+	EDMINBOOST_ANM_Settings::get_defaults()['alert_routing']
+);
+$edminboost_anm_fn_core_active   = EDMINBOOST_ANM_Feature_Notifications::is_available();
+$edminboost_anm_alert_type_choices = array(
+	'critical' => __( 'Critical severity', EDMINBOOST_ANM_TEXT_DOMAIN ),
+	'error'    => __( 'Error notices', EDMINBOOST_ANM_TEXT_DOMAIN ),
+	'warning'  => __( 'Warning severity', EDMINBOOST_ANM_TEXT_DOMAIN ),
+	'info'     => __( 'Info', EDMINBOOST_ANM_TEXT_DOMAIN ),
+	'success'  => __( 'Success', EDMINBOOST_ANM_TEXT_DOMAIN ),
+	'upsell'   => __( 'Promotions', EDMINBOOST_ANM_TEXT_DOMAIN ),
+);
 $edminboost_anm_settings_tabs  = array(
 	'general'       => __( 'General', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'notices'       => __( 'Notices', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -197,6 +226,30 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 					</div>
 				</aside>
 			</div>
+		</div>
+		<div class="edminboost-anm-card">
+			<h2><?php esc_html_e( 'Inbox experience', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+			<p class="description"><?php esc_html_e( 'Aligns with WordPress Feature Notifications patterns (Alerts tab, severity labels, compact density).', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row"><label for="edminboost-anm-inbox-density"><?php esc_html_e( 'List density', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label></th>
+					<td>
+						<select id="edminboost-anm-inbox-density" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[inbox_ui][density]">
+							<option value="comfortable" <?php selected( $edminboost_anm_inbox_ui['density'] ?? 'comfortable', 'comfortable' ); ?>><?php esc_html_e( 'Comfortable', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+							<option value="compact" <?php selected( $edminboost_anm_inbox_ui['density'] ?? '', 'compact' ); ?>><?php esc_html_e( 'Compact', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Keyboard shortcut', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+					<td>
+						<label for="edminboost-anm-inbox-kbd-shortcut">
+							<input type="checkbox" id="edminboost-anm-inbox-kbd-shortcut" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[inbox_ui][keyboard_shortcut_enabled]" value="1" <?php checked( ! empty( $edminboost_anm_inbox_ui['keyboard_shortcut_enabled'] ) ); ?> />
+							<?php esc_html_e( 'Enable Alt+Shift+N to open Notice Inbox from wp-admin', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</label>
+					</td>
+				</tr>
+			</table>
 		</div>
 		<div class="edminboost-anm-card edminboost-anm-general-options-layout" data-edminboost-anm-general-options>
 			<h2 class="edminboost-anm-general-options-layout__heading">
@@ -648,6 +701,34 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 		</div>
 
 		<div class="edminboost-anm-card">
+			<h2><?php esc_html_e( 'Channel mute presets', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+			<p class="description"><?php esc_html_e( 'One-click mutes aligned with core Feature Notifications channels. Saving applies related rules and settings.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Mute channels', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+					<td>
+						<label><input type="checkbox" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[channel_mutes][promotions]" value="1" <?php checked( ! empty( $edminboost_anm_channel_mutes['promotions'] ) ); ?> /> <?php esc_html_e( 'Promotions (enables Kill All Upsells)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label><br />
+						<label><input type="checkbox" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[channel_mutes][tips]" value="1" <?php checked( ! empty( $edminboost_anm_channel_mutes['tips'] ) ); ?> /> <?php esc_html_e( 'Tips (keyword auto-rule)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label><br />
+						<label><input type="checkbox" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[channel_mutes][updates]" value="1" <?php checked( ! empty( $edminboost_anm_channel_mutes['updates'] ) ); ?> /> <?php esc_html_e( 'Update nags (plugin & core)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<div class="edminboost-anm-card">
+			<h2><?php esc_html_e( 'Severity enforcement', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Anti-spam policy', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+					<td>
+						<label><input type="checkbox" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[severity_policy][downgrade_promotions]" value="1" <?php checked( ! empty( $edminboost_anm_severity_policy['downgrade_promotions'] ) ); ?> /> <?php esc_html_e( 'Never treat promotional notices as critical severity', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label><br />
+						<label><input type="checkbox" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[severity_policy][block_plugin_critical]" value="1" <?php checked( ! empty( $edminboost_anm_severity_policy['block_plugin_critical'] ) ); ?> /> <?php esc_html_e( 'Downgrade non-core plugins marking notices as critical (Safety Guard still protects real errors)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<div class="edminboost-anm-card">
 			<h2><?php esc_html_e( 'Spam words & whitelist', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
 			<table class="form-table" role="presentation">
 				<tr>
@@ -858,6 +939,41 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 			aria-labelledby="<?php echo esc_attr( 'edminboost-anm-settings-tab-notifications' ); ?>"
 			<?php echo 'notifications' !== $edminboost_anm_active_tab ? ' hidden' : ''; ?>
 		>
+		<div class="edminboost-anm-card">
+			<h2><?php esc_html_e( 'Alert routing', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+			<?php if ( ! function_exists( 'edminboost_anm_is_pro' ) || ! edminboost_anm_is_pro() ) : ?>
+				<p class="description"><?php esc_html_e( 'Custom alert routing by notice type is available in Notice Manager Pro. Free uses default routing (critical, error, and warning for webhooks; promotions excluded from digest).', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+			<?php else : ?>
+			<p class="description"><?php esc_html_e( 'Choose which notice types trigger outbound webhook alerts and appear in the weekly digest recent section.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Webhook types', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+					<td>
+						<?php foreach ( $edminboost_anm_alert_type_choices as $edminboost_anm_type_slug => $edminboost_anm_type_label ) : ?>
+							<label style="display:block;margin-bottom:4px;">
+								<input type="checkbox" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[alert_routing][webhook_types][]" value="<?php echo esc_attr( $edminboost_anm_type_slug ); ?>" <?php checked( in_array( $edminboost_anm_type_slug, $edminboost_anm_alert_routing['webhook_types'] ?? array(), true ) ); ?> />
+								<?php echo esc_html( $edminboost_anm_type_label ); ?>
+							</label>
+						<?php endforeach; ?>
+						<label><input type="checkbox" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[alert_routing][webhook_skip_upsell]" value="1" <?php checked( ! empty( $edminboost_anm_alert_routing['webhook_skip_upsell'] ) ); ?> /> <?php esc_html_e( 'Always skip promotions for webhooks (even if checked above)', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Digest types', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
+					<td>
+						<?php foreach ( $edminboost_anm_alert_type_choices as $edminboost_anm_type_slug => $edminboost_anm_type_label ) : ?>
+							<label style="display:block;margin-bottom:4px;">
+								<input type="checkbox" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[alert_routing][digest_types][]" value="<?php echo esc_attr( $edminboost_anm_type_slug ); ?>" <?php checked( in_array( $edminboost_anm_type_slug, $edminboost_anm_alert_routing['digest_types'] ?? array(), true ) ); ?> />
+								<?php echo esc_html( $edminboost_anm_type_label ); ?>
+							</label>
+						<?php endforeach; ?>
+						<label><input type="checkbox" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[alert_routing][digest_skip_upsell]" value="1" <?php checked( ! empty( $edminboost_anm_alert_routing['digest_skip_upsell'] ) ); ?> /> <?php esc_html_e( 'Exclude promotions from digest recent list', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+					</td>
+				</tr>
+			</table>
+			<?php endif; ?>
+		</div>
+
 		<div class="edminboost-anm-card">
 			<h2 class="screen-reader-text"><?php esc_html_e( 'Notifications & Digests', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
 
@@ -1276,6 +1392,30 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 		aria-labelledby="<?php echo esc_attr( 'edminboost-anm-settings-tab-tools' ); ?>"
 		<?php echo 'tools' !== $edminboost_anm_active_tab ? ' hidden' : ''; ?>
 	>
+	<div class="edminboost-anm-card">
+		<h2><?php esc_html_e( 'WordPress Feature Notifications', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+		<p class="description">
+			<?php esc_html_e( 'Works alongside the upcoming core notification bell. This plugin still intercepts legacy admin notices and adds stricter anti-spam controls.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+		</p>
+		<?php if ( $edminboost_anm_fn_core_active ) : ?>
+			<p class="description"><strong><?php esc_html_e( 'Core Feature Notifications detected on this site.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></strong></p>
+		<?php else : ?>
+			<p class="description"><?php esc_html_e( 'Core Feature Notifications is not active yet; these settings prepare for when it ships.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+		<?php endif; ?>
+		<table class="form-table" role="presentation">
+			<tr>
+				<th scope="row"><label for="edminboost-anm-fn-coexist"><?php esc_html_e( 'Coexistence mode', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label></th>
+				<td>
+					<select id="edminboost-anm-fn-coexist" name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[feature_notifications][coexist_mode]">
+						<?php foreach ( EDMINBOOST_ANM_Settings::get_feature_notifications_coexist_choices() as $edminboost_anm_fn_mode => $edminboost_anm_fn_label ) : ?>
+							<option value="<?php echo esc_attr( $edminboost_anm_fn_mode ); ?>" <?php selected( $edminboost_anm_fn_settings['coexist_mode'] ?? 'coexist', $edminboost_anm_fn_mode ); ?>><?php echo esc_html( $edminboost_anm_fn_label ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</td>
+			</tr>
+		</table>
+	</div>
+
 	<div class="edminboost-anm-card">
 		<h2><?php esc_html_e( 'Competitor Importer', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
 		<table class="form-table" role="presentation">

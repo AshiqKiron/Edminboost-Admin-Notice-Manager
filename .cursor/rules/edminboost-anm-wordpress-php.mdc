@@ -52,8 +52,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 ## Class Wiring
 
 - `packages/core/load.php` requires core classes; instantiate only via `edminboost_anm_run_plugin()` after `edminboost_anm_register()`.
-- `EDMINBOOST_ANM_Plugin` constructor: `Admin`, `Notices`, `Interceptor`, `Ajax`, `Digest`, `Ad_Redirects`.
-- Domain helpers (static or instantiated as needed): `EDMINBOOST_ANM_Settings`, `EDMINBOOST_ANM_Rules`, `EDMINBOOST_ANM_Inbox`, `EDMINBOOST_ANM_Stats`, `EDMINBOOST_ANM_Importer`, `EDMINBOOST_ANM_Webhook`, `EDMINBOOST_ANM_Ad_Redirects` (URL normalize/match helpers), `EDMINBOOST_ANM_Multisite` (network policy, merge layers, uninstall network-wide).
+- `EDMINBOOST_ANM_Plugin` constructor: `Admin`, `Notices`, `Interceptor`, `Ajax`, `Digest`, `Ad_Redirects`, `Feature_Notifications`.
+- Domain helpers (static or instantiated as needed): `EDMINBOOST_ANM_Settings`, `EDMINBOOST_ANM_Rules`, `EDMINBOOST_ANM_Inbox`, `EDMINBOOST_ANM_Stats`, `EDMINBOOST_ANM_Importer`, `EDMINBOOST_ANM_Webhook`, `EDMINBOOST_ANM_Ad_Redirects` (URL normalize/match helpers), `EDMINBOOST_ANM_Feature_Notifications`, `EDMINBOOST_ANM_Multisite` (network policy, merge layers, inbox rollup, uninstall network-wide).
 - `load.php` requires `class-edminboost-anm-multisite.php` (always loaded). Activation seeds options via `EDMINBOOST_ANM_Activator` (+ network sitemeta when network-activated); deactivation clears digest schedule; `wp_initialize_site` seeds new blogs via `EDMINBOOST_ANM_Plugin::handle_new_site()`.
 - Pro-only code: guard with `edminboost_anm_is_pro()`; optional future Free zip exclusions via `excludeFromCore` in `build/config.json`.
 
@@ -110,6 +110,28 @@ array(
 		'docs_url'       => '',
 		'hide_brand'     => false,
 	),
+	'inbox_ui'              => array(
+		'density'                   => 'comfortable', // comfortable | compact
+		'keyboard_shortcut_enabled' => true,
+	),
+	'feature_notifications' => array(
+		'coexist_mode' => 'coexist', // coexist | anm_primary | legacy_only
+	),
+	'channel_mutes'         => array(
+		'promotions' => false,
+		'tips'       => false,
+		'updates'    => false,
+	),
+	'severity_policy'       => array(
+		'downgrade_promotions'  => true,
+		'block_plugin_critical' => false,
+	),
+	'alert_routing'         => array(
+		'webhook_types'       => array( 'critical', 'error', 'warning' ),
+		'digest_types'        => array( 'critical', 'error', 'warning', 'info', 'success' ),
+		'webhook_skip_upsell' => true,
+		'digest_skip_upsell'  => true,
+	),
 )
 ```
 
@@ -137,7 +159,10 @@ Separate per-site options: `RULES_OPTION` (rule list), `INBOX_OPTION` (captured 
 - Display experience: `EDMINBOOST_ANM_Settings::DISPLAY_EXPERIENCE_PRESETS`, `get_display_experience_presets()`, `get_display_experience_preset_for_mode()`, `get_manage_notices_mode_labels()` — presets map to stored `manage_notices_mode`.
 - Notice panel save: `sanitize()` sets `notice_panel.enabled` to true (no Settings UI toggle); `should_show_admin_bar_notice_panel()` checks plugin enabled + stored `notice_panel.enabled`.
 - Notice panel: `EDMINBOOST_ANM_Settings::get_notice_panel_*()` registries; `get_notice_panel_admin_bar_placement()`, `get_notice_panel_preview_layout()` (default position → `left`), `notice_panel_position_uses_left_admin_bar()`, `notice_panel_style_is_dropdown()`, `notice_panel_style_uses_bell()`, `format_notice_panel_badge_display_count()`, etc. `EDMINBOOST_ANM_Notices::build_notice_badge_markup()` mirrors badge rules for live admin bar; `enqueue_admin_bar_dropdown_script()` shared for wp-admin and front-end admin bar dropdown JS; `get_plugin_screen_notice_hide_css()` + `hide_notices_on_plugin_screens()` for plugin-page notice clutter (exceptions for settings preview mocks).
-- Inbox: `EDMINBOOST_ANM_Inbox::snooze()` / `unsnooze()`, `is_actively_snoozed()`, `get_snooze_duration_key()`, `mark_read()`.
+- Inbox: `LIST_FILTERS` (`all`, `alerts`, `snoozed`, `upsells`); `get_severity_slug()` / `get_severity_label()` / `map_core_severity_to_type()` / `apply_severity_policy()`; `should_send_webhook_for_notice()` / `should_include_in_digest()` (alert routing); snooze/unsnooze, `mark_read()`; duplicate capture `repeat_count`.
+- Feature Notifications: `EDMINBOOST_ANM_Feature_Notifications::is_available()`, `ingest_notification()` (Pro), `filter_core_payload()`; settings `get_feature_notifications_coexist_mode()`, `get_feature_notifications_coexist_choices()`.
+- Channel mutes: `sanitize_channel_mutes_settings()`, `apply_channel_mutes_to_settings()`; `EDMINBOOST_ANM_Rules::sync_channel_mute_rules()`.
+- Multisite: `get_network_inbox_rollup()` (Pro network admin).
 - Settings sanitize: update `upsell_preset` and `word_filters` only when present in `$input` (other tabs omit those keys).
 - Webhook save: `sanitize_webhook_settings( $input, $stored )` merges with stored webhook; keeps URL when disabled or when a posted URL is invalid; `sanitize_webhook_url()` restricts endpoints to http/https.
 - Admin routing: `EDMINBOOST_ANM_Admin::is_plugin_screen( $hook_suffix )` — screen id, optional hook suffix, or `$_GET['page']` contains `PAGE_SLUG`.

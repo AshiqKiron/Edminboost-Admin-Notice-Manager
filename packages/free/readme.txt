@@ -4,7 +4,7 @@ Tags: admin, admin-notices, dashboard, admin-tools, notices
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -13,6 +13,8 @@ Manage, organize, and control WordPress admin notices from one central dashboard
 == Description ==
 
 Edminboost Admin Notice Manager helps site administrators take control of WordPress admin notices. Reduce clutter, review notices in one place, and configure how notices appear across the admin area.
+
+Works alongside WordPress [Feature Notifications](https://make.wordpress.org/core/2026/10/29/exploring-a-design-for-feature-notifications/) (when available): this plugin still intercepts legacy admin notices, applies stricter anti-promotion rules, and adds inbox workflows, optional email/webhook routing, and multisite policy that core’s first releases do not replace.
 
 = Features =
 
@@ -57,6 +59,9 @@ Yes. When uninstalled, all plugin options are removed from the database.
 == Changelog ==
 
 = 1.1.2 =
+* Inbox: Alerts tab (critical + warning, excludes snoozed), severity labels aligned with core Feature Notifications, compact list density, grouped duplicate rows with repeat count, and Alt+Shift+N keyboard shortcut.
+* Settings: channel mute presets (promotions, tips, updates), severity anti-spam policy, alert routing for webhook/digest by notice type, and Feature Notifications coexistence modes on Migration.
+* Integrations: bridge hooks for core Feature Notifications import when the feature plugin API is present; Pro network inbox rollup on multisite policy.
 * Security: block ad redirects intercept post-activation welcome redirects (options/transients, wp_redirect, and known admin_init hooks), keep you on the Plugins screen when appropriate, and accept bare `page` slugs in the blocklist.
 * Admin: Billing page with Free vs Pro comparison table (Pro-only differentiators; regex/CSS auto-rules, Client Shield Mode, and block ad redirects stay on both plans).
 * Settings: rename the Access & visibility tab to Access.

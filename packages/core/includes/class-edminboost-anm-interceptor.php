@@ -204,8 +204,12 @@ class EDMINBOOST_ANM_Interceptor {
 	 * @return array
 	 */
 	private static function finalize_intercept( $message, $source, $type, $html = '', $extra = array() ) {
-		$type   = EDMINBOOST_ANM_Inbox::sanitize_notice_type_slug( $type );
 		$source = sanitize_text_field( $source );
+		$type   = EDMINBOOST_ANM_Inbox::apply_severity_policy(
+			EDMINBOOST_ANM_Inbox::sanitize_notice_type_slug( $type ),
+			$message,
+			$source
+		);
 
 		if ( current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
 			$notice = EDMINBOOST_ANM_Inbox::add(
@@ -217,7 +221,7 @@ class EDMINBOOST_ANM_Interceptor {
 				)
 			);
 
-			if ( $notice ) {
+			if ( $notice && empty( $notice['_is_repeat_capture'] ) ) {
 				EDMINBOOST_ANM_Stats::record_intercept( $source, $message, $type );
 				EDMINBOOST_ANM_Webhook::maybe_send( $notice );
 			}

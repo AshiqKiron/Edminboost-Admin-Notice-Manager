@@ -366,6 +366,9 @@ class EDMINBOOST_ANM_Digest {
 			$items   = array();
 
 			foreach ( $notices as $notice ) {
+				if ( ! EDMINBOOST_ANM_Inbox::should_include_in_digest( $notice ) ) {
+					continue;
+				}
 				$items[] = array(
 					'source'  => (string) ( $notice['source_plugin'] ?? '' ),
 					'message' => wp_html_excerpt( $notice['message'] ?? '', 120, '…' ),

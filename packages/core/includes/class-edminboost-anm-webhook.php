@@ -33,6 +33,10 @@ class EDMINBOOST_ANM_Webhook {
 	 * @return void
 	 */
 	public static function maybe_send( $notice ) {
+		if ( ! is_array( $notice ) || ! EDMINBOOST_ANM_Inbox::should_send_webhook_for_notice( $notice ) ) {
+			return;
+		}
+
 		$settings = EDMINBOOST_ANM_Settings::get();
 
 		if ( empty( $settings['webhook']['enabled'] ) ) {

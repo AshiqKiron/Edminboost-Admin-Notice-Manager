@@ -60,11 +60,13 @@ $edminboost_anm_start    = $total > 0 ? ( ( $page - 1 ) * $per_page ) + 1 : 0;
 $edminboost_anm_end      = min( $page * $per_page, $total );
 
 $edminboost_anm_tabs = array(
-	'all'      => __( 'All', EDMINBOOST_ANM_TEXT_DOMAIN ),
-	'critical' => __( 'Critical', EDMINBOOST_ANM_TEXT_DOMAIN ),
-	'snoozed'  => __( 'Snoozed', EDMINBOOST_ANM_TEXT_DOMAIN ),
-	'upsells'  => __( 'Upsells', EDMINBOOST_ANM_TEXT_DOMAIN ),
+	'all'     => __( 'All', EDMINBOOST_ANM_TEXT_DOMAIN ),
+	'alerts'  => __( 'Alerts', EDMINBOOST_ANM_TEXT_DOMAIN ),
+	'snoozed' => __( 'Snoozed', EDMINBOOST_ANM_TEXT_DOMAIN ),
+	'upsells' => __( 'Promotions', EDMINBOOST_ANM_TEXT_DOMAIN ),
 );
+
+$edminboost_anm_inbox_density_class = EDMINBOOST_ANM_Settings::is_inbox_density_compact() ? ' edminboost-anm-inbox-table--compact' : '';
 ?>
 <div class="wrap edminboost-anm-wrap edminboost-anm-wrap--wide" data-edminboost-anm-inbox
 	data-inbox-filter="<?php echo esc_attr( $filter ); ?>"
@@ -122,14 +124,14 @@ $edminboost_anm_tabs = array(
 
 	<div class="edminboost-anm-card edminboost-anm-card--flush edminboost-anm-card--list-table">
 		<?php if ( ! empty( $notices ) || $total > 0 ) : ?>
-			<table class="wp-list-table widefat fixed striped edminboost-anm-table edminboost-anm-inbox-table">
+			<table class="wp-list-table widefat fixed striped edminboost-anm-table edminboost-anm-inbox-table<?php echo esc_attr( $edminboost_anm_inbox_density_class ); ?>">
 				<thead>
 					<tr>
 						<td id="cb" class="manage-column column-cb check-column"><input type="checkbox" id="edminboost-anm-select-all" class="edminboost-anm-inbox-select-all" aria-label="<?php esc_attr_e( 'Select all', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" /></td>
 						<?php
 						edminboost_anm_render_inbox_sortable_th( 'source', __( 'Source Plugin', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order );
 						edminboost_anm_render_inbox_sortable_th( 'message', __( 'Notice Message Preview', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order, true );
-						edminboost_anm_render_inbox_sortable_th( 'type', __( 'Type', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order );
+						edminboost_anm_render_inbox_sortable_th( 'type', __( 'Severity', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order );
 						?>
 						<th scope="col" class="manage-column column-actions"><?php esc_html_e( 'Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 					</tr>
@@ -143,7 +145,7 @@ $edminboost_anm_tabs = array(
 						<?php
 						edminboost_anm_render_inbox_sortable_th( 'source', __( 'Source Plugin', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order );
 						edminboost_anm_render_inbox_sortable_th( 'message', __( 'Notice Message Preview', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order, true );
-						edminboost_anm_render_inbox_sortable_th( 'type', __( 'Type', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order );
+						edminboost_anm_render_inbox_sortable_th( 'type', __( 'Severity', EDMINBOOST_ANM_TEXT_DOMAIN ), $orderby, $order );
 						?>
 						<th scope="col" class="manage-column column-actions"><?php esc_html_e( 'Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></th>
 					</tr>

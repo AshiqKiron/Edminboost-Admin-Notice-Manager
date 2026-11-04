@@ -34,6 +34,7 @@ See `edminboost-anm-project.mdc`, `edminboost-anm-standards.mdc`, `edminboost-an
 - No tracking or analytics to vendor servers. Docs link is user-initiated only.
 - **Webhook** (`settings.webhook`): disabled by default; user supplies URL; sends notice summary JSON via `wp_remote_post` only when enabled. Document in edition `readme.txt` (`packages/free/readme.txt`).
 - **Digest**: uses `wp_mail()` to configured recipients — no third-party email API.
+- **Feature Notifications bridge**: listens for core feature-plugin hooks only when plugin is enabled; Pro may ingest notifications into the local inbox — no outbound calls; coexistence mode stored in settings; filter `edminboost_anm_core_feature_notifications_active` for detection overrides.
 - No spammy readme or deceptive behavior.
 - Any new remote integration must be documented, justified, and opt-in.
 

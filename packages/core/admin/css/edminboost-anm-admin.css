@@ -1047,6 +1047,35 @@ button.edminboost-anm-tabs__tab:focus-visible {
 	vertical-align: middle;
 }
 
+.edminboost-anm-inbox-table--compact td,
+.edminboost-anm-inbox-table--compact th {
+	padding-top: 4px;
+	padding-bottom: 4px;
+	font-size: 12px;
+}
+
+.edminboost-anm-inbox-table--compact .edminboost-anm-actions .button {
+	min-height: 26px;
+	line-height: 24px;
+	padding: 0 8px;
+	font-size: 12px;
+}
+
+.edminboost-anm-inbox-repeat-badge {
+	display: inline-block;
+	margin-left: 6px;
+	padding: 0 6px;
+	border-radius: 10px;
+	font-size: 11px;
+	font-weight: 600;
+	background: #f0f0f1;
+	color: #50575e;
+}
+
+.edminboost-anm-badge--severity-critical {
+	font-weight: 600;
+}
+
 .edminboost-anm-table-footer__meta {
 	display: flex;
 	flex-direction: column;

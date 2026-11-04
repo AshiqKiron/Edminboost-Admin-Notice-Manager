@@ -373,6 +373,8 @@ class EDMINBOOST_ANM_Admin {
 			'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( 'edminboost_anm_admin' ),
 			'pageSlug' => self::PAGE_SLUG,
+			'inboxUrl' => admin_url( 'admin.php?page=' . self::PAGE_SLUG . '-inbox' ),
+			'inboxKeyboardShortcut' => EDMINBOOST_ANM_Settings::is_inbox_keyboard_shortcut_enabled(),
 			'rulesContext' => $rules_context,
 			'multisite'    => array(
 				'isMultisite'          => EDMINBOOST_ANM_Multisite::is_active(),
@@ -558,10 +560,7 @@ class EDMINBOOST_ANM_Admin {
 	 * @return array
 	 */
 	public static function parse_inbox_list_args( $source ) {
-		$filter  = sanitize_key( $source['filter'] ?? 'all' );
-		if ( ! in_array( $filter, EDMINBOOST_ANM_Inbox::LIST_FILTERS, true ) ) {
-			$filter = 'all';
-		}
+		$filter = EDMINBOOST_ANM_Inbox::normalize_list_filter( $source['filter'] ?? 'all' );
 		$search  = sanitize_text_field( $source['s'] ?? '' );
 		$page    = max( 1, (int) ( $source['paged'] ?? $source['page'] ?? 1 ) );
 		$orderby = sanitize_key( $source['orderby'] ?? 'date' );
@@ -830,6 +829,54 @@ class EDMINBOOST_ANM_Admin {
 				'pro'     => true,
 			),
 			array(
+				'feature' => __( 'Alerts tab & severity labels', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Feature Notifications–style Alerts view (critical and warning), severity badges, compact inbox density, and Alt+Shift+N shortcut.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Grouped duplicate notices', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Repeated captures of the same notice bump a repeat counter instead of cluttering the inbox.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Channel mute presets', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'One-click mutes for promotions, tips, and update nags wired to auto-rules and settings.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Severity anti-spam enforcement', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Downgrade promotional or non-core “critical” notices so red-alert spam cannot abuse the inbox.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Core Feature Notifications coexistence', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Work alongside the upcoming core notification bell; legacy admin notice interception continues regardless.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => true,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Alert routing (webhook & digest)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Route outbound webhook and digest entries by notice type; skip promotions from external alerts.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => false,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Core FN inbox bridge', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Import core Feature Notifications into the Notice Inbox and apply ANM severity policy when the core API is available.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => false,
+				'pro'     => true,
+			),
+			array(
+				'feature' => __( 'Network inbox rollup', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'tip'     => __( 'Multisite network admin summary of alert counts per site (Pro).', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'free'    => false,
+				'pro'     => true,
+			),
+			array(
 				'feature' => __( 'Auto-Rules (keyword, regex, CSS)', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'tip'     => __( 'Automatically hide or route notices using keyword, regular expression, or CSS selector rules.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'free'    => true,
@@ -978,7 +1025,8 @@ class EDMINBOOST_ANM_Admin {
 			wp_die( esc_html__( 'You do not have permission to access this page.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
 		}
 
-		$edminboost_anm_network = EDMINBOOST_ANM_Multisite::get_policy_option_raw();
+		$edminboost_anm_network              = EDMINBOOST_ANM_Multisite::get_policy_option_raw();
+		$edminboost_anm_network_inbox_rollup = EDMINBOOST_ANM_Multisite::get_network_inbox_rollup( 15 );
 
 		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-network-policy-page.php';
 	}

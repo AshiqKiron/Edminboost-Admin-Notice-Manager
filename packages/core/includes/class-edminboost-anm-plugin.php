@@ -59,15 +59,23 @@ class EDMINBOOST_ANM_Plugin {
 	protected $ad_redirects;
 
 	/**
+	 * Core Feature Notifications bridge.
+	 *
+	 * @var EDMINBOOST_ANM_Feature_Notifications
+	 */
+	protected $feature_notifications;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->admin         = new EDMINBOOST_ANM_Admin();
-		$this->notices       = new EDMINBOOST_ANM_Notices();
-		$this->interceptor   = new EDMINBOOST_ANM_Interceptor();
-		$this->ajax          = new EDMINBOOST_ANM_Ajax();
-		$this->digest        = new EDMINBOOST_ANM_Digest();
-		$this->ad_redirects  = new EDMINBOOST_ANM_Ad_Redirects();
+		$this->admin                  = new EDMINBOOST_ANM_Admin();
+		$this->notices                = new EDMINBOOST_ANM_Notices();
+		$this->interceptor            = new EDMINBOOST_ANM_Interceptor();
+		$this->ajax                   = new EDMINBOOST_ANM_Ajax();
+		$this->digest                 = new EDMINBOOST_ANM_Digest();
+		$this->ad_redirects           = new EDMINBOOST_ANM_Ad_Redirects();
+		$this->feature_notifications  = new EDMINBOOST_ANM_Feature_Notifications();
 	}
 
 	/**
@@ -95,6 +103,7 @@ class EDMINBOOST_ANM_Plugin {
 		add_action( 'init', array( $this->interceptor, 'register_hooks' ) );
 		add_action( 'init', array( $this->ajax, 'register_hooks' ) );
 		add_action( 'init', array( $this->digest, 'register_hooks' ) );
+		add_action( 'init', array( $this->feature_notifications, 'register_hooks' ) );
 		add_action( 'plugins_loaded', array( $this->ad_redirects, 'register_hooks' ), 0 );
 
 		if ( class_exists( 'EDMINBOOST_ANM_Debug' ) ) {

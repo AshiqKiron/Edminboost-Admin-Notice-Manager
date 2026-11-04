@@ -1209,4 +1209,43 @@ class EDMINBOOST_ANM_Rules {
 
 		return true;
 	}
+
+	/**
+	 * System rule ID for the tips channel mute preset.
+	 *
+	 * @var string
+	 */
+	const CHANNEL_MUTE_TIPS_RULE_ID = 'edminboost_anm_mute_tips';
+
+	/**
+	 * Create or remove auto-rules when channel mute presets are saved.
+	 *
+	 * @param array $channel_mutes Sanitized channel_mutes settings.
+	 * @return void
+	 */
+	public static function sync_channel_mute_rules( $channel_mutes ) {
+		if ( ! is_array( $channel_mutes ) ) {
+			return;
+		}
+
+		if ( class_exists( 'EDMINBOOST_ANM_Multisite' ) && ! EDMINBOOST_ANM_Multisite::site_can_edit_rules() ) {
+			return;
+		}
+
+		if ( ! empty( $channel_mutes['tips'] ) ) {
+			self::save(
+				array(
+					'id'           => self::CHANNEL_MUTE_TIPS_RULE_ID,
+					'name'         => __( 'Mute tip notices (channel preset)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+					'match_type'   => 'keyword',
+					'match_string' => 'pro tip',
+					'action'       => 'auto_dismiss_inbox',
+					'enabled'      => true,
+					'context'      => 'site',
+				)
+			);
+		} elseif ( self::get( self::CHANNEL_MUTE_TIPS_RULE_ID ) ) {
+			self::delete( self::CHANNEL_MUTE_TIPS_RULE_ID );
+		}
+	}
 }

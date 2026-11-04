@@ -1410,6 +1410,66 @@
 		});
 	}
 
+	function initInboxKeyboardShortcut() {
+		if (!data.inboxKeyboardShortcut || !data.inboxUrl) {
+			return;
+		}
+		document.addEventListener('keydown', function (event) {
+			if (!event.altKey || !event.shiftKey || 'KeyN' !== event.code) {
+				return;
+			}
+			var tag = (event.target && event.target.tagName) ? event.target.tagName.toLowerCase() : '';
+			if ('input' === tag || 'textarea' === tag || 'select' === tag || (event.target && event.target.isContentEditable)) {
+				return;
+			}
+			event.preventDefault();
+			window.location.href = data.inboxUrl;
+		});
+	}
+
+	function initInboxListKeyboardNav() {
+		var root = document.querySelector('[data-edminboost-anm-inbox]');
+		if (!root) {
+			return;
+		}
+		var focusIndex = -1;
+
+		function getRows() {
+			return Array.prototype.slice.call(root.querySelectorAll('#edminboost-anm-inbox-rows tr[data-notice-id]'));
+		}
+
+		function focusRow(index) {
+			var rows = getRows();
+			if (!rows.length) {
+				return;
+			}
+			focusIndex = Math.max(0, Math.min(index, rows.length - 1));
+			var btn = rows[focusIndex].querySelector('.edminboost-anm-inbox-read, .edminboost-anm-inbox-snooze-toggle, .edminboost-anm-inbox-convert');
+			if (btn) {
+				btn.focus();
+			}
+		}
+
+		root.addEventListener('keydown', function (event) {
+			if (!root.contains(document.activeElement) && document.activeElement !== document.body) {
+				return;
+			}
+			var rows = getRows();
+			if (!rows.length) {
+				return;
+			}
+			if ('ArrowDown' === event.key || 'j' === event.key) {
+				event.preventDefault();
+				focusRow(focusIndex + 1);
+			} else if ('ArrowUp' === event.key || 'k' === event.key) {
+				event.preventDefault();
+				focusRow(focusIndex <= 0 ? 0 : focusIndex - 1);
+			} else if ('Escape' === event.key) {
+				closeInboxDropdowns(root);
+			}
+		});
+	}
+
 	function initInboxTable() {
 		var root = document.querySelector('[data-edminboost-anm-inbox]');
 		if (!root) {
@@ -3075,7 +3135,9 @@
 		initQuickStatusToggle();
 		initPresetToggle();
 		initRuleModal();
+		initInboxKeyboardShortcut();
 		initInboxTable();
+		initInboxListKeyboardNav();
 		initDebugTools();
 		initDigestPreview();
 		initWebhookPreview();

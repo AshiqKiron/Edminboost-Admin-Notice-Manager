@@ -5,7 +5,7 @@ alwaysApply: true
 
 # EdminBoost ANM Project Rules
 
-WordPress admin notice management plugin. PHP 7.4+, WordPress 6.0+, GPL-3.0. Current release: **1.1.1**.
+WordPress admin notice management plugin. PHP 7.4+, WordPress 6.0+, GPL-3.0. Current release: **1.1.2**.
 
 See `edminboost-anm-standards.mdc`, `edminboost-anm-compliance.mdc`, `edminboost-anm-wordpress-php.mdc`, `edminboost-anm-admin-assets.mdc`, `MONOREPO.md`.
 
@@ -31,6 +31,7 @@ includes/                             # under packages/core/
   class-edminboost-anm-digest.php     # weekly email digest (cron)
   class-edminboost-anm-webhook.php    # opt-in outbound webhook alerts
   class-edminboost-anm-ad-redirects.php # block unwanted admin redirects (settings blocklist)
+  class-edminboost-anm-feature-notifications.php # core Feature Notifications bridge (Pro ingest)
   class-edminboost-anm-multisite.php  # network policy, shared defaults/rules (multisite)
   class-edminboost-anm-debug.php      # WP_DEBUG-only dev helpers
   class-edminboost-anm-{activator,deactivator}.php
@@ -65,7 +66,7 @@ dist/       # build output (gitignored; do not edit — run npm run build)
 
 - Edition bootstrap calls `edminboost_anm_register( $plugin_file, $edition )` in `packages/core/boot.php` — defines constants, sets `EDMINBOOST_ANM_PLUGIN_DIR` / `URL` to core (or assembled root), requires `load.php`, registers activation/deactivation on the edition main file. Then `edminboost_anm_run_plugin()` instantiates `EDMINBOOST_ANM_Plugin`. Loads `EDMINBOOST_ANM_Debug` only when `WP_DEBUG` is true.
 - Edition main filename equals `EDMINBOOST_ANM_PLUGIN_SLUG . '.php'` (Free vs Pro bootstrap names differ).
-- `EDMINBOOST_ANM_Plugin::run()` wires i18n, site + network admin menu/settings/assets, `wp_initialize_site` seeding, and on `init`: notices, interceptor, AJAX, digest, ad redirects (+ debug when loaded).
+- `EDMINBOOST_ANM_Plugin::run()` wires i18n, site + network admin menu/settings/assets, `wp_initialize_site` seeding, and on `init`: notices, interceptor, AJAX, digest, feature notifications bridge, ad redirects (+ debug when loaded).
 - **Options API only** — no custom database tables.
 - **Stored options** (via `EDMINBOOST_ANM_Settings` constants): `edminboost_anm_settings`, `edminboost_anm_rules`, `edminboost_anm_inbox`, `edminboost_anm_stats`, `edminboost_anm_version`. All seeded on activation with `autoload => false`.
 - **Multisite sitemeta** (via `EDMINBOOST_ANM_Multisite`): `edminboost_anm_network` (policy), `edminboost_anm_network_settings` (default settings shape), `edminboost_anm_network_rules` (shared auto-rules). Seeded on network activation / first network admin visit; per-site options remain on each blog.
@@ -81,8 +82,11 @@ dist/       # build output (gitignored; do not edit — run npm run build)
 - **Billing (plans UI)**: site admin submenu **Billing** — read-only Free vs Pro comparison table (`get_billing_comparison_rows()`, `render_billing_comparison_cell()`); upgrade link uses bootstrap constant `EDMINBOOST_ANM_PRO_URL`. Informational only — no license checks or feature gating in this plugin build (Pro separation is a follow-up).
 - **White label**: `settings.white_label` — optional admin menu title, dashboard brand/logo, hide brand/docs, custom docs URL; `EDMINBOOST_ANM_Settings::sanitize_white_label_settings()`; menu/docs helpers for admin UI.
 - **Rules**: match types `keyword`, `regex`, `css` — `html_matches_css_selector()` for class/id/tag.class on notice HTML; upsell suppression via `get_active_blacklist_phrases()` (custom phrases always; built-in preset when enabled). Site rules CRUD respects `EDMINBOOST_ANM_Multisite::site_can_edit_rules()`; network rules stored separately and merged when `share_network_rules` is on.
-- **Inbox**: snooze 1d/7d with toggle unsnooze (same duration or Snooze control) via `edminboost_anm_inbox_action`; `snooze_duration` key on stored notices; Read marks row and disables button (`is-read`).
-- **External requests**: `EDMINBOOST_ANM_Webhook::maybe_send()` posts JSON via `build_payload()` to a user-configured URL only when webhook is enabled (opt-in). Custom `text` template supports tokens (`{source}`, `{message}`, `{message_excerpt}`, `{type}`, `{site}`, `{site_name}`). Settings preview via `get_preview()` uses latest non-archived inbox notice or `get_sample_notice()`. No telemetry or vendor tracking.
+- **Inbox**: filters `all`, `alerts` (critical + warning, excludes actively snoozed; legacy filter slug `critical` → `alerts`), `snoozed`, `upsells`; severity labels via `get_severity_slug()` / `get_severity_label()`; `apply_severity_policy()` on capture; duplicate hash captures increment `repeat_count` (row badge); snooze 1d/7d with toggle unsnooze via `edminboost_anm_inbox_action`; `inbox_ui` density (`comfortable`|`compact`) and optional Alt+Shift+N shortcut.
+- **Feature Notifications**: `EDMINBOOST_ANM_Feature_Notifications` — coexist modes in settings; Pro ingests core notifications into inbox; optional payload severity filter; hook names include `feature_notifications_*` and `wp_feature_notifications_*`; availability filter `edminboost_anm_core_feature_notifications_active`.
+- **Channel mutes / severity / routing**: `channel_mutes` presets (save applies upsell + rules via `apply_channel_mutes_to_settings()` / `EDMINBOOST_ANM_Rules::sync_channel_mute_rules()`); `severity_policy` downgrades promotional or non-core critical types; `alert_routing` gates webhook send (`EDMINBOOST_ANM_Inbox::should_send_webhook_for_notice()`) and digest recent list (`should_include_in_digest()`).
+- **Multisite (Pro)**: `EDMINBOOST_ANM_Multisite::get_network_inbox_rollup()` on network policy page.
+- **External requests**: `EDMINBOOST_ANM_Webhook::maybe_send()` posts JSON via `build_payload()` to a user-configured URL only when webhook is enabled (opt-in) and notice type passes `alert_routing`. Custom `text` template supports tokens (`{source}`, `{message}`, `{message_excerpt}`, `{type}`, `{site}`, `{site_name}`). Settings preview via `get_preview()` uses latest non-archived inbox notice or `get_sample_notice()`. No telemetry or vendor tracking.
 - **Inbox query**: `EDMINBOOST_ANM_Inbox::query()` applies `page` / `per_page` slicing after sort/filter (used by digest recent section and list UI).
 - Admin UI: `EDMINBOOST_ANM_Admin` + partials (`help_tip( $message, $placement )` — dashicon tips with `data-tip` / optional `data-tip-placement` `below`|`left`). Settings page: tabbed sections (General, Notices, Access, Admin bar, Filtering, Security & Shield, Notifications, White label, Migration; plus **Multisite** on multisite sites); General two-column live previews; White label live preview; digest + webhook previews on Notifications; redirect blocklist on Security. Read-only settings form (`.is-settings-readonly`) when network policy blocks site edits. `is_plugin_screen()` matches `$_GET['page']` when needed; network screens via `EDMINBOOST_ANM_Multisite::is_network_plugin_screen()`. Plugins row meta Docs link respects white-label settings.
 - Plugin-screen assets via `is_plugin_screen()` or `is_network_plugin_screen()` (inbox/settings enqueue `list-tables` + `dashicons`). Notice CSS on wp-admin when plugin enabled; also on front-end admin bar when panel active for capable users. Inline hide JS on wp-admin outside plugin screens. Dropdown panel JS (`edminboost-anm-notices`) for dropdown styles when panel is shown. Interceptor JS on all wp-admin when plugin enabled (includes `network_admin_notices`). Dashboard Quick Status toggle reloads after AJAX save when `site_can_edit_settings()`.
@@ -142,6 +146,7 @@ Project prefix: `edminboost_anm` (use `edminboost-anm` in slugs/handles). Distin
 - `edminboost_anm_webhook_payload` — filter outbound webhook JSON payload
 - `edminboost_anm_billing_comparison` — filter Free vs Pro rows on the Billing page
 - `edminboost_anm_block_ad_redirect_activation_flags` — filter activation option suppressors when block ad redirects is enabled
+- `edminboost_anm_core_feature_notifications_active` — filter whether WordPress Feature Notifications is considered active
 
 ## Scope & Change Discipline
 

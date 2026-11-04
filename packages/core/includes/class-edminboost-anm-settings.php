@@ -197,6 +197,28 @@ class EDMINBOOST_ANM_Settings {
 				'docs_url'       => '',
 				'hide_brand'     => false,
 			),
+			'inbox_ui'              => array(
+				'density'                     => 'comfortable',
+				'keyboard_shortcut_enabled' => true,
+			),
+			'feature_notifications' => array(
+				'coexist_mode' => 'coexist',
+			),
+			'channel_mutes'         => array(
+				'promotions' => false,
+				'tips'       => false,
+				'updates'    => false,
+			),
+			'severity_policy'       => array(
+				'downgrade_promotions'  => true,
+				'block_plugin_critical' => false,
+			),
+			'alert_routing'         => array(
+				'webhook_types'       => array( 'critical', 'error', 'warning' ),
+				'digest_types'        => array( 'critical', 'error', 'warning', 'info', 'success' ),
+				'webhook_skip_upsell' => true,
+				'digest_skip_upsell'  => true,
+			),
 		);
 
 		/**
@@ -315,6 +337,11 @@ class EDMINBOOST_ANM_Settings {
 			'non_standard_admin_notices',
 			'hiding_notifications',
 			'acl',
+			'inbox_ui',
+			'feature_notifications',
+			'channel_mutes',
+			'severity_policy',
+			'alert_routing',
 		);
 
 		foreach ( $nested_keys as $key ) {
@@ -371,12 +398,35 @@ class EDMINBOOST_ANM_Settings {
 			'hiding_notifications',
 			'acl',
 			'white_label',
+			'inbox_ui',
+			'feature_notifications',
+			'channel_mutes',
+			'severity_policy',
+			'alert_routing',
 		);
 
 		foreach ( $nested_keys as $key ) {
 			$merged[ $key ] = wp_parse_args(
 				isset( $merged[ $key ] ) && is_array( $merged[ $key ] ) ? $merged[ $key ] : array(),
 				$defaults[ $key ]
+			);
+		}
+
+		if ( isset( $merged['alert_routing']['webhook_types'] ) && is_array( $merged['alert_routing']['webhook_types'] ) ) {
+			$merged['alert_routing']['webhook_types'] = array_values(
+				array_intersect(
+					array_map( 'sanitize_key', $merged['alert_routing']['webhook_types'] ),
+					EDMINBOOST_ANM_Inbox::NOTICE_TYPE_SLUGS
+				)
+			);
+		}
+
+		if ( isset( $merged['alert_routing']['digest_types'] ) && is_array( $merged['alert_routing']['digest_types'] ) ) {
+			$merged['alert_routing']['digest_types'] = array_values(
+				array_intersect(
+					array_map( 'sanitize_key', $merged['alert_routing']['digest_types'] ),
+					EDMINBOOST_ANM_Inbox::NOTICE_TYPE_SLUGS
+				)
 			);
 		}
 
@@ -625,10 +675,35 @@ class EDMINBOOST_ANM_Settings {
 
 		$output['white_label'] = self::sanitize_white_label_settings( $white_label_input );
 
+		if ( isset( $input['inbox_ui'] ) && is_array( $input['inbox_ui'] ) ) {
+			$output['inbox_ui'] = self::sanitize_inbox_ui_settings( $input['inbox_ui'] );
+		}
+
+		if ( isset( $input['feature_notifications'] ) && is_array( $input['feature_notifications'] ) ) {
+			$output['feature_notifications'] = self::sanitize_feature_notifications_settings( $input['feature_notifications'] );
+		}
+
+		if ( isset( $input['channel_mutes'] ) && is_array( $input['channel_mutes'] ) ) {
+			$output['channel_mutes'] = self::sanitize_channel_mutes_settings( $input['channel_mutes'] );
+			$output                  = self::apply_channel_mutes_to_settings( $output );
+		}
+
+		if ( isset( $input['severity_policy'] ) && is_array( $input['severity_policy'] ) ) {
+			$output['severity_policy'] = self::sanitize_severity_policy_settings( $input['severity_policy'] );
+		}
+
+		if ( isset( $input['alert_routing'] ) && is_array( $input['alert_routing'] ) ) {
+			$output['alert_routing'] = self::sanitize_alert_routing_settings( $input['alert_routing'], $output['alert_routing'] );
+		}
+
 		$output['notice_panel'] = wp_parse_args( $output['notice_panel'], $defaults['notice_panel'] );
 
 		if ( class_exists( 'EDMINBOOST_ANM_Digest' ) ) {
 			EDMINBOOST_ANM_Digest::sync_schedule( $output );
+		}
+
+		if ( class_exists( 'EDMINBOOST_ANM_Rules' ) && isset( $output['channel_mutes'] ) ) {
+			EDMINBOOST_ANM_Rules::sync_channel_mute_rules( $output['channel_mutes'] );
 		}
 
 		/**
@@ -1009,6 +1084,10 @@ class EDMINBOOST_ANM_Settings {
 			return false;
 		}
 
+		if ( self::should_hide_anm_panel_for_core_feature_notifications() ) {
+			return false;
+		}
+
 		$settings = self::get();
 		$panel    = wp_parse_args(
 			$settings['notice_panel'] ?? array(),
@@ -1016,6 +1095,73 @@ class EDMINBOOST_ANM_Settings {
 		);
 
 		return ! empty( $panel['enabled'] );
+	}
+
+	/**
+	 * Stored coexistence mode for WordPress Feature Notifications.
+	 *
+	 * @return string coexist|anm_primary|legacy_only
+	 */
+	public static function get_feature_notifications_coexist_mode() {
+		$settings = self::get();
+		$fn       = wp_parse_args(
+			$settings['feature_notifications'] ?? array(),
+			self::get_defaults()['feature_notifications']
+		);
+		$mode     = sanitize_key( $fn['coexist_mode'] ?? 'coexist' );
+
+		if ( ! in_array( $mode, EDMINBOOST_ANM_Feature_Notifications::COEXIST_MODES, true ) ) {
+			return 'coexist';
+		}
+
+		return $mode;
+	}
+
+	/**
+	 * Whether the ANM admin bar panel should be hidden because core FN is primary.
+	 *
+	 * @return bool
+	 */
+	public static function should_hide_anm_panel_for_core_feature_notifications() {
+		if ( ! class_exists( 'EDMINBOOST_ANM_Feature_Notifications' ) ) {
+			return false;
+		}
+
+		if ( ! EDMINBOOST_ANM_Feature_Notifications::is_available() ) {
+			return false;
+		}
+
+		return 'anm_primary' === self::get_feature_notifications_coexist_mode();
+	}
+
+	/**
+	 * Whether inbox list table uses compact row density.
+	 *
+	 * @return bool
+	 */
+	public static function is_inbox_density_compact() {
+		$settings = self::get();
+		$ui       = wp_parse_args(
+			$settings['inbox_ui'] ?? array(),
+			self::get_defaults()['inbox_ui']
+		);
+
+		return 'compact' === sanitize_key( $ui['density'] ?? 'comfortable' );
+	}
+
+	/**
+	 * Whether inbox keyboard shortcut (Alt+Shift+N) is enabled.
+	 *
+	 * @return bool
+	 */
+	public static function is_inbox_keyboard_shortcut_enabled() {
+		$settings = self::get();
+		$ui       = wp_parse_args(
+			$settings['inbox_ui'] ?? array(),
+			self::get_defaults()['inbox_ui']
+		);
+
+		return ! empty( $ui['keyboard_shortcut_enabled'] );
 	}
 
 	/**
@@ -1842,6 +1988,145 @@ class EDMINBOOST_ANM_Settings {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Sanitize inbox UI preferences.
+	 *
+	 * @param array $input Raw inbox_ui input.
+	 * @return array
+	 */
+	public static function sanitize_inbox_ui_settings( array $input ) {
+		$density = sanitize_key( $input['density'] ?? 'comfortable' );
+		if ( ! in_array( $density, array( 'comfortable', 'compact' ), true ) ) {
+			$density = 'comfortable';
+		}
+
+		return array(
+			'density'                     => $density,
+			'keyboard_shortcut_enabled' => ! empty( $input['keyboard_shortcut_enabled'] ),
+		);
+	}
+
+	/**
+	 * Sanitize Feature Notifications coexistence settings.
+	 *
+	 * @param array $input Raw feature_notifications input.
+	 * @return array
+	 */
+	public static function sanitize_feature_notifications_settings( array $input ) {
+		$mode = sanitize_key( $input['coexist_mode'] ?? 'coexist' );
+		if ( ! in_array( $mode, EDMINBOOST_ANM_Feature_Notifications::COEXIST_MODES, true ) ) {
+			$mode = 'coexist';
+		}
+
+		return array(
+			'coexist_mode' => $mode,
+		);
+	}
+
+	/**
+	 * Sanitize channel mute preset toggles.
+	 *
+	 * @param array $input Raw channel_mutes input.
+	 * @return array
+	 */
+	public static function sanitize_channel_mutes_settings( array $input ) {
+		return array(
+			'promotions' => ! empty( $input['promotions'] ),
+			'tips'       => ! empty( $input['tips'] ),
+			'updates'    => ! empty( $input['updates'] ),
+		);
+	}
+
+	/**
+	 * Apply channel mute presets to related settings on save.
+	 *
+	 * @param array $output Sanitized settings being saved.
+	 * @return array
+	 */
+	public static function apply_channel_mutes_to_settings( array $output ) {
+		$mutes = wp_parse_args(
+			$output['channel_mutes'] ?? array(),
+			self::get_defaults()['channel_mutes']
+		);
+
+		if ( ! empty( $mutes['promotions'] ) ) {
+			$output['upsell_preset']['enabled'] = true;
+		}
+
+		if ( ! empty( $mutes['updates'] ) ) {
+			$output['disable_plugin_update_notifications'] = true;
+			$output['disable_core_update_notifications']   = true;
+		}
+
+		return $output;
+	}
+
+	/**
+	 * Sanitize severity enforcement policy.
+	 *
+	 * @param array $input Raw severity_policy input.
+	 * @return array
+	 */
+	public static function sanitize_severity_policy_settings( array $input ) {
+		return array(
+			'downgrade_promotions'  => ! empty( $input['downgrade_promotions'] ),
+			'block_plugin_critical' => ! empty( $input['block_plugin_critical'] ),
+		);
+	}
+
+	/**
+	 * Sanitize alert routing for webhook and digest.
+	 *
+	 * @param array $input   Raw alert_routing input.
+	 * @param array $stored  Stored alert_routing values.
+	 * @return array
+	 */
+	public static function sanitize_alert_routing_settings( array $input, array $stored ) {
+		$stored   = wp_parse_args( $stored, self::get_defaults()['alert_routing'] );
+		$allowed  = EDMINBOOST_ANM_Inbox::NOTICE_TYPE_SLUGS;
+		$webhook  = $stored['webhook_types'];
+		$digest   = $stored['digest_types'];
+
+		if ( isset( $input['webhook_types'] ) && is_array( $input['webhook_types'] ) ) {
+			$webhook = array_values(
+				array_intersect( array_map( 'sanitize_key', $input['webhook_types'] ), $allowed )
+			);
+		}
+
+		if ( isset( $input['digest_types'] ) && is_array( $input['digest_types'] ) ) {
+			$digest = array_values(
+				array_intersect( array_map( 'sanitize_key', $input['digest_types'] ), $allowed )
+			);
+		}
+
+		if ( empty( $webhook ) ) {
+			$webhook = self::get_defaults()['alert_routing']['webhook_types'];
+		}
+		if ( empty( $digest ) ) {
+			$digest = self::get_defaults()['alert_routing']['digest_types'];
+		}
+
+		return array(
+			'webhook_types'       => $webhook,
+			'digest_types'        => $digest,
+			'webhook_skip_upsell' => array_key_exists( 'webhook_skip_upsell', $input ) ? ! empty( $input['webhook_skip_upsell'] ) : ! empty( $stored['webhook_skip_upsell'] ),
+			'digest_skip_upsell'  => array_key_exists( 'digest_skip_upsell', $input ) ? ! empty( $input['digest_skip_upsell'] ) : ! empty( $stored['digest_skip_upsell'] ),
+		);
+	}
+
+	/**
+	 * Choices for Feature Notifications coexistence mode.
+	 *
+	 * @return array<string, string>
+	 */
+	public static function get_feature_notifications_coexist_choices() {
+		return array(
+			'coexist'      => __( 'Work alongside core bell (recommended)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'anm_primary'  => __( 'Hide admin bar panel when core Feature Notifications is active', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'legacy_only'  => __( 'Legacy admin notices only (ignore core notification import)', EDMINBOOST_ANM_TEXT_DOMAIN ),
+		);
 	}
 
 	/**

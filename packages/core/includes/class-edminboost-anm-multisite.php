@@ -610,4 +610,58 @@ class EDMINBOOST_ANM_Multisite {
 			restore_current_blog();
 		}
 	}
+
+	/**
+	 * Per-site inbox alert counts for network administrators (Pro).
+	 *
+	 * @param int $limit Max sites to return (0 = all).
+	 * @return array<int, array{blog_id: int, name: string, alerts: int, total: int}>
+	 */
+	public static function get_network_inbox_rollup( $limit = 20 ) {
+		if ( ! self::is_active() || ! function_exists( 'edminboost_anm_is_pro' ) || ! edminboost_anm_is_pro() ) {
+			return array();
+		}
+
+		if ( ! is_network_admin() || ! current_user_can( self::NETWORK_CAPABILITY ) ) {
+			return array();
+		}
+
+		$site_ids = get_sites(
+			array(
+				'number' => $limit > 0 ? $limit : 0,
+				'fields' => 'ids',
+			)
+		);
+
+		$rollup = array();
+
+		foreach ( $site_ids as $blog_id ) {
+			$blog_id = (int) $blog_id;
+			switch_to_blog( $blog_id );
+
+			if ( ! EDMINBOOST_ANM_Settings::is_enabled() ) {
+				restore_current_blog();
+				continue;
+			}
+
+			$counts = EDMINBOOST_ANM_Inbox::get_counts();
+			$rollup[] = array(
+				'blog_id' => $blog_id,
+				'name'    => get_bloginfo( 'name' ),
+				'alerts'  => (int) ( $counts['alerts'] ?? 0 ),
+				'total'   => (int) ( $counts['all'] ?? 0 ),
+			);
+
+			restore_current_blog();
+		}
+
+		usort(
+			$rollup,
+			static function ( $a, $b ) {
+				return ( $b['alerts'] ?? 0 ) <=> ( $a['alerts'] ?? 0 );
+			}
+		);
+
+		return $rollup;
+	}
 }

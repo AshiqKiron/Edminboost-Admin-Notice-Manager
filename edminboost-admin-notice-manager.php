@@ -7,7 +7,7 @@
  * Plugin Name: Edminboost - Admin Notice Manager
  * Plugin URI: https://asphaltthemes.com/edminboost/admin-notice-manager
  * Description: Manage, organize, and control WordPress admin notices from one central dashboard.
- * Version: 1.1.1
+ * Version: 1.1.2
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: ashiquzzaman
@@ -29,7 +29,7 @@ edminboost_anm_register(
 	array(
 		'is_pro'   => false,
 		'slug'     => 'edminboost-admin-notice-manager',
-		'version'  => '1.1.1',
+		'version'  => '1.1.2',
 		'core_dir' => __DIR__ . '/packages/core',
 		'core_url' => plugins_url( 'packages/core/', __FILE__ ),
 	)

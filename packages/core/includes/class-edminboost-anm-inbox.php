@@ -19,7 +19,14 @@ class EDMINBOOST_ANM_Inbox {
 	 *
 	 * @var string[]
 	 */
-	const LIST_FILTERS = array( 'all', 'critical', 'snoozed', 'upsells' );
+	const LIST_FILTERS = array( 'all', 'alerts', 'snoozed', 'upsells' );
+
+	/**
+	 * Legacy inbox filter slug mapped to {@see LIST_FILTERS} alerts tab.
+	 *
+	 * @var string
+	 */
+	const LEGACY_ALERTS_FILTER = 'critical';
 
 	/**
 	 * Allowed notice type slugs for display and CSS modifiers.
@@ -164,17 +171,39 @@ class EDMINBOOST_ANM_Inbox {
 		$message       = wp_strip_all_tags( $data['message'] ?? '' );
 		$message       = self::truncate_string( $message, self::MAX_MESSAGE_LENGTH );
 		$source_plugin = sanitize_text_field( $data['source_plugin'] ?? __( 'Unknown', EDMINBOOST_ANM_TEXT_DOMAIN ) );
-		$type          = self::sanitize_notice_type_slug( $data['type'] ?? 'info' );
+		$type          = self::apply_severity_policy(
+			self::sanitize_notice_type_slug( $data['type'] ?? 'info' ),
+			$message,
+			$source_plugin
+		);
 		$hash          = self::generate_hash( $message, $source_plugin );
-
-		foreach ( self::get_all() as $existing ) {
-			if ( ( $existing['hash'] ?? '' ) === $hash && 'archived' !== ( $existing['status'] ?? '' ) ) {
-				return null;
-			}
-		}
 
 		$html = isset( $data['html'] ) ? wp_kses_post( $data['html'] ) : '';
 		$html = self::truncate_string( $html, self::MAX_HTML_LENGTH );
+
+		$notices = self::get_all();
+		$now     = time();
+
+		foreach ( $notices as $index => $existing ) {
+			if ( ( $existing['hash'] ?? '' ) !== $hash || 'archived' === ( $existing['status'] ?? '' ) ) {
+				continue;
+			}
+
+			$notices[ $index ]['last_seen']    = $now;
+			$notices[ $index ]['repeat_count'] = max( 1, (int) ( $existing['repeat_count'] ?? 1 ) ) + 1;
+			if ( '' !== $html ) {
+				$notices[ $index ]['html'] = $html;
+			}
+			if ( ! empty( $data['origin'] ) ) {
+				$notices[ $index ]['origin'] = sanitize_key( (string) $data['origin'] );
+			}
+
+			self::save_all( $notices );
+
+			$notices[ $index ]['_is_repeat_capture'] = true;
+
+			return $notices[ $index ];
+		}
 
 		$notice = array(
 			'id'             => 'notice_' . strtolower( wp_generate_password( 8, false ) ),
@@ -185,13 +214,20 @@ class EDMINBOOST_ANM_Inbox {
 			'status'         => 'new',
 			'read_at'        => 0,
 			'snoozed_until'  => 0,
-			'intercepted_at' => time(),
+			'intercepted_at' => $now,
+			'last_seen'      => $now,
+			'repeat_count'   => 1,
 			'hash'           => $hash,
 		);
 
-		$notices   = self::get_all();
+		if ( ! empty( $data['origin'] ) ) {
+			$notice['origin'] = sanitize_key( (string) $data['origin'] );
+		}
+
 		$notices[] = $notice;
 		self::save_all( $notices );
+
+		$notice['_is_repeat_capture'] = false;
 
 		return $notice;
 	}
@@ -221,8 +257,11 @@ class EDMINBOOST_ANM_Inbox {
 		}
 
 		switch ( $filter ) {
-			case 'critical':
-				if ( 'critical' !== ( $notice['type'] ?? '' ) && 'warning' !== ( $notice['type'] ?? '' ) ) {
+			case 'alerts':
+				if ( ! self::notice_is_alert_type( $notice ) ) {
+					return false;
+				}
+				if ( self::is_actively_snoozed( $notice ) ) {
 					return false;
 				}
 				break;
@@ -266,10 +305,7 @@ class EDMINBOOST_ANM_Inbox {
 
 		$args = wp_parse_args( $args, $defaults );
 
-		$args['filter'] = sanitize_key( $args['filter'] );
-		if ( ! in_array( $args['filter'], self::LIST_FILTERS, true ) ) {
-			$args['filter'] = 'all';
-		}
+		$args['filter'] = self::normalize_list_filter( $args['filter'] );
 
 		$notices = self::get_all();
 		$now     = time();
@@ -363,10 +399,10 @@ class EDMINBOOST_ANM_Inbox {
 
 		$now    = time();
 		$counts = array(
-			'all'      => 0,
-			'critical' => 0,
-			'snoozed'  => 0,
-			'upsells'  => 0,
+			'all'     => 0,
+			'alerts'  => 0,
+			'snoozed' => 0,
+			'upsells' => 0,
 		);
 
 		foreach ( self::get_all() as $notice ) {
@@ -701,18 +737,209 @@ class EDMINBOOST_ANM_Inbox {
 	 * @return string
 	 */
 	public static function get_type_label( $type ) {
+		return self::get_severity_label( self::get_severity_slug( $type ) );
+	}
+
+	/**
+	 * Map stored notice type to Feature Notifications severity slug.
+	 *
+	 * @param string $type Notice type slug.
+	 * @return string critical|warning|info
+	 */
+	public static function get_severity_slug( $type ) {
 		$type = self::sanitize_notice_type_slug( $type );
 
+		if ( in_array( $type, array( 'critical', 'error' ), true ) ) {
+			return 'critical';
+		}
+
+		if ( 'warning' === $type ) {
+			return 'warning';
+		}
+
+		return 'info';
+	}
+
+	/**
+	 * Human-readable severity label (aligned with core Feature Notifications vocabulary).
+	 *
+	 * @param string $severity critical|warning|info
+	 * @return string
+	 */
+	public static function get_severity_label( $severity ) {
+		$severity = sanitize_key( $severity );
+
 		$labels = array(
-			'critical' => __( 'Warning (Critical)', EDMINBOOST_ANM_TEXT_DOMAIN ),
-			'warning'  => __( 'Warning (Critical)', EDMINBOOST_ANM_TEXT_DOMAIN ),
-			'upsell'   => __( 'Promotion (Upsell)', EDMINBOOST_ANM_TEXT_DOMAIN ),
-			'success'  => __( 'Success', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'critical' => __( 'Critical', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'warning'  => __( 'Warning', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			'info'     => __( 'Info', EDMINBOOST_ANM_TEXT_DOMAIN ),
-			'error'    => __( 'Error', EDMINBOOST_ANM_TEXT_DOMAIN ),
 		);
 
-		return $labels[ $type ] ?? $labels['info'];
+		return $labels[ $severity ] ?? $labels['info'];
+	}
+
+	/**
+	 * Whether a notice type counts as an alert (critical or warning severity).
+	 *
+	 * @param array $notice Notice row.
+	 * @return bool
+	 */
+	public static function notice_is_alert_type( $notice ) {
+		$type = self::sanitize_notice_type_slug( $notice['type'] ?? 'info' );
+
+		return in_array( $type, array( 'critical', 'error', 'warning' ), true );
+	}
+
+	/**
+	 * Map core Feature Notifications payload to inbox type slug.
+	 *
+	 * @param array $payload Core notification data.
+	 * @return string
+	 */
+	public static function map_core_severity_to_type( $payload ) {
+		if ( ! is_array( $payload ) ) {
+			return 'info';
+		}
+
+		$severity = sanitize_key( (string) ( $payload['severity'] ?? $payload['level'] ?? '' ) );
+		$intent   = sanitize_key( (string) ( $payload['intent'] ?? '' ) );
+
+		if ( in_array( $intent, array( 'promotion', 'tip', 'marketing' ), true ) ) {
+			return 'upsell';
+		}
+
+		switch ( $severity ) {
+			case 'critical':
+			case 'alert':
+				return 'critical';
+			case 'warning':
+				return 'warning';
+			default:
+				return 'info';
+		}
+	}
+
+	/**
+	 * Apply site severity policy (anti-spam) to a notice type before storage.
+	 *
+	 * @param string $type    Proposed type slug.
+	 * @param string $message Notice message.
+	 * @param string $source  Source plugin label.
+	 * @return string
+	 */
+	public static function apply_severity_policy( $type, $message, $source = '' ) {
+		$type    = self::sanitize_notice_type_slug( $type );
+		$message = wp_strip_all_tags( (string) $message );
+		$source  = sanitize_text_field( (string) $source );
+
+		$settings = EDMINBOOST_ANM_Settings::get();
+		$policy   = wp_parse_args(
+			$settings['severity_policy'] ?? array(),
+			EDMINBOOST_ANM_Settings::get_defaults()['severity_policy']
+		);
+
+		$classified = EDMINBOOST_ANM_Rules::classify_type( $message );
+
+		if ( ! empty( $policy['downgrade_promotions'] ) && 'upsell' === $classified ) {
+			return 'upsell';
+		}
+
+		if ( ! empty( $policy['downgrade_promotions'] ) && in_array( $type, array( 'critical', 'error' ), true ) && 'upsell' === $classified ) {
+			return 'upsell';
+		}
+
+		if ( ! empty( $policy['block_plugin_critical'] ) && in_array( $type, array( 'critical', 'error' ), true ) ) {
+			if ( ! EDMINBOOST_ANM_Interceptor::is_protected_notice( '', $message ) ) {
+				$core_sources = array( 'WordPress', 'wordpress', __( 'WordPress', EDMINBOOST_ANM_TEXT_DOMAIN ) );
+				if ( ! in_array( $source, $core_sources, true ) ) {
+					return 'warning';
+				}
+			}
+		}
+
+		return $type;
+	}
+
+	/**
+	 * Whether alert routing allows webhook delivery for this notice.
+	 *
+	 * @param array $notice Notice row.
+	 * @return bool
+	 */
+	public static function should_send_webhook_for_notice( $notice ) {
+		$defaults = EDMINBOOST_ANM_Settings::get_defaults()['alert_routing'];
+		$routing  = $defaults;
+
+		if ( function_exists( 'edminboost_anm_is_pro' ) && edminboost_anm_is_pro() ) {
+			$settings = EDMINBOOST_ANM_Settings::get();
+			$routing  = wp_parse_args(
+				$settings['alert_routing'] ?? array(),
+				$defaults
+			);
+		}
+
+		$type = self::sanitize_notice_type_slug( $notice['type'] ?? 'info' );
+
+		if ( ! empty( $routing['webhook_skip_upsell'] ) && 'upsell' === $type ) {
+			return false;
+		}
+
+		$allowed = isset( $routing['webhook_types'] ) && is_array( $routing['webhook_types'] )
+			? array_map( 'sanitize_key', $routing['webhook_types'] )
+			: array( 'critical', 'error', 'warning' );
+
+		return in_array( $type, $allowed, true );
+	}
+
+	/**
+	 * Whether a notice should appear in digest recent sections.
+	 *
+	 * @param array $notice Notice row.
+	 * @return bool
+	 */
+	public static function should_include_in_digest( $notice ) {
+		$defaults = EDMINBOOST_ANM_Settings::get_defaults()['alert_routing'];
+		$routing  = $defaults;
+
+		if ( function_exists( 'edminboost_anm_is_pro' ) && edminboost_anm_is_pro() ) {
+			$settings = EDMINBOOST_ANM_Settings::get();
+			$routing  = wp_parse_args(
+				$settings['alert_routing'] ?? array(),
+				$defaults
+			);
+		}
+
+		$type = self::sanitize_notice_type_slug( $notice['type'] ?? 'info' );
+
+		if ( ! empty( $routing['digest_skip_upsell'] ) && 'upsell' === $type ) {
+			return false;
+		}
+
+		$allowed = isset( $routing['digest_types'] ) && is_array( $routing['digest_types'] )
+			? array_map( 'sanitize_key', $routing['digest_types'] )
+			: array( 'critical', 'error', 'warning', 'info', 'success' );
+
+		return in_array( $type, $allowed, true );
+	}
+
+	/**
+	 * Normalize legacy filter slugs for inbox list queries.
+	 *
+	 * @param string $filter Raw filter slug.
+	 * @return string
+	 */
+	public static function normalize_list_filter( $filter ) {
+		$filter = sanitize_key( $filter );
+
+		if ( self::LEGACY_ALERTS_FILTER === $filter ) {
+			return 'alerts';
+		}
+
+		if ( in_array( $filter, self::LIST_FILTERS, true ) ) {
+			return $filter;
+		}
+
+		return 'all';
 	}
 
 	/**

@@ -15,8 +15,10 @@ Source paths below are under `packages/core/admin/` (assembled to `admin/` at pl
 - Wrap in an IIFE with `'use strict'`.
 - Scope DOM queries to `.edminboost-anm-wrap` or plugin-specific selectors.
 - Use `fetch`/`admin-ajax.php` with `edminboostAnmData.ajaxUrl`, `nonce`, and localized `i18n` for errors/success.
-- Inbox: sort/filter/pagination via `edminboost_anm_inbox_list` (updates `#edminboost-anm-inbox-rows` HTML from server-rendered partial); URL query sync for filters/sort/page.
-- Inbox row actions: Read via `edminboost_anm_inbox_action` (`read`) — disables button and adds `.is-read`; snooze menu with toggle unsnooze (repeat duration or `.edminboost-anm-inbox-snooze-toggle` when `.is-snoozed`) — `setInboxSnoozeState()` from AJAX `snoozed` + `duration` payload.
+- Inbox: sort/filter/pagination via `edminboost_anm_inbox_list` (updates `#edminboost-anm-inbox-rows` HTML from server-rendered partial); URL query sync for filters/sort/page; filter tabs include **Alerts** (`alerts` — critical + warning).
+- Inbox: `initInboxKeyboardShortcut()` — when localized `inboxKeyboardShortcut` + `inboxUrl`, Alt+Shift+N opens inbox from wp-admin (skips when focus in inputs); `initInboxListKeyboardNav()` — j/k and arrow keys move focus across row action buttons.
+- Inbox row actions: Read via `edminboost_anm_inbox_action` (`read`) — disables button and adds `.is-read`; snooze menu with toggle unsnooze (repeat duration or `.edminboost-anm-inbox-snooze-toggle` when `.is-snoozed`) — `setInboxSnoozeState()` from AJAX `snoozed` + `duration` payload; repeat captures show `.edminboost-anm-inbox-repeat-badge` when `repeat_count` > 1.
+- Inbox density: body/wrap class from `inbox_ui.density` (`compact` tightens table spacing via CSS).
 - Rules: WP core preset conversion via `edminboost_anm_convert_wp_preset` (toggle undo supported); CRUD via save/delete/toggle AJAX with inline errors and empty state; delete uses core-style link + `confirm()`; match type includes CSS selector (`css`). Rule AJAX posts optional `context` (`site` default, `network` on Network Auto-Rules screen) — appended from localized `rulesContext` via shared request helper.
 - Settings: tabbed UI via `initSettingsTabs()` on `[data-edminboost-anm-settings]` — `?tab=` query sync, `history.replaceState`, keyboard (Arrow/Home/End), `edminboost-anm-settings-tab` custom event; legacy `?tab=upsell` maps to `filtering`. Tools tab adds `.is-tab-tools` on the form (hides main Save button where appropriate). Preserve active tab in `_wp_http_referer` on submit; `.edminboost-anm-multisite-policy-form` submit forces `tab=multisite` in referer.
 - Settings: digest live preview via `initDigestPreview()` — POST `edminboost_anm_digest_preview` with unsaved `digest[...]` fields (including `digest[send_weekday]`); renders structured `content` into `[data-edminboost-anm-digest-preview-content]` with `escapeHtml()`; updates next-send line from `next_send` in response; debounced refresh when preview panel is open; auto-load on Notifications tab (including `?tab=notifications` deep links).
@@ -61,6 +63,8 @@ Source paths below are under `packages/core/admin/` (assembled to `admin/` at pl
 	ajaxUrl: string,
 	nonce: string,
 	pageSlug: string,
+	inboxUrl: string,
+	inboxKeyboardShortcut: boolean,
 	rulesContext: 'site' | 'network',
 	multisite: {
 		isMultisite: boolean,
@@ -110,8 +114,8 @@ Source paths below are under `packages/core/admin/` (assembled to `admin/` at pl
 | `edminboost-anm-inbox-page.php` | Inbox list table shell (filters, bulk actions) |
 | `edminboost-anm-inbox-table-rows.php` | `<tr>` rows only — included from page render and AJAX `rows` HTML |
 | `edminboost-anm-rules-page.php` | Filter rules CRUD + WP preset conversion UI |
-| `edminboost-anm-settings-page.php` | Tabbed Settings API form — tabs: `general`, `notices`, `access`, `admin_bar`, `filtering`, `security`, `notifications`, `white_label`, `tools` (Migration); optional `multisite` when multisite active (hidden on network defaults screen via `$edminboost_anm_hide_multisite_tab`). Legacy `?tab=upsell` → `filtering`. General: two-column live previews. White label: agency branding + live preview. Notifications: digest two-column layout + webhook preview. Security: redirect blocklist. Tools: importer/export. Read-only notice + `.is-settings-readonly` when `$edminboost_anm_settings_readonly`. Supports alternate `$edminboost_anm_option_name` / `$edminboost_anm_settings_group` for network defaults. |
-| `edminboost-anm-network-policy-page.php` | Network multisite policy form (Settings API group `NETWORK_POLICY_GROUP`; includes shared policy partials) |
+| `edminboost-anm-settings-page.php` | Tabbed Settings API form — tabs: `general`, `notices`, `access`, `admin_bar`, `filtering`, `security`, `notifications`, `white_label`, `tools` (Migration); optional `multisite` when multisite active (hidden on network defaults screen via `$edminboost_anm_hide_multisite_tab`). Legacy `?tab=upsell` → `filtering`. General: inbox UI (density, keyboard shortcut). Filtering: channel mutes + severity policy. Notifications: digest/webhook previews + alert routing checkboxes. Migration: Feature Notifications coexistence when core API detected. Read-only notice + `.is-settings-readonly` when `$edminboost_anm_settings_readonly`. Supports alternate `$edminboost_anm_option_name` / `$edminboost_anm_settings_group` for network defaults. |
+| `edminboost-anm-network-policy-page.php` | Network multisite policy form (Settings API group `NETWORK_POLICY_GROUP`; includes shared policy partials; Pro inbox alert rollup table when data present) |
 | `edminboost-anm-multisite-policy-fields.php` | Shared policy select + override checkboxes (network policy page + Settings Multisite tab) |
 | `edminboost-anm-multisite-policy-next-steps.php` | Contextual links after policy fields (network vs site Settings) |
 | `edminboost-anm-billing-page.php` | Free vs Pro comparison table + external upgrade CTA (`EDMINBOOST_ANM_PRO_URL`); rows from `get_billing_comparison_rows()` |
