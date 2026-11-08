@@ -42,6 +42,7 @@ includes/                             # under packages/core/
   class-edminboost-anm-webhook.php
   class-edminboost-anm-ad-redirects.php  # block unwanted admin redirects
   class-edminboost-anm-feature-notifications.php  # core Feature Notifications bridge (Pro ingest)
+  class-edminboost-anm-notification-sources.php  # Channels tab registry + per-source channel gating
   class-edminboost-anm-multisite.php  # network policy, defaults, shared rules
   class-edminboost-anm-debug.php      # WP_DEBUG only
   class-edminboost-anm-{activator,deactivator}.php
@@ -53,6 +54,8 @@ admin/
   js/edminboost-anm-notice-inline.js
   partials/edminboost-anm-{dashboard,inbox,rules,settings,billing}-page.php
   partials/edminboost-anm-inbox-table-rows.php
+  partials/edminboost-anm-inbox-feed-rows.php   # GitHub-style inbox list items (inbox_feed mode)
+  partials/edminboost-anm-settings-channels-panel.php
   partials/edminboost-anm-notice-panel-dropdown.php
   partials/edminboost-anm-network-policy-page.php
   partials/edminboost-anm-multisite-policy-{fields,next-steps}.php
@@ -63,15 +66,16 @@ composer.json  package.json  MONOREPO.md
 ```
 
 - Shared `packages/core/boot.php` + `load.php`; edition bootstraps call `edminboost_anm_register()` then `edminboost_anm_run_plugin()`. Pro sets `EDMINBOOST_ANM_IS_PRO` (see `edminboost_anm_is_pro()`).
-- `EDMINBOOST_ANM_Plugin::run()` wires i18n, site + network admin menu/settings/assets, `wp_initialize_site` seeding, and on `init`: notices, interceptor, AJAX, digest, feature notifications bridge, ad redirects.
-- Settings: primary option via `EDMINBOOST_ANM_Settings` (Settings API group `edminboost_anm_settings_group`). Rules and inbox stored in separate per-site options. Tabbed settings UI (General, Notices, Access, Admin bar, Filtering, Security, Notifications, White label, Migration; **Multisite** tab on multisite sites). Network admin: multisite policy, network default settings (same partial), network auto-rules.
+- `EDMINBOOST_ANM_Plugin::run()` wires i18n, site + network admin menu/settings/assets, `wp_initialize_site` seeding, and on `init`: notices, interceptor, AJAX, digest, feature notifications bridge, ad redirects, `EDMINBOOST_ANM_Notification_Sources::register_hooks()`.
+- Settings: primary option via `EDMINBOOST_ANM_Settings` (Settings API group `edminboost_anm_settings_group`). Rules and inbox stored in separate per-site options. Tabbed settings UI (General, Notices, Access, Admin bar, Filtering, Security, Notifications, **Channels**, White label, Migration; **Multisite** tab on multisite sites). Network admin: multisite policy, network default settings (same partial), network auto-rules.
 - **Multisite**: policies `per_site` / `network_defaults` / `network_locked`; merged effective settings; optional shared network auto-rules; site edit gates via `site_can_edit_settings()` / `site_can_edit_rules()`. Policy UI fields shared via `edminboost-anm-multisite-policy-fields.php` + `edminboost-anm-multisite-policy-next-steps.php` (network policy page and Settings **Multisite** tab).
 - **Billing**: admin **Billing** page — Free vs Pro comparison table (`get_billing_comparison_rows()`), filter `edminboost_anm_billing_comparison`, upgrade URL `EDMINBOOST_ANM_PRO_URL`. Informational/marketing only; no in-plugin license gating yet.
 - **White label**: agency menu title, dashboard brand/logo, docs link overrides (`settings.white_label`).
 - Options API only — no custom tables. No REST API.
 - AJAX for dashboard/rules/inbox (including `edminboost_anm_inbox_list` sort; inbox snooze toggle and read state), importer, capture, WP preset conversion, user search, notice hide/reset hidden; weekly digest via WP-Cron (`send_weekday`, custom `weekly` schedule); optional webhook (user URL preserved when disabled, off by default). Webhook send and digest recent list respect `alert_routing` type filters and upsell skip flags.
-- **Inbox (1.1.2)**: filters `all`, `alerts` (critical + warning, excludes actively snoozed; legacy `critical` slug maps to `alerts`), `snoozed`, `upsells`; Feature Notifications–aligned severity labels; optional compact density (`inbox_ui.density`); duplicate captures bump `repeat_count` (badge in row partial); optional Alt+Shift+N shortcut (`inbox_ui.keyboard_shortcut_enabled`); list keyboard nav (j/k, arrows) on inbox screen.
-- **Settings (1.1.2)**: channel mute presets (`channel_mutes` — promotions/tips/updates, syncs upsell preset + auto-rules on save); severity anti-spam (`severity_policy`); alert routing on Notifications tab; Feature Notifications coexistence on Migration (`feature_notifications.coexist_mode`: `coexist`|`anm_primary`|`legacy_only`).
+- **Inbox (1.1.2)**: filters `all`, `alerts` (critical + warning, excludes actively snoozed; legacy `critical` slug maps to `alerts`), `snoozed`, `upsells`; Feature Notifications–aligned severity labels; optional compact density (`inbox_ui.density`); duplicate captures bump `repeat_count` (badge in row partial); optional Alt+Shift+N shortcut (`inbox_ui.keyboard_shortcut_enabled`); list keyboard nav (j/k, arrows) on inbox screen. **Inbox feed UI** when Display experience uses `inbox_feed` (`uses_inbox_feed_layout()`): GitHub-style sidebar + card list; AJAX/page rows via `render_inbox_list_rows_html()` → `edminboost-anm-inbox-feed-rows.php`.
+- **Display experience (1.1.2)**: presets include **Notifications like GitHub** (`inbox_feed`) and **Ecommerce notifications only** (`ecom_dashboard` + `ecommerce_display_scope` for WooCommerce/EDD/other); live General tab preview mirrors both layouts.
+- **Settings (1.1.2)**: **Channels** tab — `notification_channels` source × channel matrix (`EDMINBOOST_ANM_Notification_Sources` registry: WordPress, WooCommerce, EDD, active plugins); routes inbox (`admin`), digest (`email`), webhook per source; channel mute presets (`channel_mutes`); severity anti-spam (`severity_policy`); alert routing on Notifications tab; Feature Notifications coexistence on Migration (`feature_notifications.coexist_mode`: `coexist`|`anm_primary`|`legacy_only`).
 - **Feature Notifications**: `EDMINBOOST_ANM_Feature_Notifications` listens for core feature-plugin hooks when enabled; Pro ingests into inbox (`origin` `core_feature_notifications`); filters core payload severity when supported; detection filter `edminboost_anm_core_feature_notifications_active`.
 - **Multisite (Pro)**: network policy page shows per-site inbox alert rollup via `EDMINBOOST_ANM_Multisite::get_network_inbox_rollup()`.
 - Auto-Rules: `keyword`, `regex`, and `css` selector match types; custom upsell blacklist phrases apply even when Kill All Upsells preset is off.
@@ -134,6 +138,8 @@ Registered in `EDMINBOOST_ANM_Ajax::register_hooks()` — all use `verify_reques
 - `edminboost_anm_billing_comparison` — filter Free vs Pro rows on the Billing page
 - `edminboost_anm_block_ad_redirect_activation_flags` — filter activation option suppressors when block ad redirects is enabled
 - `edminboost_anm_core_feature_notifications_active` — filter whether WordPress Feature Notifications is considered active
+- `edminboost_anm_notification_source_registry` / `edminboost_anm_notification_source_registry_base` — filter Channels tab source tree
+- `edminboost_anm_notification_source_id_for_notice` / `edminboost_anm_notification_channel_enabled` — filter source resolution and channel gating
 
 ## Cursor Rules
 
@@ -156,4 +162,4 @@ Persistent AI guidance lives in `.cursor/rules/`:
 - Update `packages/free/readme.txt` changelog for user-facing changes; keep `.cursor/rules/` and `AGENTS.md` in sync when behavior or architecture changes.
 - Update `packages/core/uninstall.php` (and deactivator for cron) when adding stored options or schedules; multisite uninstall uses `EDMINBOOST_ANM_Multisite::uninstall_all_sites()`.
 - New AJAX actions: register in `EDMINBOOST_ANM_Ajax`, use `verify_request()` (or `verify_debug_request()` for debug-only).
-- Shared inbox row markup: update `edminboost-anm-inbox-table-rows.php` once for both full page and AJAX list responses.
+- Shared inbox row markup: update `edminboost-anm-inbox-table-rows.php` and/or `edminboost-anm-inbox-feed-rows.php` (via `render_inbox_list_rows_html()`) for both full page and AJAX list responses.

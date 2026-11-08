@@ -38,6 +38,7 @@ Cross-cutting quality standards. See also: `edminboost-anm-project.mdc`, `edminb
 - General settings previews (`display-experience`, `general-options`): `aria-live="polite"`; client-built HTML must use `anmPreviewEscapeHtml` / equivalent; cross-tab Admin bar field changes may refresh display-experience mock without saving.
 - White label preview (`#edminboost-anm-white-label-preview`): `aria-live="polite"`; client-built mock must escape all dynamic strings (`anmPreviewEscapeHtml`).
 - Admin bar dropdown: use `aria-haspopup`, `aria-expanded`, `aria-controls`, and screen-reader text for counts; panel `#edminboost-anm-notices-panel` uses `hidden` when closed.
+- Channels matrix: `role="grid"` table with `aria-describedby` caption; labeled column/group toggles; disabled inputs when settings are network read-only.
 
 ## Admin UX
 

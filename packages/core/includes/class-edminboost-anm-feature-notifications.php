@@ -99,19 +99,26 @@ class EDMINBOOST_ANM_Feature_Notifications {
 		$source = sanitize_text_field( (string) ( $data['source'] ?? $data['plugin'] ?? __( 'WordPress', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
 		$type   = EDMINBOOST_ANM_Inbox::map_core_severity_to_type( $data );
 
-		$notice = EDMINBOOST_ANM_Inbox::add(
-			array(
-				'message'       => $message,
-				'html'          => isset( $data['html'] ) ? wp_kses_post( (string) $data['html'] ) : '',
-				'source_plugin' => $source,
-				'type'          => $type,
-				'origin'        => 'core_feature_notifications',
-			)
+		$draft = array(
+			'message'       => $message,
+			'html'          => isset( $data['html'] ) ? wp_kses_post( (string) $data['html'] ) : '',
+			'source_plugin' => $source,
+			'type'          => $type,
+			'origin'        => 'core_feature_notifications',
 		);
+
+		$notice = null;
+		if ( ! class_exists( 'EDMINBOOST_ANM_Notification_Sources' )
+			|| EDMINBOOST_ANM_Notification_Sources::notice_allows_channel( $draft, 'admin' ) ) {
+			$notice = EDMINBOOST_ANM_Inbox::add( $draft );
+		}
 
 		if ( $notice ) {
 			EDMINBOOST_ANM_Stats::record_intercept( $source, $message, $type );
 			EDMINBOOST_ANM_Webhook::maybe_send( $notice );
+		} elseif ( class_exists( 'EDMINBOOST_ANM_Notification_Sources' )
+			&& EDMINBOOST_ANM_Notification_Sources::notice_allows_channel( $draft, 'webhook' ) ) {
+			EDMINBOOST_ANM_Webhook::maybe_send( $draft );
 		}
 	}
 

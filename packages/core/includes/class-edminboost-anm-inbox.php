@@ -284,6 +284,11 @@ class EDMINBOOST_ANM_Inbox {
 			}
 		}
 
+		if ( class_exists( 'EDMINBOOST_ANM_Notification_Sources' )
+			&& ! EDMINBOOST_ANM_Notification_Sources::notice_allows_channel( $notice, 'admin' ) ) {
+			return false;
+		}
+
 		return true;
 	}
 
@@ -884,6 +889,11 @@ class EDMINBOOST_ANM_Inbox {
 			return false;
 		}
 
+		if ( class_exists( 'EDMINBOOST_ANM_Notification_Sources' )
+			&& ! EDMINBOOST_ANM_Notification_Sources::notice_allows_channel( $notice, 'webhook' ) ) {
+			return false;
+		}
+
 		$allowed = isset( $routing['webhook_types'] ) && is_array( $routing['webhook_types'] )
 			? array_map( 'sanitize_key', $routing['webhook_types'] )
 			: array( 'critical', 'error', 'warning' );
@@ -912,6 +922,11 @@ class EDMINBOOST_ANM_Inbox {
 		$type = self::sanitize_notice_type_slug( $notice['type'] ?? 'info' );
 
 		if ( ! empty( $routing['digest_skip_upsell'] ) && 'upsell' === $type ) {
+			return false;
+		}
+
+		if ( class_exists( 'EDMINBOOST_ANM_Notification_Sources' )
+			&& ! EDMINBOOST_ANM_Notification_Sources::notice_allows_channel( $notice, 'email' ) ) {
 			return false;
 		}
 

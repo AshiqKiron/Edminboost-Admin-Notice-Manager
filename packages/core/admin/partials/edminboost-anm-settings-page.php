@@ -52,6 +52,7 @@ $edminboost_anm_alert_routing    = wp_parse_args(
 	$settings['alert_routing'] ?? array(),
 	EDMINBOOST_ANM_Settings::get_defaults()['alert_routing']
 );
+$edminboost_anm_channel_prefs    = EDMINBOOST_ANM_Notification_Sources::get_merged_source_preferences();
 $edminboost_anm_fn_core_active   = EDMINBOOST_ANM_Feature_Notifications::is_available();
 $edminboost_anm_alert_type_choices = array(
 	'critical' => __( 'Critical severity', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -69,6 +70,7 @@ $edminboost_anm_settings_tabs  = array(
 	'filtering'     => __( 'Filtering', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'security'      => __( 'Security & Shield', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'notifications' => __( 'Notifications', EDMINBOOST_ANM_TEXT_DOMAIN ),
+	'channels'      => __( 'Channels', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'white_label'   => __( 'White label', EDMINBOOST_ANM_TEXT_DOMAIN ),
 	'tools'         => __( 'Migration', EDMINBOOST_ANM_TEXT_DOMAIN ),
 );
@@ -84,6 +86,8 @@ $edminboost_anm_display_presets          = EDMINBOOST_ANM_Settings::get_display_
 $edminboost_anm_active_display_preset    = EDMINBOOST_ANM_Settings::get_display_experience_preset_for_mode( $edminboost_anm_manage_mode );
 $edminboost_anm_manage_mode_labels       = EDMINBOOST_ANM_Settings::get_manage_notices_mode_labels();
 $edminboost_anm_display_experience_open  = '' === $edminboost_anm_active_display_preset;
+$edminboost_anm_ecom_scope               = EDMINBOOST_ANM_Settings::get_ecommerce_display_scope();
+$edminboost_anm_ecom_scope_visible       = 'ecom_dashboard' === $edminboost_anm_manage_mode;
 $edminboost_anm_active_tab     = 'general';
 if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Tab UI only; no privileged action.
 	$edminboost_anm_tab_candidate = sanitize_key( wp_unslash( $_GET['tab'] ) );
@@ -189,6 +193,44 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 								</label>
 							</div>
 						<?php endforeach; ?>
+					</fieldset>
+					<fieldset
+						class="edminboost-anm-ecom-display-scope"
+						data-edminboost-anm-ecom-display-scope
+						<?php echo $edminboost_anm_ecom_scope_visible ? '' : ' hidden'; ?>
+					>
+						<legend><?php esc_html_e( 'Ecommerce notifications to show', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></legend>
+						<p class="description"><?php esc_html_e( 'When the ecommerce display experience is active, only checked groups stay on the dashboard. Unchecked groups are sent to the inbox.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+						<label class="edminboost-anm-ecom-display-scope__option" for="edminboost-anm-ecom-scope-woocommerce">
+							<input
+								type="checkbox"
+								id="edminboost-anm-ecom-scope-woocommerce"
+								name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[ecommerce_display_scope][woocommerce]"
+								value="1"
+								<?php checked( ! empty( $edminboost_anm_ecom_scope['woocommerce'] ) ); ?>
+							/>
+							<?php esc_html_e( 'WooCommerce', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</label>
+						<label class="edminboost-anm-ecom-display-scope__option" for="edminboost-anm-ecom-scope-edd">
+							<input
+								type="checkbox"
+								id="edminboost-anm-ecom-scope-edd"
+								name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[ecommerce_display_scope][edd]"
+								value="1"
+								<?php checked( ! empty( $edminboost_anm_ecom_scope['edd'] ) ); ?>
+							/>
+							<?php esc_html_e( 'Easy Digital Downloads', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</label>
+						<label class="edminboost-anm-ecom-display-scope__option" for="edminboost-anm-ecom-scope-other">
+							<input
+								type="checkbox"
+								id="edminboost-anm-ecom-scope-other"
+								name="<?php echo esc_attr( $edminboost_anm_option_name ); ?>[ecommerce_display_scope][other]"
+								value="1"
+								<?php checked( ! empty( $edminboost_anm_ecom_scope['other'] ) ); ?>
+							/>
+							<?php esc_html_e( 'Other store plugins', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+						</label>
 					</fieldset>
 					<details class="edminboost-anm-display-experience-advanced" data-edminboost-anm-display-experience-advanced <?php echo $edminboost_anm_display_experience_open ? ' open' : ''; ?>>
 						<summary><?php esc_html_e( 'Advanced display options', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></summary>
@@ -1200,6 +1242,8 @@ if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerificat
 			</div>
 		</div>
 		</div>
+
+		<?php require EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-settings-channels-panel.php'; ?>
 
 		<div
 			id="<?php echo esc_attr( 'edminboost-anm-settings-panel-white_label' ); ?>"

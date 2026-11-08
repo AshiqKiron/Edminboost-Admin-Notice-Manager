@@ -66,14 +66,40 @@ $edminboost_anm_tabs = array(
 	'upsells' => __( 'Promotions', EDMINBOOST_ANM_TEXT_DOMAIN ),
 );
 
+$edminboost_anm_inbox_feed_primary = array(
+	'all' => __( 'Inbox', EDMINBOOST_ANM_TEXT_DOMAIN ),
+);
+
+$edminboost_anm_inbox_feed_filters = array(
+	'alerts'  => array(
+		'label' => __( 'Alerts', EDMINBOOST_ANM_TEXT_DOMAIN ),
+		'icon'  => 'dashicons-warning',
+	),
+	'snoozed' => array(
+		'label' => __( 'Snoozed', EDMINBOOST_ANM_TEXT_DOMAIN ),
+		'icon'  => 'dashicons-clock',
+	),
+	'upsells' => array(
+		'label' => __( 'Promotions', EDMINBOOST_ANM_TEXT_DOMAIN ),
+		'icon'  => 'dashicons-megaphone',
+	),
+);
+
 $edminboost_anm_inbox_density_class = EDMINBOOST_ANM_Settings::is_inbox_density_compact() ? ' edminboost-anm-inbox-table--compact' : '';
+$edminboost_anm_inbox_feed          = EDMINBOOST_ANM_Settings::uses_inbox_feed_layout();
+
+$edminboost_anm_wrap_class = 'wrap edminboost-anm-wrap edminboost-anm-wrap--wide';
+if ( $edminboost_anm_inbox_feed ) {
+	$edminboost_anm_wrap_class .= ' edminboost-anm-wrap--inbox-feed';
+}
 ?>
-<div class="wrap edminboost-anm-wrap edminboost-anm-wrap--wide" data-edminboost-anm-inbox
+<div class="<?php echo esc_attr( $edminboost_anm_wrap_class ); ?>" data-edminboost-anm-inbox
 	data-inbox-filter="<?php echo esc_attr( $filter ); ?>"
 	data-inbox-search="<?php echo esc_attr( $search ); ?>"
 	data-inbox-page="<?php echo esc_attr( (string) $page ); ?>"
 	data-inbox-orderby="<?php echo esc_attr( $orderby ); ?>"
 	data-inbox-order="<?php echo esc_attr( $order ); ?>">
+	<?php if ( ! $edminboost_anm_inbox_feed ) : ?>
 	<header class="edminboost-anm-page-header">
 		<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 		<form class="edminboost-anm-search" method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>">
@@ -121,7 +147,127 @@ $edminboost_anm_inbox_density_class = EDMINBOOST_ANM_Settings::is_inbox_density_
 			</a>
 		<?php endforeach; ?>
 	</nav>
+	<?php endif; ?>
 
+	<?php if ( $edminboost_anm_inbox_feed ) : ?>
+	<div class="edminboost-anm-inbox-feed">
+		<aside class="edminboost-anm-inbox-feed__sidebar" aria-label="<?php esc_attr_e( 'Notification navigation', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>">
+			<h2 class="edminboost-anm-inbox-feed__sidebar-title screen-reader-text"><?php esc_html_e( 'Inbox', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></h2>
+			<ul class="edminboost-anm-inbox-feed__nav edminboost-anm-inbox-feed__nav--primary">
+				<?php foreach ( $edminboost_anm_inbox_feed_primary as $tab_slug => $tab_label ) : ?>
+					<?php
+					$tab_query = array(
+						'filter'  => $tab_slug,
+						's'       => $search,
+						'orderby' => $orderby,
+						'order'   => $order,
+					);
+					if ( 'all' === $tab_slug ) {
+						unset( $tab_query['filter'] );
+					}
+					if ( '' === $search ) {
+						unset( $tab_query['s'] );
+					}
+					if ( 'date' === $orderby && 'desc' === $order ) {
+						unset( $tab_query['orderby'], $tab_query['order'] );
+					}
+					$tab_url   = add_query_arg( $tab_query, $edminboost_anm_base_url );
+					$is_active = $filter === $tab_slug || ( 'all' === $tab_slug && 'all' === $filter );
+					$nav_class = 'edminboost-anm-inbox-feed__nav-link';
+					if ( $is_active ) {
+						$nav_class .= ' is-active';
+					}
+					?>
+					<li>
+						<a class="<?php echo esc_attr( $nav_class ); ?>" href="<?php echo esc_url( $tab_url ); ?>">
+							<span class="edminboost-anm-inbox-feed__nav-icon dashicons dashicons-email" aria-hidden="true"></span>
+							<span class="edminboost-anm-inbox-feed__nav-label"><?php echo esc_html( $tab_label ); ?></span>
+							<span class="edminboost-anm-inbox-feed__nav-count"><?php echo esc_html( (string) ( $counts[ $tab_slug ] ?? 0 ) ); ?></span>
+						</a>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+			<p class="edminboost-anm-inbox-feed__filters-heading"><?php esc_html_e( 'Filters', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+			<ul class="edminboost-anm-inbox-feed__nav edminboost-anm-inbox-feed__nav--filters">
+				<?php foreach ( $edminboost_anm_inbox_feed_filters as $tab_slug => $tab_meta ) : ?>
+					<?php
+					$tab_label = $tab_meta['label'];
+					$tab_icon  = $tab_meta['icon'];
+					$tab_query = array(
+						'filter'  => $tab_slug,
+						's'       => $search,
+						'orderby' => $orderby,
+						'order'   => $order,
+					);
+					if ( '' === $search ) {
+						unset( $tab_query['s'] );
+					}
+					if ( 'date' === $orderby && 'desc' === $order ) {
+						unset( $tab_query['orderby'], $tab_query['order'] );
+					}
+					$tab_url   = add_query_arg( $tab_query, $edminboost_anm_base_url );
+					$is_active = $filter === $tab_slug;
+					$nav_class = 'edminboost-anm-inbox-feed__nav-link';
+					if ( $is_active ) {
+						$nav_class .= ' is-active';
+					}
+					?>
+					<li>
+						<a class="<?php echo esc_attr( $nav_class ); ?>" href="<?php echo esc_url( $tab_url ); ?>">
+							<span class="edminboost-anm-inbox-feed__nav-icon dashicons <?php echo esc_attr( $tab_icon ); ?>" aria-hidden="true"></span>
+							<span class="edminboost-anm-inbox-feed__nav-label"><?php echo esc_html( $tab_label ); ?></span>
+							<span class="edminboost-anm-inbox-feed__nav-count"><?php echo esc_html( (string) ( $counts[ $tab_slug ] ?? 0 ) ); ?></span>
+						</a>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</aside>
+		<div class="edminboost-anm-inbox-feed__main">
+			<header class="edminboost-anm-inbox-feed__header">
+				<h1 class="edminboost-anm-inbox-feed__heading"><?php echo esc_html( get_admin_page_title() ); ?></h1>
+				<form class="edminboost-anm-search edminboost-anm-inbox-feed__search" method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>">
+					<input type="hidden" name="page" value="<?php echo esc_attr( EDMINBOOST_ANM_Admin::PAGE_SLUG . '-inbox' ); ?>" />
+					<?php if ( 'all' !== $filter ) : ?>
+						<input type="hidden" name="filter" value="<?php echo esc_attr( $filter ); ?>" />
+					<?php endif; ?>
+					<?php if ( 'date' !== $orderby || 'desc' !== $order ) : ?>
+						<input type="hidden" name="orderby" value="<?php echo esc_attr( $orderby ); ?>" />
+						<input type="hidden" name="order" value="<?php echo esc_attr( $order ); ?>" />
+					<?php endif; ?>
+					<?php if ( $page > 1 ) : ?>
+						<input type="hidden" name="paged" value="<?php echo esc_attr( (string) $page ); ?>" />
+					<?php endif; ?>
+					<label class="screen-reader-text" for="edminboost-anm-inbox-feed-search"><?php esc_html_e( 'Search notices', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></label>
+					<input type="search" id="edminboost-anm-inbox-feed-search" name="s" value="<?php echo esc_attr( $search ); ?>" placeholder="<?php esc_attr_e( 'Search notices…', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" />
+					<button type="submit" class="button"><span class="dashicons dashicons-search" aria-hidden="true"></span><span class="screen-reader-text"><?php esc_html_e( 'Search', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></span></button>
+				</form>
+			</header>
+			<div class="edminboost-anm-inbox-feed__toolbar">
+				<label class="edminboost-anm-inbox-feed__select-all">
+					<input type="checkbox" id="edminboost-anm-select-all" class="edminboost-anm-inbox-select-all" aria-label="<?php esc_attr_e( 'Select all', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>" />
+					<?php esc_html_e( 'Select all', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+				</label>
+				<span class="edminboost-anm-inbox-feed__sort">
+					<?php esc_html_e( 'Sort by:', EDMINBOOST_ANM_TEXT_DOMAIN ); ?>
+					<a href="#" class="edminboost-anm-inbox-sort" data-orderby="date"><?php esc_html_e( 'Date', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></a>
+					<a href="#" class="edminboost-anm-inbox-sort" data-orderby="message"><?php esc_html_e( 'Message', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></a>
+					<a href="#" class="edminboost-anm-inbox-sort" data-orderby="source"><?php esc_html_e( 'Source', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></a>
+				</span>
+			</div>
+			<div class="edminboost-anm-card edminboost-anm-card--flush edminboost-anm-inbox-feed__card">
+				<?php if ( ! empty( $notices ) || $total > 0 ) : ?>
+					<ul id="edminboost-anm-inbox-rows" class="edminboost-anm-inbox-feed__list">
+						<?php include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-inbox-feed-rows.php'; ?>
+					</ul>
+				<?php else : ?>
+					<div class="edminboost-anm-empty edminboost-anm-inbox-feed__empty">
+						<p><?php esc_html_e( 'No notices in the inbox yet. Intercepted notices will appear here.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
+					</div>
+				<?php endif; ?>
+			</div>
+		</div>
+	</div>
+	<?php else : ?>
 	<div class="edminboost-anm-card edminboost-anm-card--flush edminboost-anm-card--list-table">
 		<?php if ( ! empty( $notices ) || $total > 0 ) : ?>
 			<table class="wp-list-table widefat fixed striped edminboost-anm-table edminboost-anm-inbox-table<?php echo esc_attr( $edminboost_anm_inbox_density_class ); ?>">
@@ -157,6 +303,7 @@ $edminboost_anm_inbox_density_class = EDMINBOOST_ANM_Settings::is_inbox_density_
 			</div>
 		<?php endif; ?>
 	</div>
+	<?php endif; ?>
 
 	<div class="edminboost-anm-table-footer"<?php echo $total > 0 ? '' : ' hidden'; ?>>
 		<div class="edminboost-anm-bulk-actions">

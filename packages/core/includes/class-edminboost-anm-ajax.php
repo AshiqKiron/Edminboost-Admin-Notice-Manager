@@ -291,7 +291,7 @@ class EDMINBOOST_ANM_Ajax {
 
 		wp_send_json_success(
 			array(
-				'rows'        => EDMINBOOST_ANM_Admin::render_inbox_table_rows_html( $slice['notices'] ),
+				'rows'        => EDMINBOOST_ANM_Admin::render_inbox_list_rows_html( $slice['notices'] ),
 				'orderby'     => $list_args['orderby'],
 				'order'       => $list_args['order'],
 				'page'        => $slice['page'],

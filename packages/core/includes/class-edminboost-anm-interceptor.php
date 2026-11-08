@@ -149,6 +149,25 @@ class EDMINBOOST_ANM_Interceptor {
 			return array( 'suppress' => true );
 		}
 
+		if ( 'ecom_dashboard' === $manage_mode && class_exists( 'EDMINBOOST_ANM_Notification_Sources' ) ) {
+			$draft = array(
+				'message'       => $message,
+				'html'          => $html,
+				'source_plugin' => $source,
+				'type'          => EDMINBOOST_ANM_Rules::classify_type( $message ),
+			);
+
+			if ( ! EDMINBOOST_ANM_Notification_Sources::notice_is_ecommerce_display( $draft ) ) {
+				return self::finalize_intercept(
+					$message,
+					$source,
+					$draft['type'],
+					$html,
+					array( 'source' => 'ecom_dashboard_filter' )
+				);
+			}
+		}
+
 		if ( EDMINBOOST_ANM_Settings::notice_matches_spam_words( $message ) ) {
 			return array( 'suppress' => true, 'source' => 'spam_words' );
 		}
@@ -212,18 +231,25 @@ class EDMINBOOST_ANM_Interceptor {
 		);
 
 		if ( current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
-			$notice = EDMINBOOST_ANM_Inbox::add(
-				array(
-					'message'       => $message,
-					'html'          => $html,
-					'source_plugin' => $source,
-					'type'          => $type,
-				)
+			$draft = array(
+				'message'       => $message,
+				'html'          => $html,
+				'source_plugin' => $source,
+				'type'          => $type,
 			);
+
+			$notice = null;
+			if ( ! class_exists( 'EDMINBOOST_ANM_Notification_Sources' )
+				|| EDMINBOOST_ANM_Notification_Sources::notice_allows_channel( $draft, 'admin' ) ) {
+				$notice = EDMINBOOST_ANM_Inbox::add( $draft );
+			}
 
 			if ( $notice && empty( $notice['_is_repeat_capture'] ) ) {
 				EDMINBOOST_ANM_Stats::record_intercept( $source, $message, $type );
 				EDMINBOOST_ANM_Webhook::maybe_send( $notice );
+			} elseif ( ! $notice && class_exists( 'EDMINBOOST_ANM_Notification_Sources' )
+				&& EDMINBOOST_ANM_Notification_Sources::notice_allows_channel( $draft, 'webhook' ) ) {
+				EDMINBOOST_ANM_Webhook::maybe_send( $draft );
 			}
 		}
 

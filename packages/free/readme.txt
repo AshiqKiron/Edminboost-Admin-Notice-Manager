@@ -59,7 +59,10 @@ Yes. When uninstalled, all plugin options are removed from the database.
 == Changelog ==
 
 = 1.1.2 =
+* Settings (General): Display experience preset **Ecommerce notifications only** — keeps WooCommerce, Easy Digital Downloads, and other store plugin notices visible (scope checkboxes for each group); routes WordPress and non-store notices to the inbox and admin bar (live preview included).
+* Settings (General): Display experience preset **Notifications like GitHub** — clear dashboard, GitHub-style notification feed on the Notice Inbox (left sidebar: Inbox plus Filters for Alerts, Snoozed, and Promotions), and admin bar entry (live preview mirrors GitHub notifications layout).
 * Inbox: Alerts tab (critical + warning, excludes snoozed), severity labels aligned with core Feature Notifications, compact list density, grouped duplicate rows with repeat count, and Alt+Shift+N keyboard shortcut.
+* Settings: new Channels tab — per-source delivery matrix (Admin inbox/panel, Email digest, Webhook) grouped by WordPress, WooCommerce, Easy Digital Downloads, and other active plugins.
 * Settings: channel mute presets (promotions, tips, updates), severity anti-spam policy, alert routing for webhook/digest by notice type, and Feature Notifications coexistence modes on Migration.
 * Integrations: bridge hooks for core Feature Notifications import when the feature plugin API is present; Pro network inbox rollup on multisite policy.
 * Security: block ad redirects intercept post-activation welcome redirects (options/transients, wp_redirect, and known admin_init hooks), keep you on the Plugins screen when appropriate, and accept bare `page` slugs in the blocklist.

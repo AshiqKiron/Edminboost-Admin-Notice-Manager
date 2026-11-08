@@ -331,6 +331,41 @@
 			+ '</a></div>';
 	}
 
+	function anmPreviewBuildNoticePanelFromSamples(i18n, samples) {
+		var html = '<div class="edminboost-anm-notices-panel edminboost-anm-notices-panel--compact edminboost-anm-notice-panel-preview__panel">';
+		html += anmPreviewBuildPanelHeaderHtml(i18n);
+		html += '<ul class="edminboost-anm-notices-panel__list">';
+		samples.forEach(function (item) {
+			var typeClass = item.type === 'error' || item.type === 'critical' ? 'is-type-critical' : 'is-type-' + item.type;
+			html += '<li class="edminboost-anm-notices-panel__item ' + typeClass + '">';
+			html += '<span class="edminboost-anm-notices-panel__type">' + anmPreviewEscapeHtml(item.type) + '</span>';
+			html += '<span class="edminboost-anm-notices-panel__message">' + anmPreviewEscapeHtml(item.message) + '</span>';
+			html += '<span class="edminboost-anm-notices-panel__meta"><span class="edminboost-anm-notices-panel__source">' + anmPreviewEscapeHtml(item.source) + '</span></span>';
+			html += '</li>';
+		});
+		html += '</ul>';
+		html += anmPreviewBuildPanelFooterHtml(i18n);
+		html += '</div>';
+		return html;
+	}
+
+	function anmPreviewBuildNonEcomCapturedPanel(i18n) {
+		var samples = [
+			{
+				type: 'info',
+				message: i18n.displayExperiencePreviewNoticeUpdate || 'WordPress 6.7 is available. Please update now.',
+				source: i18n.displayExperiencePreviewInboxFeedSource || 'WordPress'
+			},
+			{
+				type: 'warning',
+				message: i18n.displayExperiencePreviewNoticeLicense || 'Please activate your SEO plugin license to receive updates.',
+				source: i18n.displayExperiencePreviewNoticeLicenseSource || 'Yoast SEO'
+			}
+		];
+
+		return anmPreviewBuildNoticePanelFromSamples(i18n, samples);
+	}
+
 	function anmPreviewBuildCompactPanel(i18n) {
 		var samples = [
 			{
@@ -349,21 +384,7 @@
 				source: i18n.noticePanelSample3Source || 'Advanced Custom Fields'
 			}
 		];
-		var html = '<div class="edminboost-anm-notices-panel edminboost-anm-notices-panel--compact edminboost-anm-notice-panel-preview__panel">';
-		html += anmPreviewBuildPanelHeaderHtml(i18n);
-		html += '<ul class="edminboost-anm-notices-panel__list">';
-		samples.forEach(function (item) {
-			var typeClass = item.type === 'error' || item.type === 'critical' ? 'is-type-critical' : 'is-type-' + item.type;
-			html += '<li class="edminboost-anm-notices-panel__item ' + typeClass + '">';
-			html += '<span class="edminboost-anm-notices-panel__type">' + anmPreviewEscapeHtml(item.type) + '</span>';
-			html += '<span class="edminboost-anm-notices-panel__message">' + anmPreviewEscapeHtml(item.message) + '</span>';
-			html += '<span class="edminboost-anm-notices-panel__meta"><span class="edminboost-anm-notices-panel__source">' + anmPreviewEscapeHtml(item.source) + '</span></span>';
-			html += '</li>';
-		});
-		html += '</ul>';
-		html += anmPreviewBuildPanelFooterHtml(i18n);
-		html += '</div>';
-		return html;
+		return anmPreviewBuildNoticePanelFromSamples(i18n, samples);
 	}
 
 	function anmPreviewBuildTriggerHtml(i18n, style, badgeStyle, position, count) {
@@ -385,16 +406,16 @@
 			+ '</span>';
 	}
 
-	function anmPreviewBuildMockBarHtml(i18n, panelOptions, openDropdown, noticeCount) {
+	function anmPreviewBuildMockBarHtml(i18n, panelOptions, openDropdown, noticeCount, customPanelHtml) {
 		var style = panelOptions.style;
 		var badgeStyle = panelOptions.badgeStyle;
 		var position = panelOptions.position;
 		var previewLayout = anmPreviewGetPositionLayout(position);
 		var triggerHtml = anmPreviewBuildTriggerHtml(i18n, style, badgeStyle, position, noticeCount);
-		var panelHtml = '';
-		if (openDropdown && anmPreviewIsDropdownStyle(style)) {
+		var panelHtml = customPanelHtml || '';
+		if (!panelHtml && openDropdown && anmPreviewIsDropdownStyle(style)) {
 			panelHtml = style === 'dropdown_compact' ? anmPreviewBuildCompactPanel(i18n) : anmPreviewBuildCompactPanel(i18n);
-		} else if (openDropdown && !anmPreviewIsDropdownStyle(style)) {
+		} else if (!panelHtml && openDropdown && !anmPreviewIsDropdownStyle(style)) {
 			panelHtml = anmPreviewBuildCompactPanel(i18n);
 		}
 
@@ -439,6 +460,160 @@
 			+ '</div></div>';
 	}
 
+	function anmManageModeFromPresetInput(input) {
+		if (!input) {
+			return '';
+		}
+		var mode = input.getAttribute('data-manage-mode');
+		if (mode) {
+			return mode;
+		}
+		var map = data.displayExperiencePresetModes || {};
+		var slug = input.value || '';
+		return map[slug] || '';
+	}
+
+	function anmNormalizeManageNoticesMode(mode) {
+		if (!mode) {
+			return mode;
+		}
+		var map = data.displayExperiencePresetModes || {};
+		if (map[mode]) {
+			return map[mode];
+		}
+		return mode;
+	}
+
+	function anmPreviewBuildGithubNotificationsHtml(i18n) {
+		var items = [
+			{
+				title: i18n.displayExperiencePreviewInboxFeedSample1Title || 'WordPress 6.7 is available',
+				excerpt: i18n.displayExperiencePreviewInboxFeedSample1Excerpt || i18n.displayExperiencePreviewInboxFeedSample1 || '',
+				label: i18n.displayExperiencePreviewInboxFeedSample1Label || 'update available',
+				source: i18n.displayExperiencePreviewInboxFeedSource || 'WordPress',
+				date: i18n.displayExperiencePreviewInboxFeedSample1Date || 'on Mar 12',
+				icon: 'dashicons-download',
+				unread: true
+			},
+			{
+				title: i18n.displayExperiencePreviewInboxFeedSample2Title || 'SEO plugin license',
+				excerpt: i18n.displayExperiencePreviewInboxFeedSample2Excerpt || i18n.displayExperiencePreviewInboxFeedSample2 || '',
+				label: i18n.displayExperiencePreviewInboxFeedSample2Label || 'warning',
+				source: i18n.displayExperiencePreviewInboxFeedSourceYoast || 'Yoast SEO',
+				date: i18n.displayExperiencePreviewInboxFeedSample2Date || 'on Mar 10',
+				icon: 'dashicons-warning',
+				unread: true
+			},
+			{
+				title: i18n.displayExperiencePreviewInboxFeedSample3Title || 'New form submission',
+				excerpt: i18n.displayExperiencePreviewInboxFeedSample3Excerpt || i18n.displayExperiencePreviewInboxFeedSample3 || '',
+				label: i18n.displayExperiencePreviewInboxFeedSample3Label || 'info',
+				source: i18n.displayExperiencePreviewInboxFeedSourceForms || 'WPForms',
+				date: i18n.displayExperiencePreviewInboxFeedSample3Date || 'on Mar 8',
+				icon: 'dashicons-info',
+				unread: true
+			}
+		];
+		var rows = items.map(function (item) {
+			var sourceInitial = (item.source || '').trim().charAt(0).toUpperCase() || 'W';
+			return '<li class="edminboost-anm-inbox-feed__item edminboost-anm-github-feed__item edminboost-anm-display-experience-preview__feed-item' + (item.unread ? '' : ' is-read') + '">'
+				+ '<span class="edminboost-anm-inbox-feed__unread" aria-hidden="true"' + (item.unread ? '' : ' hidden') + '></span>'
+				+ '<input type="checkbox" class="edminboost-anm-inbox-feed__check" tabindex="-1" disabled aria-hidden="true" />'
+				+ '<span class="edminboost-anm-inbox-feed__icon dashicons ' + item.icon + '" aria-hidden="true"></span>'
+				+ '<div class="edminboost-anm-inbox-feed__body">'
+				+ '<p class="edminboost-anm-inbox-feed__title">' + anmPreviewEscapeHtml(item.title) + '</p>'
+				+ '<p class="edminboost-anm-inbox-feed__excerpt">' + anmPreviewEscapeHtml(item.excerpt) + '</p>'
+				+ '</div>'
+				+ '<div class="edminboost-anm-inbox-feed__meta">'
+				+ '<span class="edminboost-anm-github-feed__type">' + anmPreviewEscapeHtml(item.label) + '</span>'
+				+ '<span class="edminboost-anm-github-feed__avatar" aria-hidden="true" title="' + anmPreviewEscapeHtml(item.source) + '">' + anmPreviewEscapeHtml(sourceInitial) + '</span>'
+				+ '<time class="edminboost-anm-inbox-feed__time">' + anmPreviewEscapeHtml(item.date) + '</time>'
+				+ '</div></li>';
+		}).join('');
+
+		var feedTitle = i18n.displayExperiencePreviewInboxFeedTitle || 'Notifications';
+		var navInbox = i18n.displayExperiencePreviewInboxFeedNavInbox || 'Inbox';
+		var navSaved = i18n.displayExperiencePreviewInboxFeedNavSaved || 'Saved';
+		var navDone = i18n.displayExperiencePreviewInboxFeedNavDone || 'Done';
+		var navAlerts = i18n.displayExperiencePreviewInboxFeedNavAlerts || 'Alerts';
+		var navSnoozed = i18n.displayExperiencePreviewInboxFeedNavSnoozed || 'Snoozed';
+		var navPromotions = i18n.displayExperiencePreviewInboxFeedNavPromo || 'Promotions';
+		var filterUnread = i18n.displayExperiencePreviewInboxFeedFilterUnread || 'Unread';
+		var filterUpdates = i18n.displayExperiencePreviewInboxFeedFilterUpdates || 'Updates';
+		var filterPlugins = i18n.displayExperiencePreviewInboxFeedFilterPlugins || 'From plugins';
+		var filtersLabel = i18n.displayExperiencePreviewInboxFeedFilters || 'Filters';
+		var tabAll = i18n.displayExperiencePreviewInboxFeedTabAll || 'All';
+		var tabUnread = i18n.displayExperiencePreviewInboxFeedTabUnread || 'Unread';
+		var searchQuery = i18n.displayExperiencePreviewInboxFeedSearchQuery || 'is:unread';
+		var sortBy = i18n.displayExperiencePreviewInboxFeedSortBy || 'Sort by:';
+		var sortNewest = i18n.displayExperiencePreviewInboxFeedSortNewest || 'Newest to oldest';
+		var groupBy = i18n.displayExperiencePreviewInboxFeedGroupBy || 'Group by:';
+		var groupDate = i18n.displayExperiencePreviewInboxFeedGroupDate || 'Date';
+		var selectAll = i18n.displayExperiencePreviewInboxFeedSelectAll || 'Select all';
+		var proTip = i18n.displayExperiencePreviewInboxFeedProTip || '';
+		var pager = i18n.displayExperiencePreviewInboxFeedPager || '1–3 of 3';
+
+		function previewNav(label, count, active, icon) {
+			return '<span class="edminboost-anm-github-feed__nav' + (active ? ' is-active' : '') + '" tabindex="-1">'
+				+ (icon ? '<span class="edminboost-anm-github-feed__nav-icon dashicons ' + icon + '" aria-hidden="true"></span>' : '')
+				+ '<span class="edminboost-anm-github-feed__nav-label">' + anmPreviewEscapeHtml(label) + '</span>'
+				+ (count !== '' ? '<span class="edminboost-anm-github-feed__nav-count">' + anmPreviewEscapeHtml(String(count)) + '</span>' : '')
+				+ '</span>';
+		}
+
+		function previewFilterNav(label, count, icon) {
+			return '<span class="edminboost-anm-github-feed__nav edminboost-anm-github-feed__nav--filter" tabindex="-1">'
+				+ '<span class="edminboost-anm-github-feed__nav-icon dashicons ' + icon + '" aria-hidden="true"></span>'
+				+ '<span class="edminboost-anm-github-feed__nav-label">' + anmPreviewEscapeHtml(label) + '</span>'
+				+ (count !== '' ? '<span class="edminboost-anm-github-feed__nav-count">' + anmPreviewEscapeHtml(String(count)) + '</span>' : '')
+				+ '</span>';
+		}
+
+		return '<div class="edminboost-anm-github-feed edminboost-anm-display-experience-preview__inbox-feed" role="img" aria-label="' + anmPreviewEscapeHtml(feedTitle) + '">'
+			+ '<div class="edminboost-anm-github-feed__titlebar" aria-hidden="true">'
+			+ '<span class="edminboost-anm-github-feed__titlebar-mark"></span>'
+			+ '<span class="edminboost-anm-github-feed__titlebar-heading">' + anmPreviewEscapeHtml(feedTitle) + '</span>'
+			+ '</div>'
+			+ '<div class="edminboost-anm-github-feed__layout">'
+			+ '<aside class="edminboost-anm-github-feed__sidebar" aria-hidden="true">'
+			+ previewNav(navInbox, 3, true, 'dashicons-email')
+			+ previewNav(navSaved, '', false, 'dashicons-book')
+			+ previewNav(navDone, '', false, 'dashicons-yes')
+			+ '<p class="edminboost-anm-github-feed__filters-heading">' + anmPreviewEscapeHtml(filtersLabel) + '</p>'
+			+ previewFilterNav(filterUnread, 3, 'dashicons-marker')
+			+ previewFilterNav(navAlerts, 2, 'dashicons-warning')
+			+ previewFilterNav(navSnoozed, 0, 'dashicons-clock')
+			+ previewFilterNav(navPromotions, 1, 'dashicons-megaphone')
+			+ previewFilterNav(filterUpdates, 1, 'dashicons-download')
+			+ previewFilterNav(filterPlugins, 2, 'dashicons-admin-plugins')
+			+ '</aside>'
+			+ '<div class="edminboost-anm-github-feed__main">'
+			+ '<div class="edminboost-anm-github-feed__tabs" aria-hidden="true">'
+			+ '<span class="edminboost-anm-github-feed__tab">' + anmPreviewEscapeHtml(tabAll) + '</span>'
+			+ '<span class="edminboost-anm-github-feed__tab is-active">' + anmPreviewEscapeHtml(tabUnread) + '</span>'
+			+ '<span class="edminboost-anm-github-feed__search"><span class="edminboost-anm-github-feed__search-input">' + anmPreviewEscapeHtml(searchQuery) + '</span></span>'
+			+ '</div>'
+			+ '<div class="edminboost-anm-github-feed__meta-toolbar" aria-hidden="true">'
+			+ '<span>' + anmPreviewEscapeHtml(sortBy) + ' <strong>' + anmPreviewEscapeHtml(sortNewest) + '</strong></span>'
+			+ '<span>' + anmPreviewEscapeHtml(groupBy) + ' <strong>' + anmPreviewEscapeHtml(groupDate) + '</strong></span>'
+			+ '</div>'
+			+ '<div class="edminboost-anm-github-feed__toolbar" aria-hidden="true">'
+			+ '<label class="edminboost-anm-inbox-feed__select-all">'
+			+ '<input type="checkbox" tabindex="-1" disabled aria-hidden="true" /> '
+			+ anmPreviewEscapeHtml(selectAll)
+			+ '</label></div>'
+			+ '<div class="edminboost-anm-github-feed__card">'
+			+ '<ul class="edminboost-anm-inbox-feed__list">' + rows + '</ul>'
+			+ '</div>'
+			+ '<div class="edminboost-anm-github-feed__footer" aria-hidden="true">'
+			+ '<span class="edminboost-anm-github-feed__protip">' + anmPreviewEscapeHtml(proTip) + '</span>'
+			+ '<span class="edminboost-anm-github-feed__pager">' + anmPreviewEscapeHtml(pager) + '</span>'
+			+ '</div>'
+			+ '</div>'
+			+ '</div>'
+			+ '</div>';
+	}
+
 	function anmPreviewBuildDashboardNoticesHtml(i18n) {
 		var lines = [
 			{
@@ -461,6 +636,40 @@
 		}).join('');
 	}
 
+	function anmPreviewBuildEcomDashboardNoticesHtml(i18n, scope) {
+		scope = scope || {};
+		var lines = [];
+		if (scope.woocommerce) {
+			lines.push({
+				className: 'notice notice-warning',
+				text: i18n.displayExperiencePreviewNoticeWooStock || 'WooCommerce: 2 products are low in stock.'
+			});
+		}
+		if (scope.edd) {
+			lines.push({
+				className: 'notice notice-info',
+				text: i18n.displayExperiencePreviewNoticeEddPayment || 'Easy Digital Downloads: complete your payment gateway setup.'
+			});
+		}
+		if (scope.other) {
+			lines.push({
+				className: 'notice notice-info',
+				text: i18n.displayExperiencePreviewNoticeEcomOther || 'Your store plugin needs a quick configuration step.'
+			});
+		}
+		if (!lines.length) {
+			lines.push({
+				className: 'notice notice-info edminboost-anm-display-experience-preview__empty',
+				text: i18n.displayExperiencePreviewEcomDashboardEmpty || 'No ecommerce notice groups selected — store notices are sent to the inbox.'
+			});
+		}
+		return lines.map(function (line) {
+			return '<div class="' + line.className + ' edminboost-anm-display-experience-preview__notice edminboost-anm-display-experience-preview__notice--ecom"><p>'
+				+ anmPreviewEscapeHtml(line.text)
+				+ '</p></div>';
+		}).join('');
+	}
+
 	function anmRenderDisplayExperiencePreview(mode) {
 		var stage = document.querySelector('[data-edminboost-anm-display-experience-preview-stage]');
 		var previewRoot = document.getElementById('edminboost-anm-display-experience-preview');
@@ -472,9 +681,18 @@
 			return;
 		}
 
-		mode = mode || 'hide_selected';
+		mode = anmNormalizeManageNoticesMode(mode);
+		if (!mode) {
+			mode = 'hide_selected';
+		}
 		if (previewFrame) {
 			previewFrame.setAttribute('data-preview-mode', mode);
+			previewFrame.classList.toggle('is-inbox-feed-mode', mode === 'inbox_feed');
+			previewFrame.classList.toggle('is-ecom-dashboard-mode', mode === 'ecom_dashboard');
+		}
+		if (previewRoot) {
+			previewRoot.classList.toggle('is-inbox-feed-mode', mode === 'inbox_feed');
+			previewRoot.classList.toggle('is-ecom-dashboard-mode', mode === 'ecom_dashboard');
 		}
 
 		var panelOptions = anmReadNoticePanelPreviewOptions();
@@ -488,6 +706,25 @@
 			adminBarHtml = anmPreviewBuildPlainAdminBarHtml(i18n);
 			dashboardInner = '<div class="edminboost-anm-display-experience-preview__notices">'
 				+ anmPreviewBuildDashboardNoticesHtml(i18n)
+				+ '</div>';
+		} else if (mode === 'inbox_feed') {
+			adminBarHtml = anmPreviewBuildMockBarHtml(i18n, panelOptions, true, noticeCount);
+			dashboardInner = anmPreviewBuildGithubNotificationsHtml(i18n);
+		} else if (mode === 'ecom_dashboard') {
+			var ecomScope = anmReadEcomDisplayScope();
+			var nonEcomCapturedCount = 2;
+			adminBarHtml = anmPreviewBuildMockBarHtml(
+				i18n,
+				panelOptions,
+				true,
+				nonEcomCapturedCount,
+				anmPreviewBuildNonEcomCapturedPanel(i18n)
+			);
+			dashboardInner = '<p class="edminboost-anm-display-experience-preview__ecom-label description">'
+				+ anmPreviewEscapeHtml(i18n.displayExperiencePreviewEcomDashboardLabel || 'Store notices on the dashboard')
+				+ '</p>';
+			dashboardInner += '<div class="edminboost-anm-display-experience-preview__notices edminboost-anm-display-experience-preview__notices--ecom-only">'
+				+ anmPreviewBuildEcomDashboardNoticesHtml(i18n, ecomScope)
 				+ '</div>';
 		} else if (mode === 'hide_selected' || mode === 'compact_panel') {
 			adminBarHtml = anmPreviewBuildMockBarHtml(i18n, panelOptions, true, noticeCount);
@@ -506,13 +743,20 @@
 				+ '</p>';
 		}
 
-		stage.innerHTML = adminBarHtml
-			+ '<div class="edminboost-anm-display-experience-preview__dashboard">'
-			+ '<p class="edminboost-anm-display-experience-preview__page-title">'
-			+ anmPreviewEscapeHtml(i18n.displayExperiencePreviewDashboardTitle || 'Dashboard')
-			+ '</p>'
-			+ dashboardInner
-			+ '</div>';
+		if (mode === 'inbox_feed') {
+			stage.innerHTML = adminBarHtml
+				+ '<div class="edminboost-anm-display-experience-preview__dashboard edminboost-anm-display-experience-preview__dashboard--inbox-feed">'
+				+ dashboardInner
+				+ '</div>';
+		} else {
+			stage.innerHTML = adminBarHtml
+				+ '<div class="edminboost-anm-display-experience-preview__dashboard">'
+				+ '<p class="edminboost-anm-display-experience-preview__page-title">'
+				+ anmPreviewEscapeHtml(i18n.displayExperiencePreviewDashboardTitle || 'Dashboard')
+				+ '</p>'
+				+ dashboardInner
+				+ '</div>';
+		}
 
 		if (previewCaption) {
 			var caption = '';
@@ -523,8 +767,17 @@
 				case 'hide_selected':
 					caption = i18n.displayExperiencePreviewCaptionHideSelected || '';
 					break;
+				case 'inbox_feed':
+					caption = i18n.displayExperiencePreviewCaptionInboxFeed || '';
+					break;
+				case 'ecom_dashboard':
+					caption = i18n.displayExperiencePreviewCaptionEcomDashboard || '';
+					break;
 				case 'hide_all':
 					caption = i18n.displayExperiencePreviewCaptionHideAll || '';
+					break;
+				case 'compact_panel':
+					caption = i18n.displayExperiencePreviewCaptionCompactPanel || i18n.displayExperiencePreviewInboxHint || '';
 					break;
 				default:
 					caption = '';
@@ -1235,12 +1488,20 @@
 		setConvertButtonConverted(row ? row.querySelector('.edminboost-anm-inbox-convert') : null, false);
 	}
 
+	function anmClosestInboxRow(el) {
+		return el && el.closest ? el.closest('[data-notice-id]') : null;
+	}
+
 	function setInboxReadState(row, read) {
 		if (!row) {
 			return;
 		}
 		var readBtn = row.querySelector('.edminboost-anm-inbox-read');
 		row.classList.toggle('is-read', read);
+		var unreadDot = row.querySelector('.edminboost-anm-inbox-feed__unread');
+		if (unreadDot) {
+			unreadDot.hidden = !!read;
+		}
 		if (readBtn) {
 			readBtn.classList.toggle('is-marked-read', read);
 			readBtn.disabled = read;
@@ -1435,7 +1696,7 @@
 		var focusIndex = -1;
 
 		function getRows() {
-			return Array.prototype.slice.call(root.querySelectorAll('#edminboost-anm-inbox-rows tr[data-notice-id]'));
+			return Array.prototype.slice.call(root.querySelectorAll('#edminboost-anm-inbox-rows [data-notice-id]'));
 		}
 
 		function focusRow(index) {
@@ -1533,7 +1794,7 @@
 					}).then(function (result) {
 						if (result.success) {
 							closeInboxDropdowns(root);
-							setInboxSnoozeState(dropdownToggle.closest('tr'), false, '');
+							setInboxSnoozeState(anmClosestInboxRow(dropdownToggle), false, '');
 						}
 					});
 					return;
@@ -1557,7 +1818,7 @@
 				}
 				apiPost('edminboost_anm_inbox_action', { inbox_action: 'read', id: readBtn.dataset.id }).then(function (result) {
 					if (result.success) {
-						setInboxReadState(readBtn.closest('tr'), true);
+						setInboxReadState(anmClosestInboxRow(readBtn), true);
 						return;
 					}
 					window.alert((result.data && result.data.message) || (data.i18n && data.i18n.actionError) || 'Action failed.');
@@ -1567,7 +1828,7 @@
 
 			var snoozeBtn = event.target.closest('.edminboost-anm-inbox-snooze');
 			if (snoozeBtn) {
-				var snoozeRow = snoozeBtn.closest('tr');
+				var snoozeRow = anmClosestInboxRow(snoozeBtn);
 				apiPost('edminboost_anm_inbox_action', {
 					inbox_action: 'snooze',
 					id: snoozeBtn.dataset.id,
@@ -1595,7 +1856,7 @@
 						window.alert((result.data && result.data.message) || (data.i18n && data.i18n.actionError) || 'Action failed.');
 						return;
 					}
-					var row = convertBtn.closest('tr');
+					var row = anmClosestInboxRow(convertBtn);
 					if (inboxConverted) {
 						unmarkInboxConverted(row);
 					} else {
@@ -1723,6 +1984,111 @@
 				});
 			});
 		}
+	}
+
+	function initNotificationChannelsMatrix() {
+		var root = document.querySelector('[data-edminboost-anm-notification-channels]');
+		if (!root) {
+			return;
+		}
+
+		function cellsForGroup(groupId) {
+			return root.querySelectorAll(
+				'.edminboost-anm-notification-channels-cell[data-group="' + groupId + '"]:not(:disabled)'
+			);
+		}
+
+		function cellsForChannel(channel) {
+			return root.querySelectorAll(
+				'.edminboost-anm-notification-channels-cell[data-channel="' + channel + '"]:not(:disabled)'
+			);
+		}
+
+		function syncGroupToggle(groupId) {
+			var toggle = root.querySelector(
+				'.edminboost-anm-notification-channels-select-group[data-group="' + groupId + '"]'
+			);
+			if (!toggle) {
+				return;
+			}
+			var cells = cellsForGroup(groupId);
+			if (!cells.length) {
+				return;
+			}
+			var checkedCount = 0;
+			cells.forEach(function (cell) {
+				if (cell.checked) {
+					checkedCount += 1;
+				}
+			});
+			toggle.checked = checkedCount === cells.length;
+			toggle.indeterminate = checkedCount > 0 && checkedCount < cells.length;
+		}
+
+		function syncColumnToggle(channel) {
+			var toggles = root.querySelectorAll(
+				'.edminboost-anm-notification-channels-select-column[data-channel="' + channel + '"]:not(:disabled)'
+			);
+			var cells = cellsForChannel(channel);
+			if (!cells.length || !toggles.length) {
+				return;
+			}
+			var checkedCount = 0;
+			cells.forEach(function (cell) {
+				if (cell.checked) {
+					checkedCount += 1;
+				}
+			});
+			var allOn = checkedCount === cells.length;
+			var someOn = checkedCount > 0 && checkedCount < cells.length;
+			toggles.forEach(function (toggle) {
+				toggle.checked = allOn;
+				toggle.indeterminate = someOn;
+			});
+		}
+
+		root.querySelectorAll('.edminboost-anm-notification-channels-select-group').forEach(function (groupToggle) {
+			groupToggle.addEventListener('change', function () {
+				var groupId = groupToggle.dataset.group;
+				var on = groupToggle.checked;
+				groupToggle.indeterminate = false;
+				cellsForGroup(groupId).forEach(function (cell) {
+					cell.checked = on;
+				});
+				['admin', 'email', 'webhook'].forEach(syncColumnToggle);
+			});
+		});
+
+		root.querySelectorAll('.edminboost-anm-notification-channels-select-column').forEach(function (columnToggle) {
+			columnToggle.addEventListener('change', function () {
+				var channel = columnToggle.dataset.channel;
+				var on = columnToggle.checked;
+				root.querySelectorAll(
+					'.edminboost-anm-notification-channels-select-column[data-channel="' + channel + '"]:not(:disabled)'
+				).forEach(function (peer) {
+					peer.checked = on;
+					peer.indeterminate = false;
+				});
+				cellsForChannel(channel).forEach(function (cell) {
+					cell.checked = on;
+				});
+				root.querySelectorAll('.edminboost-anm-notification-channels-select-group').forEach(function (groupToggle) {
+					syncGroupToggle(groupToggle.dataset.group);
+				});
+			});
+		});
+
+		root.querySelectorAll('.edminboost-anm-notification-channels-cell').forEach(function (cell) {
+			cell.addEventListener('change', function () {
+				syncGroupToggle(cell.dataset.group);
+				syncColumnToggle(cell.dataset.channel);
+			});
+		});
+
+		root.querySelectorAll('.edminboost-anm-notification-channels-select-group').forEach(function (groupToggle) {
+			syncGroupToggle(groupToggle.dataset.group);
+		});
+		['admin', 'email', 'webhook'].forEach(syncColumnToggle);
 	}
 
 	function initSettingsTabs() {
@@ -2176,6 +2542,24 @@
 		window.addEventListener('resize', hideTip);
 	}
 
+	function anmReadEcomDisplayScope() {
+		var wooEl = document.getElementById('edminboost-anm-ecom-scope-woocommerce');
+		var eddEl = document.getElementById('edminboost-anm-ecom-scope-edd');
+		var otherEl = document.getElementById('edminboost-anm-ecom-scope-other');
+		if (!wooEl && !eddEl && !otherEl) {
+			return {
+				woocommerce: true,
+				edd: true,
+				other: true
+			};
+		}
+		return {
+			woocommerce: !!(wooEl && wooEl.checked),
+			edd: !!(eddEl && eddEl.checked),
+			other: !!(otherEl && otherEl.checked)
+		};
+	}
+
 	function initDisplayExperience() {
 		var hidden = document.getElementById('edminboost-anm-manage-notices-mode');
 		var root = document.querySelector('[data-edminboost-anm-display-experience]');
@@ -2186,11 +2570,15 @@
 		var presetInputs = root.querySelectorAll('.edminboost-anm-display-experience__input');
 		var presetOptions = root.querySelectorAll('.edminboost-anm-display-experience__option');
 		var advancedInputs = document.querySelectorAll('.edminboost-anm-display-experience-advanced__input');
+		var ecomScopeRoot = document.querySelector('[data-edminboost-anm-ecom-display-scope]');
+		var ecomScopeInputs = ecomScopeRoot
+			? ecomScopeRoot.querySelectorAll('input[type="checkbox"]')
+			: [];
 
 		function presetSelectedForMode(mode) {
 			var selected = null;
 			presetInputs.forEach(function (radio) {
-				if (radio.checked && radio.dataset.manageMode === mode) {
+				if (radio.checked && anmManageModeFromPresetInput(radio) === mode) {
 					selected = radio;
 				}
 			});
@@ -2208,9 +2596,21 @@
 			});
 		}
 
+		function syncEcomScopeVisibility(mode) {
+			if (!ecomScopeRoot) {
+				return;
+			}
+			if (mode === 'ecom_dashboard') {
+				ecomScopeRoot.removeAttribute('hidden');
+			} else {
+				ecomScopeRoot.setAttribute('hidden', 'hidden');
+			}
+		}
+
 		function setMode(mode) {
 			hidden.value = mode;
 			syncUi(mode);
+			syncEcomScopeVisibility(mode);
 			anmRenderDisplayExperiencePreview(mode);
 		}
 
@@ -2219,18 +2619,21 @@
 				if (!radio.checked) {
 					return;
 				}
-				setMode(radio.dataset.manageMode || '');
+				setMode(anmManageModeFromPresetInput(radio));
 			});
 		});
 
 		presetOptions.forEach(function (option) {
-			option.addEventListener('click', function () {
+			option.addEventListener('click', function (event) {
+				if (event.target.closest('.edminboost-anm-display-experience-advanced__input')) {
+					return;
+				}
 				var input = option.querySelector('.edminboost-anm-display-experience__input');
 				if (!input) {
 					return;
 				}
 				input.checked = true;
-				setMode(input.dataset.manageMode || '');
+				setMode(anmManageModeFromPresetInput(input));
 			});
 		});
 
@@ -2243,6 +2646,14 @@
 					preset.checked = false;
 				});
 				setMode(radio.value);
+			});
+		});
+
+		ecomScopeInputs.forEach(function (input) {
+			input.addEventListener('change', function () {
+				if (hidden.value === 'ecom_dashboard') {
+					anmRenderDisplayExperiencePreview('ecom_dashboard');
+				}
 			});
 		});
 
@@ -2278,6 +2689,7 @@
 		}
 
 		syncUi(hidden.value || '');
+		syncEcomScopeVisibility(hidden.value || '');
 		anmRenderDisplayExperiencePreview(hidden.value || '');
 	}
 
@@ -3142,6 +3554,7 @@
 		initDigestPreview();
 		initWebhookPreview();
 		initSettingsTabs();
+		initNotificationChannelsMatrix();
 		initSettingsImporter();
 		initHidingNotificationsSettings();
 		initBlockAdRedirectsSettings();

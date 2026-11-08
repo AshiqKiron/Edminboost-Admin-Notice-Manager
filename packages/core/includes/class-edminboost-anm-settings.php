@@ -112,14 +112,14 @@ class EDMINBOOST_ANM_Settings {
 	 *
 	 * @var string[]
 	 */
-	const MANAGE_NOTICES_MODES = array( 'show_all', 'hide_all', 'hide_selected', 'compact_panel' );
+	const MANAGE_NOTICES_MODES = array( 'show_all', 'hide_all', 'hide_selected', 'compact_panel', 'inbox_feed', 'ecom_dashboard', 'facebook_notifications' );
 
 	/**
 	 * Display experience preset slugs (General settings UI).
 	 *
 	 * @var string[]
 	 */
-	const DISPLAY_EXPERIENCE_PRESETS = array( 'dashboard', 'clean_inbox', 'toolbar_only' );
+	const DISPLAY_EXPERIENCE_PRESETS = array( 'dashboard', 'clean_inbox', 'github_notifications', 'facebook_notifications', 'ecommerce_only', 'toolbar_only' );
 
 	/**
 	 * Default settings.
@@ -201,6 +201,11 @@ class EDMINBOOST_ANM_Settings {
 				'density'                     => 'comfortable',
 				'keyboard_shortcut_enabled' => true,
 			),
+			'ecommerce_display_scope' => array(
+				'woocommerce' => true,
+				'edd'         => true,
+				'other'       => true,
+			),
 			'feature_notifications' => array(
 				'coexist_mode' => 'coexist',
 			),
@@ -218,6 +223,9 @@ class EDMINBOOST_ANM_Settings {
 				'digest_types'        => array( 'critical', 'error', 'warning', 'info', 'success' ),
 				'webhook_skip_upsell' => true,
 				'digest_skip_upsell'  => true,
+			),
+			'notification_channels' => array(
+				'sources' => array(),
 			),
 		);
 
@@ -338,16 +346,28 @@ class EDMINBOOST_ANM_Settings {
 			'hiding_notifications',
 			'acl',
 			'inbox_ui',
+			'ecommerce_display_scope',
 			'feature_notifications',
 			'channel_mutes',
 			'severity_policy',
 			'alert_routing',
+			'notification_channels',
 		);
 
 		foreach ( $nested_keys as $key ) {
 			$base_nested = isset( $base[ $key ] ) && is_array( $base[ $key ] ) ? $base[ $key ] : array();
 			$override_nested = isset( $overrides[ $key ] ) && is_array( $overrides[ $key ] ) ? $overrides[ $key ] : array();
 			$merged[ $key ]  = wp_parse_args( $override_nested, $base_nested );
+		}
+
+		if ( isset( $merged['notification_channels']['sources'] ) || isset( $overrides['notification_channels']['sources'] ) ) {
+			$sources_base = isset( $base['notification_channels']['sources'] ) && is_array( $base['notification_channels']['sources'] )
+				? $base['notification_channels']['sources']
+				: array();
+			$sources_override = isset( $overrides['notification_channels']['sources'] ) && is_array( $overrides['notification_channels']['sources'] )
+				? $overrides['notification_channels']['sources']
+				: array();
+			$merged['notification_channels']['sources'] = wp_parse_args( $sources_override, $sources_base );
 		}
 
 		if ( isset( $merged['notice_panel']['colors'] ) || isset( $base['notice_panel']['colors'] ) || isset( $overrides['notice_panel']['colors'] ) ) {
@@ -399,16 +419,25 @@ class EDMINBOOST_ANM_Settings {
 			'acl',
 			'white_label',
 			'inbox_ui',
+			'ecommerce_display_scope',
 			'feature_notifications',
 			'channel_mutes',
 			'severity_policy',
 			'alert_routing',
+			'notification_channels',
 		);
 
 		foreach ( $nested_keys as $key ) {
 			$merged[ $key ] = wp_parse_args(
 				isset( $merged[ $key ] ) && is_array( $merged[ $key ] ) ? $merged[ $key ] : array(),
 				$defaults[ $key ]
+			);
+		}
+
+		if ( isset( $merged['notification_channels']['sources'] ) && is_array( $merged['notification_channels']['sources'] ) ) {
+			$merged['notification_channels']['sources'] = wp_parse_args(
+				$merged['notification_channels']['sources'],
+				array()
 			);
 		}
 
@@ -539,6 +568,10 @@ class EDMINBOOST_ANM_Settings {
 		$output['disable_core_update_notifications']   = ! empty( $input['disable_core_update_notifications'] );
 		$output['hide_core_notices']                   = in_array( $manage_mode, array( 'hide_all', 'compact_panel' ), true );
 
+		if ( isset( $input['ecommerce_display_scope'] ) && is_array( $input['ecommerce_display_scope'] ) ) {
+			$output['ecommerce_display_scope'] = self::sanitize_ecommerce_display_scope( $input['ecommerce_display_scope'] );
+		}
+
 		$standard_input = isset( $input['standard_admin_notices'] ) && is_array( $input['standard_admin_notices'] )
 			? $input['standard_admin_notices']
 			: array();
@@ -563,6 +596,17 @@ class EDMINBOOST_ANM_Settings {
 		$panel_input = isset( $input['notice_panel'] ) && is_array( $input['notice_panel'] )
 			? $input['notice_panel']
 			: array();
+
+		if ( isset( $input['manage_notices_mode'] ) && 'facebook_notifications' === $manage_mode && ! isset( $input['notice_panel'] ) ) {
+			$panel_input = array_merge(
+				$panel_input,
+				array(
+					'style'       => 'dropdown',
+					'position'    => 'before_profile',
+					'badge_style' => 'dot',
+				)
+			);
+		}
 
 		$allowed_styles = self::get_notice_panel_style_slugs();
 		$panel_style      = sanitize_key( $panel_input['style'] ?? 'link' );
@@ -694,6 +738,13 @@ class EDMINBOOST_ANM_Settings {
 
 		if ( isset( $input['alert_routing'] ) && is_array( $input['alert_routing'] ) ) {
 			$output['alert_routing'] = self::sanitize_alert_routing_settings( $input['alert_routing'], $output['alert_routing'] );
+		}
+
+		if ( isset( $input['notification_channels'] ) && is_array( $input['notification_channels'] ) ) {
+			$output['notification_channels'] = EDMINBOOST_ANM_Notification_Sources::sanitize_preferences(
+				$input['notification_channels'],
+				$output['notification_channels'] ?? $defaults['notification_channels']
+			);
 		}
 
 		$output['notice_panel'] = wp_parse_args( $output['notice_panel'], $defaults['notice_panel'] );
@@ -1000,6 +1051,9 @@ class EDMINBOOST_ANM_Settings {
 			'hide_all'      => __( 'Hide all', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			'hide_selected' => __( 'Hide selected', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			'compact_panel' => __( 'Compact panel', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'inbox_feed'              => __( 'Inbox feed', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'facebook_notifications'  => __( 'Facebook-style notifications', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'ecom_dashboard'          => __( 'Ecommerce dashboard only', EDMINBOOST_ANM_TEXT_DOMAIN ),
 		);
 	}
 
@@ -1019,6 +1073,16 @@ class EDMINBOOST_ANM_Settings {
 				'label'       => __( 'Clean dashboard + inbox / admin bar', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'description' => __( 'Recommended. Hides the notices you configure under Notices, Access, and Auto-Rules, then collects them in the inbox and admin bar panel.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'mode'        => 'hide_selected',
+			),
+			'github_notifications' => array(
+				'label'       => __( 'Notifications like GitHub', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'description' => __( 'Keeps wp-admin pages clean and routes captured notices to a GitHub-style notification feed in the plugin inbox. Use the admin bar link as a quick entry point.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'mode'        => 'inbox_feed',
+			),
+			'ecommerce_only' => array(
+				'label'       => __( 'Ecommerce notifications only', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'description' => __( 'Shows WooCommerce, Easy Digital Downloads, and other store plugin notices on the dashboard. Everything else is sent to the inbox and admin bar panel.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'mode'        => 'ecom_dashboard',
 			),
 			'toolbar_only' => array(
 				'label'       => __( 'Toolbar only', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -1072,6 +1136,50 @@ class EDMINBOOST_ANM_Settings {
 		$mode = self::get_manage_notices_mode();
 
 		return in_array( $mode, array( 'hide_all', 'compact_panel' ), true );
+	}
+
+	/**
+	 * Whether the inbox uses the GitHub-style notification feed layout.
+	 *
+	 * @return bool
+	 */
+	public static function uses_inbox_feed_layout() {
+		return 'inbox_feed' === self::get_manage_notices_mode();
+	}
+
+	/**
+	 * Ecommerce notice groups shown on the dashboard when manage mode is ecom_dashboard.
+	 *
+	 * @return array{woocommerce: bool, edd: bool, other: bool}
+	 */
+	public static function get_ecommerce_display_scope() {
+		$settings = self::get();
+
+		return wp_parse_args(
+			$settings['ecommerce_display_scope'] ?? array(),
+			self::get_defaults()['ecommerce_display_scope']
+		);
+	}
+
+	/**
+	 * Sanitize ecommerce display scope checkboxes.
+	 *
+	 * @param array $input Raw scope input.
+	 * @return array
+	 */
+	public static function sanitize_ecommerce_display_scope( array $input ) {
+		$defaults = self::get_defaults()['ecommerce_display_scope'];
+		$scope    = array(
+			'woocommerce' => ! empty( $input['woocommerce'] ),
+			'edd'         => ! empty( $input['edd'] ),
+			'other'       => ! empty( $input['other'] ),
+		);
+
+		if ( ! $scope['woocommerce'] && ! $scope['edd'] && ! $scope['other'] ) {
+			return $defaults;
+		}
+
+		return $scope;
 	}
 
 	/**

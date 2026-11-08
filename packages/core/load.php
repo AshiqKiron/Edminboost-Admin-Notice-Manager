@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-activator.php';
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-deactivator.php';
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-feature-notifications.php';
+require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-notification-sources.php';
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-settings.php';
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-multisite.php';
 require_once EDMINBOOST_ANM_PLUGIN_DIR . 'includes/class-edminboost-anm-stats.php';

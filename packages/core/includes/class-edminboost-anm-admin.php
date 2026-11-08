@@ -369,10 +369,16 @@ class EDMINBOOST_ANM_Admin {
 			}
 		}
 
+		$display_experience_preset_modes = array();
+		foreach ( EDMINBOOST_ANM_Settings::get_display_experience_presets() as $preset_slug => $preset ) {
+			$display_experience_preset_modes[ $preset_slug ] = isset( $preset['mode'] ) ? (string) $preset['mode'] : '';
+		}
+
 		return array(
 			'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( 'edminboost_anm_admin' ),
 			'pageSlug' => self::PAGE_SLUG,
+			'displayExperiencePresetModes' => $display_experience_preset_modes,
 			'inboxUrl' => admin_url( 'admin.php?page=' . self::PAGE_SLUG . '-inbox' ),
 			'inboxKeyboardShortcut' => EDMINBOOST_ANM_Settings::is_inbox_keyboard_shortcut_enabled(),
 			'rulesContext' => $rules_context,
@@ -456,6 +462,53 @@ class EDMINBOOST_ANM_Admin {
 				'displayExperiencePreviewCaptionShowAll'       => __( 'Notices stay on the dashboard. Inbox and admin bar stay available for optional use.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'displayExperiencePreviewCaptionHideSelected'  => __( 'Matching notices leave the dashboard and appear in the inbox and admin bar panel.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'displayExperiencePreviewCaptionHideAll'       => __( 'Every notice is suppressed on the dashboard unless a rule allows it through.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewCaptionInboxFeed'     => __( 'Dashboard stays clean; captured notices appear in the GitHub-style inbox feed and admin bar entry.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewCaptionEcomDashboard' => __( 'Shows WooCommerce, Easy Digital Downloads, and other store plugin notices on the dashboard. Everything else is sent to the inbox and admin bar panel.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewNoticeWooStock'       => __( 'WooCommerce: 2 products are low in stock.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewNoticeEddPayment'     => __( 'Easy Digital Downloads: complete your payment gateway setup.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewNoticeEcomOther'      => __( 'Your store plugin needs a quick configuration step.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewNoticeLicenseSource' => __( 'Yoast SEO', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewEcomDashboardLabel' => __( 'Store notices on the dashboard', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewEcomDashboardEmpty' => __( 'No ecommerce notice groups selected — store notices are sent to the inbox.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedTitle'       => __( 'Notifications', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedNavInbox'    => __( 'Inbox', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedNavSaved'    => __( 'Saved', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedNavDone'     => __( 'Done', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedNavAlerts'   => __( 'Alerts', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedNavPromo'    => __( 'Promotions', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedNavSnoozed'  => __( 'Snoozed', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedFilterUnread' => __( 'Unread', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedFilterUpdates' => __( 'Updates', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedFilterPlugins' => __( 'From plugins', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedFilters'     => __( 'Filters', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedTabAll'      => __( 'All', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedTabUnread'   => __( 'Unread', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSearchQuery' => __( 'is:unread', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSortBy'      => __( 'Sort by:', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSortNewest'  => __( 'Newest to oldest', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedGroupBy'     => __( 'Group by:', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedGroupDate'   => __( 'Date', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSelectAll'   => __( 'Select all', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedProTip'      => __( 'ProTip! Open the full inbox to snooze, read, or convert notices to rules.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedPager'       => __( '1–3 of 3', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSample1Title' => __( 'WordPress 6.7 is available', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSample1Excerpt' => __( 'A new WordPress release is ready — review changes and update when convenient.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSample1Label' => __( 'update available', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSample2Title' => __( 'SEO plugin license', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSample2Excerpt' => __( 'Please activate your SEO plugin license to receive updates and support.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSample2Label' => __( 'warning', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSample3Title' => __( 'New form submission', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSample3Excerpt' => __( 'You have a new form submission waiting in your inbox.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSample3Label' => __( 'info', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSample1Date' => __( 'on Mar 12', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSample2Date' => __( 'on Mar 10', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSample3Date' => __( 'on Mar 8', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSample1'     => __( 'WordPress 6.7 is available. Please update now.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSample2'     => __( 'Please activate your SEO plugin license to receive updates.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSample3'     => __( 'You have a new form submission waiting in your inbox.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSource'      => __( 'WordPress', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSourceYoast' => __( 'Yoast SEO', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewInboxFeedSourceForms' => __( 'WPForms', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'displayExperiencePreviewDashboardTitle'       => __( 'Dashboard', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'displayExperiencePreviewDashboardClear'       => __( 'Dashboard notice area is clear.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'displayExperiencePreviewHideAllDashboard'     => __( 'No notices shown on the dashboard.', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -705,6 +758,33 @@ class EDMINBOOST_ANM_Admin {
 		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-inbox-table-rows.php';
 
 		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Render inbox GitHub-style feed list items.
+	 *
+	 * @param array $notices Notice rows.
+	 * @return string
+	 */
+	public static function render_inbox_feed_rows_html( $notices ) {
+		ob_start();
+		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-inbox-feed-rows.php';
+
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Render inbox list row HTML for the active display experience.
+	 *
+	 * @param array $notices Notice rows.
+	 * @return string
+	 */
+	public static function render_inbox_list_rows_html( $notices ) {
+		if ( EDMINBOOST_ANM_Settings::uses_inbox_feed_layout() ) {
+			return self::render_inbox_feed_rows_html( $notices );
+		}
+
+		return self::render_inbox_table_rows_html( $notices );
 	}
 
 	/**
