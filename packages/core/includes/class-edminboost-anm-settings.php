@@ -1079,6 +1079,11 @@ class EDMINBOOST_ANM_Settings {
 				'description' => __( 'Keeps wp-admin pages clean and routes captured notices to a GitHub-style notification feed in the plugin inbox. Use the admin bar link as a quick entry point.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'mode'        => 'inbox_feed',
 			),
+			'facebook_notifications' => array(
+				'label'       => __( 'Notifications like Facebook', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'description' => __( 'Keeps the dashboard clear and surfaces captured notices in a Facebook-style bell dropdown beside your profile. Grouped New and Earlier items with quick filters.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'mode'        => 'facebook_notifications',
+			),
 			'ecommerce_only' => array(
 				'label'       => __( 'Ecommerce notifications only', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'description' => __( 'Shows WooCommerce, Easy Digital Downloads, and other store plugin notices on the dashboard. Everything else is sent to the inbox and admin bar panel.', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -1145,6 +1150,15 @@ class EDMINBOOST_ANM_Settings {
 	 */
 	public static function uses_inbox_feed_layout() {
 		return 'inbox_feed' === self::get_manage_notices_mode();
+	}
+
+	/**
+	 * Whether the admin bar uses the Facebook-style notification dropdown panel.
+	 *
+	 * @return bool
+	 */
+	public static function uses_facebook_notifications_panel() {
+		return 'facebook_notifications' === self::get_manage_notices_mode();
 	}
 
 	/**
@@ -1533,6 +1547,40 @@ class EDMINBOOST_ANM_Settings {
 	 */
 	public static function get_notice_panel_badge_style_slugs() {
 		return array_keys( self::get_notice_panel_badge_styles() );
+	}
+
+	/**
+	 * Inbox count shown on the admin bar bell badge (unread when the style uses a bell).
+	 *
+	 * @param array $panel Notice panel settings.
+	 * @return int
+	 */
+	public static function get_notice_panel_badge_count( array $panel ) {
+		$style    = sanitize_key( $panel['style'] ?? 'link' );
+		$position = sanitize_key( $panel['position'] ?? 'default' );
+
+		if ( self::uses_facebook_notifications_panel() || self::notice_panel_style_uses_bell( $style, $position ) ) {
+			return EDMINBOOST_ANM_Inbox::get_unread_active_count();
+		}
+
+		return EDMINBOOST_ANM_Inbox::get_active_count();
+	}
+
+	/**
+	 * AJAX `counts` key used to refresh the admin bar badge after inbox actions.
+	 *
+	 * @param array $panel Notice panel settings.
+	 * @return string
+	 */
+	public static function get_notice_panel_badge_counts_key( array $panel ) {
+		$style    = sanitize_key( $panel['style'] ?? 'link' );
+		$position = sanitize_key( $panel['position'] ?? 'default' );
+
+		if ( self::uses_facebook_notifications_panel() || self::notice_panel_style_uses_bell( $style, $position ) ) {
+			return 'unread';
+		}
+
+		return 'all';
 	}
 
 	/**

@@ -7,13 +7,27 @@
 			"overlay": "free",
 			"folder": "edminboost-admin-notice-manager",
 			"zipNameTemplate": "edminboost-admin-notice-manager-{version}.zip",
-			"excludeFromCore": []
+			"excludeFromCore": [
+				"languages/build-translations.py",
+				"languages/google_backend.py",
+				"languages/argos_backend.py",
+				"languages/apply_generated_json.py",
+				"languages/msgids.json",
+				"languages/generated"
+			]
 		},
 		"pro": {
 			"overlay": "pro",
 			"folder": "edminboost-admin-notice-manager-pro",
 			"zipNameTemplate": "edminboost-admin-notice-manager-pro-{version}.zip",
-			"excludeFromCore": []
+			"excludeFromCore": [
+				"languages/build-translations.py",
+				"languages/google_backend.py",
+				"languages/argos_backend.py",
+				"languages/apply_generated_json.py",
+				"languages/msgids.json",
+				"languages/generated"
+			]
 		}
 	}
 }

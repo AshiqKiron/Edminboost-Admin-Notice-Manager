@@ -121,6 +121,27 @@ class EDMINBOOST_ANM_Ajax {
 	}
 
 	/**
+	 * Verify AJAX for notice capture / inline hide (non-admin roles with hiding enabled).
+	 *
+	 * @return void
+	 */
+	private function verify_notice_intercept_request() {
+		check_ajax_referer( 'edminboost_anm_admin', 'nonce' );
+
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', EDMINBOOST_ANM_TEXT_DOMAIN ) ), 403 );
+		}
+
+		if ( current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
+			return;
+		}
+
+		if ( ! EDMINBOOST_ANM_Settings::should_apply_notice_hiding_for_user() ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', EDMINBOOST_ANM_TEXT_DOMAIN ) ), 403 );
+		}
+	}
+
+	/**
 	 * Toggle global plugin enabled state.
 	 *
 	 * @return void
@@ -329,7 +350,21 @@ class EDMINBOOST_ANM_Ajax {
 						)
 					);
 				}
-				wp_send_json_success( array( 'read' => true ) );
+				wp_send_json_success(
+					array(
+						'read'   => true,
+						'counts' => EDMINBOOST_ANM_Inbox::get_counts(),
+					)
+				);
+				return;
+			case 'mark_all_read':
+				$marked = EDMINBOOST_ANM_Inbox::mark_all_read();
+				wp_send_json_success(
+					array(
+						'count'  => $marked,
+						'counts' => EDMINBOOST_ANM_Inbox::get_counts(),
+					)
+				);
 				return;
 			case 'snooze':
 				if ( '' === $id ) {
@@ -456,14 +491,14 @@ class EDMINBOOST_ANM_Ajax {
 				if ( ! in_array( $bulk, $allowed, true ) ) {
 					wp_send_json_error( array( 'message' => __( 'Invalid action.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
 				}
-				$count = EDMINBOOST_ANM_Inbox::bulk_action( $ids, $bulk );
+				$duration_key = sanitize_key( wp_unslash( $_POST['duration'] ?? '1d' ) );
+				$duration_key = '7d' === $duration_key ? '7d' : '1d';
+				$count        = EDMINBOOST_ANM_Inbox::bulk_action( $ids, $bulk, $duration_key );
 				wp_send_json_success( array( 'count' => $count ) );
 				return;
 			default:
 				wp_send_json_error( array( 'message' => __( 'Invalid action.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
 		}
-
-		wp_send_json_success();
 	}
 
 	/**
@@ -553,7 +588,7 @@ class EDMINBOOST_ANM_Ajax {
 	 * @return void
 	 */
 	public function handle_notice_hide() {
-		$this->verify_request();
+		$this->verify_notice_intercept_request();
 
 		if ( ! EDMINBOOST_ANM_Settings::is_enabled() ) {
 			wp_send_json_error( array( 'message' => __( 'Plugin disabled.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
@@ -562,6 +597,10 @@ class EDMINBOOST_ANM_Ajax {
 		$scope = sanitize_key( wp_unslash( $_POST['scope'] ?? '' ) );
 		if ( ! in_array( $scope, array( 'hide_for_me', 'hide_for_all' ), true ) ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid action.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );
+		}
+
+		if ( 'hide_for_all' === $scope && ! current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', EDMINBOOST_ANM_TEXT_DOMAIN ) ), 403 );
 		}
 
 		$html = wp_unslash( $_POST['html'] ?? '' );
@@ -589,7 +628,7 @@ class EDMINBOOST_ANM_Ajax {
 	 * @return void
 	 */
 	public function handle_capture_notice() {
-		$this->verify_request();
+		$this->verify_notice_intercept_request();
 
 		if ( ! EDMINBOOST_ANM_Settings::is_enabled() ) {
 			wp_send_json_error( array( 'message' => __( 'Plugin disabled.', EDMINBOOST_ANM_TEXT_DOMAIN ) ) );

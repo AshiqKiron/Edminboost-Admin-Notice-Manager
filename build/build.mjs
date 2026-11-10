@@ -24,15 +24,30 @@ function shouldSkip( filePath ) {
 	if ( base === '.DS_Store' || base === 'Thumbs.db' ) {
 		return true;
 	}
+	if ( base.endsWith( '.log' ) ) {
+		return true;
+	}
 	return false;
+}
+
+/**
+ * @param {string} relFromCore Path relative to the core package root (for excludeFromCore).
+ * @param {string[]} excludeRelative
+ * @return {boolean}
+ */
+function isExcludedFromCore( relFromCore, excludeRelative ) {
+	return excludeRelative.some(
+		( ex ) => relFromCore === ex || relFromCore.startsWith( ex + path.sep )
+	);
 }
 
 /**
  * @param {string} src
  * @param {string} dest
- * @param {string[]} excludeRelative
+ * @param {string[]} excludeRelative Paths relative to coreRoot.
+ * @param {string} coreRoot
  */
-function copyDir( src, dest, excludeRelative = [] ) {
+function copyDir( src, dest, excludeRelative = [], coreRoot = src ) {
 	if ( ! fs.existsSync( src ) ) {
 		throw new Error( `Missing source directory: ${ src }` );
 	}
@@ -42,13 +57,13 @@ function copyDir( src, dest, excludeRelative = [] ) {
 			continue;
 		}
 		const srcPath = path.join( src, entry.name );
-		const rel = path.relative( src, srcPath );
-		if ( excludeRelative.some( ( ex ) => rel === ex || rel.startsWith( ex + path.sep ) ) ) {
+		const relFromCore = path.relative( coreRoot, srcPath );
+		if ( isExcludedFromCore( relFromCore, excludeRelative ) ) {
 			continue;
 		}
 		const destPath = path.join( dest, entry.name );
 		if ( entry.isDirectory() ) {
-			copyDir( srcPath, destPath, excludeRelative );
+			copyDir( srcPath, destPath, excludeRelative, coreRoot );
 		} else {
 			fs.copyFileSync( srcPath, destPath );
 		}
@@ -83,8 +98,8 @@ function assembleEdition( editionKey ) {
 	fs.rmSync( outDir, { recursive: true, force: true } );
 	fs.mkdirSync( outDir, { recursive: true } );
 
-	copyDir( coreSrc, outDir, edition.excludeFromCore || [] );
-	copyDir( overlaySrc, outDir );
+	copyDir( coreSrc, outDir, edition.excludeFromCore || [], coreSrc );
+	copyDir( overlaySrc, outDir, [], overlaySrc );
 
 	console.log( `Assembled ${ editionKey } → ${ path.relative( root, outDir ) }` );
 	return { outDir, edition, version: readVersion( editionKey ) };

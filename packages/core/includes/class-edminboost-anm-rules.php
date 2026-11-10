@@ -295,6 +295,17 @@ class EDMINBOOST_ANM_Rules {
 			$action = 'auto_dismiss_inbox';
 		}
 
+		if ( 'regex' === $match_type ) {
+			$pattern = '@' . str_replace( '@', '\@', $match_string ) . '@i';
+			$valid   = @preg_match( $pattern, '' );
+			if ( false === $valid ) {
+				return new WP_Error(
+					'invalid_regex',
+					__( 'Invalid regular expression. Check the pattern and try again.', EDMINBOOST_ANM_TEXT_DOMAIN )
+				);
+			}
+		}
+
 		$context = sanitize_key( $data['context'] ?? 'site' );
 		if ( ! in_array( $context, array( 'site', 'network' ), true ) ) {
 			$context = 'site';

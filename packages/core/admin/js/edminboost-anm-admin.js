@@ -387,9 +387,98 @@
 		return anmPreviewBuildNoticePanelFromSamples(i18n, samples);
 	}
 
+	function anmPreviewBuildFacebookPanelHtml(i18n) {
+		var items = [
+			{
+				source: i18n.displayExperiencePreviewFbSample1Source || 'WordPress',
+				message: i18n.displayExperiencePreviewFbSample1 || 'WordPress 6.7 is available. Please update now.',
+				time: '2h',
+				icon: 'dashicons-admin-comments',
+				unread: true
+			},
+			{
+				source: i18n.displayExperiencePreviewFbSample2Source || 'Yoast SEO',
+				message: i18n.displayExperiencePreviewFbSample2 || 'Please activate your SEO plugin license to receive updates.',
+				time: '8h',
+				icon: 'dashicons-warning',
+				unread: true
+			},
+			{
+				source: i18n.displayExperiencePreviewFbSample3Source || 'WPForms',
+				message: i18n.displayExperiencePreviewFbSample3 || 'You have a new form submission waiting in your inbox.',
+				time: '11h',
+				icon: 'dashicons-megaphone',
+				unread: false
+			}
+		];
+
+		function row(item) {
+			var unreadDot = item.unread
+				? '<span class="edminboost-anm-fb-notif__unread-dot" aria-hidden="true"></span>'
+				: '';
+			return '<li class="edminboost-anm-fb-notif__item' + (item.unread ? '' : ' is-read') + '">'
+				+ '<div class="edminboost-anm-fb-notif__body">'
+				+ '<p class="edminboost-anm-fb-notif__text"><strong class="edminboost-anm-fb-notif__source">' + anmPreviewEscapeHtml(item.source) + '</strong>'
+				+ '<span class="edminboost-anm-fb-notif__message"> ' + anmPreviewEscapeHtml(item.message) + '</span></p>'
+				+ '<span class="edminboost-anm-fb-notif__time">' + anmPreviewEscapeHtml(item.time) + '</span>'
+				+ '</div>'
+				+ unreadDot
+				+ '</li>';
+		}
+
+		var title = i18n.displayExperiencePreviewFbTitle || i18n.displayExperiencePreviewInboxFeedTitle || 'Notifications';
+		var tabAll = i18n.displayExperiencePreviewFbTabAll || i18n.displayExperiencePreviewInboxFeedTabAll || 'All';
+		var tabUnread = i18n.displayExperiencePreviewFbTabUnread || i18n.displayExperiencePreviewInboxFeedTabUnread || 'Unread';
+		var sectionNew = i18n.displayExperiencePreviewFbSectionNew || 'New';
+		var sectionEarlier = i18n.displayExperiencePreviewFbSectionEarlier || 'Earlier';
+		var seeAll = i18n.displayExperiencePreviewFbSeeAll || 'See all';
+		var footer = i18n.displayExperiencePreviewFbFooter || 'See previous notifications';
+
+		return '<div class="edminboost-anm-notices-panel edminboost-anm-notices-panel--facebook edminboost-anm-notice-panel-preview__panel">'
+			+ '<div class="edminboost-anm-fb-notif__header">'
+			+ '<h2 class="edminboost-anm-fb-notif__title">' + anmPreviewEscapeHtml(title) + '</h2>'
+			+ '<div class="edminboost-anm-fb-notif__menu">'
+			+ '<button type="button" class="edminboost-anm-fb-notif__menu-toggle" tabindex="-1" aria-hidden="true"><span class="dashicons dashicons-ellipsis"></span></button>'
+			+ '</div>'
+			+ '</div>'
+			+ '<div class="edminboost-anm-fb-notif__tabs" role="presentation">'
+			+ '<span class="edminboost-anm-fb-notif__tab is-active" tabindex="-1">' + anmPreviewEscapeHtml(tabAll) + '</span>'
+			+ '<span class="edminboost-anm-fb-notif__tab" tabindex="-1">' + anmPreviewEscapeHtml(tabUnread) + '</span>'
+			+ '</div>'
+			+ '<div class="edminboost-anm-fb-notif__scroll">'
+			+ '<div class="edminboost-anm-fb-notif__section">'
+			+ '<div class="edminboost-anm-fb-notif__section-head">'
+			+ '<h3 class="edminboost-anm-fb-notif__section-title">' + anmPreviewEscapeHtml(sectionNew) + '</h3>'
+			+ '<span class="edminboost-anm-fb-notif__see-all" tabindex="-1">' + anmPreviewEscapeHtml(seeAll) + '</span>'
+			+ '</div>'
+			+ '<ul class="edminboost-anm-fb-notif__list">' + row(items[0]) + row(items[1]) + '</ul>'
+			+ '</div>'
+			+ '<div class="edminboost-anm-fb-notif__section">'
+			+ '<h3 class="edminboost-anm-fb-notif__section-title edminboost-anm-fb-notif__section-title--solo">' + anmPreviewEscapeHtml(sectionEarlier) + '</h3>'
+			+ '<ul class="edminboost-anm-fb-notif__list">' + row(items[2]) + '</ul>'
+			+ '</div>'
+			+ '</div>'
+			+ '<div class="edminboost-anm-fb-notif__footer">'
+			+ '<span class="edminboost-anm-fb-notif__footer-link" tabindex="-1">' + anmPreviewEscapeHtml(footer) + '</span>'
+			+ '</div>'
+			+ '</div>';
+	}
+
+	function anmPreviewFacebookPanelOptions(panelOptions) {
+		return {
+			style: 'dropdown',
+			badgeStyle: 'dot',
+			position: 'before_profile',
+			colors: panelOptions.colors || {}
+		};
+	}
+
 	function anmPreviewBuildTriggerHtml(i18n, style, badgeStyle, position, count) {
 		if (anmPreviewStyleUsesBell(style, position)) {
 			var triggerClass = 'edminboost-anm-notice-panel-preview__trigger edminboost-anm-notice-panel-preview__trigger--bell';
+			if (position === 'before_profile') {
+				triggerClass += ' is-facebook';
+			}
 			if (style === 'bell_link') {
 				triggerClass += ' is-style-bell-link';
 			} else if (anmPreviewIsDropdownStyle(style)) {
@@ -693,6 +782,7 @@
 		if (previewRoot) {
 			previewRoot.classList.toggle('is-inbox-feed-mode', mode === 'inbox_feed');
 			previewRoot.classList.toggle('is-ecom-dashboard-mode', mode === 'ecom_dashboard');
+			previewRoot.classList.toggle('is-facebook-notifications-mode', mode === 'facebook_notifications');
 		}
 
 		var panelOptions = anmReadNoticePanelPreviewOptions();
@@ -710,6 +800,21 @@
 		} else if (mode === 'inbox_feed') {
 			adminBarHtml = anmPreviewBuildMockBarHtml(i18n, panelOptions, true, noticeCount);
 			dashboardInner = anmPreviewBuildGithubNotificationsHtml(i18n);
+		} else if (mode === 'facebook_notifications') {
+			var fbPanelOptions = anmPreviewFacebookPanelOptions(panelOptions);
+			adminBarHtml = anmPreviewBuildMockBarHtml(
+				i18n,
+				fbPanelOptions,
+				true,
+				noticeCount,
+				anmPreviewBuildFacebookPanelHtml(i18n)
+			);
+			dashboardInner = '<p class="edminboost-anm-display-experience-preview__empty">'
+				+ anmPreviewEscapeHtml(i18n.displayExperiencePreviewDashboardClear || 'Dashboard notice area is clear.')
+				+ '</p>';
+			dashboardInner += '<p class="edminboost-anm-display-experience-preview__inbox-hint">'
+				+ anmPreviewEscapeHtml(i18n.displayExperiencePreviewFbHint || i18n.displayExperiencePreviewInboxHint || '')
+				+ '</p>';
 		} else if (mode === 'ecom_dashboard') {
 			var ecomScope = anmReadEcomDisplayScope();
 			var nonEcomCapturedCount = 2;
@@ -769,6 +874,9 @@
 					break;
 				case 'inbox_feed':
 					caption = i18n.displayExperiencePreviewCaptionInboxFeed || '';
+					break;
+				case 'facebook_notifications':
+					caption = i18n.displayExperiencePreviewCaptionFacebook || '';
 					break;
 				case 'ecom_dashboard':
 					caption = i18n.displayExperiencePreviewCaptionEcomDashboard || '';
@@ -1563,6 +1671,41 @@
 		});
 	}
 
+	function updateInboxFeedSortLinks(root, orderby, order) {
+		if (!root) {
+			return;
+		}
+
+		root.querySelectorAll('.edminboost-anm-inbox-feed__sort .edminboost-anm-inbox-sort').forEach(function (link) {
+			var isActive = (link.dataset.orderby || '') === orderby;
+			link.classList.toggle('is-active', isActive);
+			link.setAttribute('aria-current', isActive ? 'true' : 'false');
+			link.classList.remove('is-sort-asc', 'is-sort-desc');
+			if (isActive) {
+				link.classList.add('desc' === order ? 'is-sort-desc' : 'is-sort-asc');
+			}
+		});
+	}
+
+	function syncInboxFeedEmptyState(root, hasRows) {
+		if (!root || !root.classList.contains('edminboost-anm-wrap--inbox-feed')) {
+			return;
+		}
+		var empty = root.querySelector('.edminboost-anm-inbox-feed__empty');
+		var list = root.querySelector('#edminboost-anm-inbox-rows');
+		if (!list) {
+			return;
+		}
+		if (hasRows) {
+			list.hidden = false;
+			list.setAttribute('aria-hidden', 'false');
+			if (empty) {
+				empty.hidden = true;
+				empty.setAttribute('aria-hidden', 'true');
+			}
+		}
+	}
+
 	function syncInboxSearchHiddenInput(searchForm, name, value, removeWhen) {
 		if (!searchForm) {
 			return;
@@ -1646,12 +1789,14 @@
 				return;
 			}
 			tbody.innerHTML = result.data.rows || '';
+			syncInboxFeedEmptyState(root, Boolean((result.data.rows || '').trim()));
 			root.dataset.inboxOrderby = result.data.orderby || orderby;
 			root.dataset.inboxOrder = result.data.order || order;
 			if (result.data.page) {
 				root.dataset.inboxPage = String(result.data.page);
 			}
 			updateInboxSortHeaders(table, root.dataset.inboxOrderby, root.dataset.inboxOrder);
+			updateInboxFeedSortLinks(root, root.dataset.inboxOrderby, root.dataset.inboxOrder);
 			updateInboxUrlState(
 				root,
 				root.dataset.inboxOrderby,
@@ -1739,6 +1884,7 @@
 
 		var table = root.querySelector('.edminboost-anm-inbox-table');
 		updateInboxSortHeaders(table, root.dataset.inboxOrderby || 'date', root.dataset.inboxOrder || 'desc');
+		updateInboxFeedSortLinks(root, root.dataset.inboxOrderby || 'date', root.dataset.inboxOrder || 'desc');
 
 		root.addEventListener('change', function (event) {
 			if (event.target.classList.contains('edminboost-anm-inbox-select-all')) {
@@ -1880,11 +2026,20 @@
 				if (!ids.length) {
 					return;
 				}
-				apiPost('edminboost_anm_inbox_action', {
+				var bulkDuration = '1d';
+				if ('snooze_7d' === action) {
+					action = 'snooze';
+					bulkDuration = '7d';
+				}
+				var inboxPayload = {
 					inbox_action: 'bulk',
 					bulk_action: action,
 					ids: ids
-				}).then(function (result) {
+				};
+				if ('snooze' === action) {
+					inboxPayload.duration = bulkDuration;
+				}
+				apiPost('edminboost_anm_inbox_action', inboxPayload).then(function (result) {
 					if (result.success) {
 						window.location.reload();
 					}

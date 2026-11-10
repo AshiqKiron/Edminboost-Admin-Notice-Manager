@@ -83,6 +83,18 @@ class EDMINBOOST_ANM_Interceptor {
 
 		$result = $this->process_notice( $html );
 
+		if ( function_exists( 'edminboost_anm_agent_debug_log' ) ) {
+			edminboost_anm_agent_debug_log(
+				'class-edminboost-anm-interceptor.php:end_buffer',
+				'php_notice_processed',
+				array(
+					'suppress' => ! empty( $result['suppress'] ),
+					'source'   => sanitize_key( $result['source'] ?? '' ),
+				),
+				'D'
+			);
+		}
+
 		if ( ! $result['suppress'] ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- original notice HTML.
 			echo $html;
@@ -125,10 +137,6 @@ class EDMINBOOST_ANM_Interceptor {
 		}
 
 		$manage_mode = EDMINBOOST_ANM_Settings::get_manage_notices_mode();
-		if ( 'hide_all' === $manage_mode ) {
-			return array( 'suppress' => true, 'source' => 'hide_all_mode' );
-		}
-
 		if ( EDMINBOOST_ANM_Rules::matches_css_ignore_selectors( $html ) ) {
 			return array( 'suppress' => false );
 		}
@@ -136,6 +144,16 @@ class EDMINBOOST_ANM_Interceptor {
 		$source = ! empty( $meta['source_plugin'] )
 			? sanitize_text_field( $meta['source_plugin'] )
 			: self::detect_source_plugin();
+
+		if ( 'hide_all' === $manage_mode ) {
+			return self::finalize_intercept(
+				$message,
+				$source,
+				EDMINBOOST_ANM_Rules::classify_type( $message ),
+				$html,
+				array( 'source' => 'hide_all_mode' )
+			);
+		}
 
 		$hash_pref = EDMINBOOST_ANM_Inbox::get_hash_preference(
 			EDMINBOOST_ANM_Inbox::generate_hash( $message, $source )
@@ -230,15 +248,15 @@ class EDMINBOOST_ANM_Interceptor {
 			$source
 		);
 
-		if ( current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
-			$draft = array(
-				'message'       => $message,
-				'html'          => $html,
-				'source_plugin' => $source,
-				'type'          => $type,
-			);
+		$draft = array(
+			'message'       => $message,
+			'html'          => $html,
+			'source_plugin' => $source,
+			'type'          => $type,
+		);
 
-			$notice = null;
+		$notice = null;
+		if ( current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
 			if ( ! class_exists( 'EDMINBOOST_ANM_Notification_Sources' )
 				|| EDMINBOOST_ANM_Notification_Sources::notice_allows_channel( $draft, 'admin' ) ) {
 				$notice = EDMINBOOST_ANM_Inbox::add( $draft );
@@ -246,11 +264,14 @@ class EDMINBOOST_ANM_Interceptor {
 
 			if ( $notice && empty( $notice['_is_repeat_capture'] ) ) {
 				EDMINBOOST_ANM_Stats::record_intercept( $source, $message, $type );
-				EDMINBOOST_ANM_Webhook::maybe_send( $notice );
-			} elseif ( ! $notice && class_exists( 'EDMINBOOST_ANM_Notification_Sources' )
-				&& EDMINBOOST_ANM_Notification_Sources::notice_allows_channel( $draft, 'webhook' ) ) {
-				EDMINBOOST_ANM_Webhook::maybe_send( $draft );
 			}
+		}
+
+		if ( $notice && empty( $notice['_is_repeat_capture'] ) ) {
+			EDMINBOOST_ANM_Webhook::maybe_send( $notice );
+		} elseif ( ! $notice && class_exists( 'EDMINBOOST_ANM_Notification_Sources' )
+			&& EDMINBOOST_ANM_Notification_Sources::notice_allows_channel( $draft, 'webhook' ) ) {
+			EDMINBOOST_ANM_Webhook::maybe_send( $draft );
 		}
 
 		return array_merge(

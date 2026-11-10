@@ -38,7 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 - Check capabilities before rendering admin pages: `current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY )` on site admin; `current_user_can( EDMINBOOST_ANM_Multisite::NETWORK_CAPABILITY )` on network admin screens.
 - Escape output: `esc_html()`, `esc_attr()`, `esc_url()`, `esc_html__()`, `esc_html_e()`.
 - Sanitize site settings via `EDMINBOOST_ANM_Settings::sanitize()` as `sanitize_callback` in `register_setting()`; network defaults via `sanitize_network_settings()`; network policy via `EDMINBOOST_ANM_Multisite::sanitize_policy()`.
-- New AJAX handlers: register in `EDMINBOOST_ANM_Ajax::register_hooks()`, implement `handle_*`, call `verify_request()` (honor posted `context` for network vs site); use `verify_site_settings_mutation()` when changing site-level settings storage (digest/webhook preview: sanitize nested input with dedicated helpers when accepting unsaved form fields).
+- New AJAX handlers: register in `EDMINBOOST_ANM_Ajax::register_hooks()`, implement `handle_*`, call `verify_request()` (honor posted `context` for network vs site); use `verify_site_settings_mutation()` when changing site-level settings storage (digest/webhook preview: sanitize nested input with dedicated helpers when accepting unsaved form fields). Capture and inline hide endpoints use private `verify_notice_intercept_request()` (`manage_options` or `should_apply_notice_hiding_for_user()`); `hide_for_all` still requires capability in the handler.
 
 ## WordPress APIs
 
@@ -63,7 +63,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 array(
 	'enabled'                              => false,
 	'hide_core_notices'                    => false,
-	'manage_notices_mode'                  => 'hide_selected', // show_all | hide_all | hide_selected | compact_panel | inbox_feed | ecom_dashboard
+	'manage_notices_mode'                  => 'hide_selected', // show_all | hide_all | hide_selected | compact_panel | inbox_feed | ecom_dashboard | facebook_notifications
 	'ecommerce_display_scope'            => array( 'woocommerce' => true, 'edd' => true, 'other' => true ), // when mode is ecom_dashboard
 	'disable_plugin_update_notifications'  => false,
 	'disable_core_update_notifications'    => false,
@@ -157,16 +157,18 @@ Separate per-site options: `RULES_OPTION` (rule list), `INBOX_OPTION` (captured 
 | `edminboost-anm-multisite-policy-next-steps.php` | Shared multisite policy next-steps links |
 | `edminboost-anm-billing-page.php` | Billing / Free vs Pro comparison (read-only) |
 | `edminboost-anm-notice-panel-dropdown.php` | Admin bar dropdown preview |
+| `edminboost-anm-notice-panel-facebook.php` | Facebook-style admin bar panel when `uses_facebook_notifications_panel()` |
 
 `EDMINBOOST_ANM_Notices::DROPDOWN_PREVIEW_LIMIT` (8) caps dropdown preview items.
 
 - Settings help tips: `EDMINBOOST_ANM_Admin::help_tip( $message, $placement = 'below' )` — escaped dashicons + `data-tip` + `data-tip-placement` (`below`|`left`) for JS popup; output is safe HTML (escape in helper, document phpcs ignore when echoing in partials).
 - Settings sanitize: `enabled` updated only when present in `$input` (Dashboard AJAX / explicit posts); other fields unchanged on Settings save.
-- Display experience: `EDMINBOOST_ANM_Settings::DISPLAY_EXPERIENCE_PRESETS`, `get_display_experience_presets()`, `get_display_experience_preset_for_mode()`, `get_manage_notices_mode_labels()`, `uses_inbox_feed_layout()` — presets map to stored `manage_notices_mode` (`inbox_feed`, `ecom_dashboard`, etc.).
+- Display experience: `EDMINBOOST_ANM_Settings::DISPLAY_EXPERIENCE_PRESETS`, `get_display_experience_presets()`, `get_display_experience_preset_for_mode()`, `get_manage_notices_mode_labels()`, `uses_inbox_feed_layout()`, `uses_facebook_notifications_panel()` — presets map to stored `manage_notices_mode` (`inbox_feed`, `facebook_notifications`, `ecom_dashboard`, etc.); Facebook preset save merges default `notice_panel` (`dropdown`, `before_profile`, dot badge) when `notice_panel` omitted from POST.
 - Inbox row render: `EDMINBOOST_ANM_Admin::render_inbox_list_rows_html()`, `render_inbox_feed_rows_html()`, `render_inbox_table_rows_html()`.
 - Notice panel save: `sanitize()` sets `notice_panel.enabled` to true (no Settings UI toggle); `should_show_admin_bar_notice_panel()` checks plugin enabled + stored `notice_panel.enabled`.
-- Notice panel: `EDMINBOOST_ANM_Settings::get_notice_panel_*()` registries; `get_notice_panel_admin_bar_placement()`, `get_notice_panel_preview_layout()` (default position → `left`), `notice_panel_position_uses_left_admin_bar()`, `notice_panel_style_is_dropdown()`, `notice_panel_style_uses_bell()`, `format_notice_panel_badge_display_count()`, etc. `EDMINBOOST_ANM_Notices::build_notice_badge_markup()` mirrors badge rules for live admin bar; `enqueue_admin_bar_dropdown_script()` shared for wp-admin and front-end admin bar dropdown JS; `get_plugin_screen_notice_hide_css()` + `hide_notices_on_plugin_screens()` for plugin-page notice clutter (exceptions for settings preview mocks).
-- Inbox: `LIST_FILTERS` (`all`, `alerts`, `snoozed`, `upsells`); `get_severity_slug()` / `get_severity_label()` / `map_core_severity_to_type()` / `apply_severity_policy()`; `should_send_webhook_for_notice()` / `should_include_in_digest()` (alert routing); snooze/unsnooze, `mark_read()`; duplicate capture `repeat_count`.
+- Notice panel: `EDMINBOOST_ANM_Settings::get_notice_panel_*()` registries; `get_notice_panel_admin_bar_placement()`, `get_notice_panel_preview_layout()` (default position → `left`), `notice_panel_position_uses_left_admin_bar()`, `notice_panel_position_uses_facebook_slot()` (`before_profile`), `notice_panel_style_is_dropdown()`, `notice_panel_style_uses_bell()`, `format_notice_panel_badge_display_count()`, etc. Facebook mode: `EDMINBOOST_ANM_Notices` adds `edminboost-anm-notices--facebook` only when `uses_facebook_notifications_panel()` (distinct from `edminboost-anm-notices--before-profile` on slot); includes `edminboost-anm-notice-panel-facebook.php`; row copy via `get_facebook_panel_message_excerpt()` + `format_panel_relative_time()`; `get_facebook_notice_icon_class()` exists but is not used in current FB panel markup (do not reintroduce avatars without an explicit product change). `enqueue_admin_bar_dropdown_script()` passes `edminboostAnmNotices` with `inboxUrl` and `i18n.fbUnreadEmpty`. `EDMINBOOST_ANM_Notices::build_notice_badge_markup()` mirrors badge rules for live admin bar; `get_plugin_screen_notice_hide_css()` + `hide_notices_on_plugin_screens()` for plugin-page notice clutter (exceptions for settings preview mocks).
+- Inbox: `LIST_FILTERS` (`all`, `alerts`, `snoozed`, `upsells`); `get_severity_slug()` / `get_severity_label()` / `map_core_severity_to_type()` / `apply_severity_policy()`; `should_send_webhook_for_notice()` / `should_include_in_digest()` (alert routing); snooze/unsnooze, `mark_read()`, `mark_all_read()`; `bulk_action( $ids, $action, $duration_key = '1d' )` for bulk snooze; duplicate capture `repeat_count`.
+- Access / hiding: `should_apply_notice_hiding_for_user()` gates interceptor hooks, capture AJAX, and inline hide script; `should_intercept_notices()` when enabled and manage mode is not `show_all`.
 - Feature Notifications: `EDMINBOOST_ANM_Feature_Notifications::is_available()`, `ingest_notification()` (Pro), `filter_core_payload()`; settings `get_feature_notifications_coexist_mode()`, `get_feature_notifications_coexist_choices()`.
 - Channel mutes: `sanitize_channel_mutes_settings()`, `apply_channel_mutes_to_settings()`; `EDMINBOOST_ANM_Rules::sync_channel_mute_rules()`.
 - Notification channels: `EDMINBOOST_ANM_Notification_Sources::get_registry()`, `get_merged_source_preferences()`, `sanitize_preferences()`, `resolve_source_id_for_notice()`, `notice_allows_channel()`, `notice_is_ecommerce_display()`; settings merge preserves `notification_channels.sources` across network/site layers.

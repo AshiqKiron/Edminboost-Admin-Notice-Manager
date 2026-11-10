@@ -4,7 +4,7 @@ Tags: admin, admin-notices, dashboard, admin-tools, notices
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -58,7 +58,24 @@ Yes. When uninstalled, all plugin options are removed from the database.
 
 == Changelog ==
 
+= 1.1.3 =
+* Admin bar bell badge now reflects unread inbox notices (including after Mark all as read); link style still shows total active count.
+* Facebook notification panel “Notification settings” opens Settings → Admin bar instead of the inbox.
+* Fix invalid inbox list sort order fallback; remove stray local debug telemetry from capture and webhook paths.
+* Fix Free webhook alerts being disabled after saving Settings (Channels matrix no longer clears per-source webhook prefs on Free; Free edition skips per-source webhook channel blocking so existing sites recover without re-saving).
+* Fix JS notice interception for roles covered by Client Shield / notice hiding without `manage_options`.
+* Inline “Hide for me” is available to those users; “Hide for all” remains administrators only.
+* Legacy importer no longer seeds default rules when only an unsupported competitor plugin folder is detected, or when legacy options contain no importable rules.
+* JS interceptor retries capture after a failed AJAX response instead of skipping the notice for the rest of the page load.
+* Expired inbox snoozes are normalized to active read/new status when the inbox is loaded.
+* GitHub-style inbox feed: sorting works when the inbox is empty; active sort state shown in the feed toolbar.
+* Bulk snooze offers 1-day and 7-day actions; regex rules show an error when the pattern is invalid.
+* Hide-all display mode routes notices through the inbox again so webhooks and stats record intercepts.
+* Webhook delivery runs on any qualifying intercept session, not only when the current user has `manage_options` (inbox and stats stay admin-only).
+
 = 1.1.2 =
+* Admin bar notification panel and inbox: improved responsive layout on phones and tablets (panel opens above the mobile admin bar, scroll areas respect viewport height; GitHub-style feed and table inbox with tablet column tuning, horizontal filter tabs, and stacked row actions on small screens).
+* Settings (General): Display experience preset **Notifications like Facebook** — clear dashboard, Facebook-style bell dropdown beside your profile (New/Earlier groups, All/Unread filters), and recommended admin bar placement when you save (live preview included).
 * Settings (General): Display experience preset **Ecommerce notifications only** — keeps WooCommerce, Easy Digital Downloads, and other store plugin notices visible (scope checkboxes for each group); routes WordPress and non-store notices to the inbox and admin bar (live preview included).
 * Settings (General): Display experience preset **Notifications like GitHub** — clear dashboard, GitHub-style notification feed on the Notice Inbox (left sidebar: Inbox plus Filters for Alerts, Snoozed, and Promotions), and admin bar entry (live preview mirrors GitHub notifications layout).
 * Inbox: Alerts tab (critical + warning, excludes snoozed), severity labels aligned with core Feature Notifications, compact list density, grouped duplicate rows with repeat count, and Alt+Shift+N keyboard shortcut.

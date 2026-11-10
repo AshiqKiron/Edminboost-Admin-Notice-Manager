@@ -33,13 +33,18 @@ class EDMINBOOST_ANM_Webhook {
 	 * @return void
 	 */
 	public static function maybe_send( $notice ) {
-		if ( ! is_array( $notice ) || ! EDMINBOOST_ANM_Inbox::should_send_webhook_for_notice( $notice ) ) {
+		if ( ! is_array( $notice ) ) {
 			return;
 		}
 
 		$settings = EDMINBOOST_ANM_Settings::get();
 
 		if ( empty( $settings['webhook']['enabled'] ) ) {
+			return;
+		}
+
+		$allows_webhook = EDMINBOOST_ANM_Inbox::should_send_webhook_for_notice( $notice );
+		if ( ! $allows_webhook ) {
 			return;
 		}
 
@@ -50,7 +55,7 @@ class EDMINBOOST_ANM_Webhook {
 
 		$payload = self::build_payload( $notice, $settings );
 
-		wp_remote_post(
+		$response = wp_remote_post(
 			$url,
 			array(
 				'timeout' => 5,
@@ -58,6 +63,19 @@ class EDMINBOOST_ANM_Webhook {
 				'body'    => wp_json_encode( $payload ),
 			)
 		);
+
+		if ( function_exists( 'edminboost_anm_agent_debug_log' ) ) {
+			edminboost_anm_agent_debug_log(
+				'class-edminboost-anm-webhook.php:maybe_send',
+				'webhook_sent',
+				array(
+					'type'    => sanitize_key( $notice['type'] ?? '' ),
+					'ok'      => ! is_wp_error( $response ),
+					'code'    => is_wp_error( $response ) ? 0 : (int) wp_remote_retrieve_response_code( $response ),
+				),
+				'A'
+			);
+		}
 	}
 
 	/**

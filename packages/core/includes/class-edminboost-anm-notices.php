@@ -101,29 +101,29 @@ class EDMINBOOST_ANM_Notices {
 			}
 		}
 
-		if ( ! $can_manage ) {
-			return;
-		}
-
-		if ( ! is_admin() ) {
-			if ( $needs_admin_bar && EDMINBOOST_ANM_Settings::notice_panel_style_is_dropdown( $panel['style'] ?? 'link' ) ) {
-				$this->enqueue_admin_bar_dropdown_script( $panel );
-			}
-			return;
-		}
-
 		$localized = array(
-			'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
-			'nonce'       => wp_create_nonce( 'edminboost_anm_admin' ),
-			'badgeStyle'  => sanitize_key( $panel['badge_style'] ?? 'count' ),
-			'i18n'        => array(
-				'actionError' => __( 'Could not update this notice. Please try again.', EDMINBOOST_ANM_TEXT_DOMAIN ),
-				'hideForMe'   => __( 'Hide for me', EDMINBOOST_ANM_TEXT_DOMAIN ),
-				'hideForAll'  => __( 'Hide for all', EDMINBOOST_ANM_TEXT_DOMAIN ),
+			'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
+			'inboxUrl'      => admin_url( 'admin.php?page=' . EDMINBOOST_ANM_Admin::PAGE_SLUG . '-inbox' ),
+			'settingsUrl'   => admin_url( 'admin.php?page=' . EDMINBOOST_ANM_Admin::PAGE_SLUG . '-settings&tab=admin_bar' ),
+			'nonce'         => wp_create_nonce( 'edminboost_anm_admin' ),
+			'badgeStyle'    => sanitize_key( $panel['badge_style'] ?? 'count' ),
+			'badgeCountKey' => EDMINBOOST_ANM_Settings::get_notice_panel_badge_counts_key( $panel ),
+			'canHideForAll' => $can_manage,
+			'i18n'          => array(
+				'actionError'        => __( 'Could not update this notice. Please try again.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'hideForMe'          => __( 'Hide for me', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'hideForAll'         => __( 'Hide for all', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'fbUnreadEmpty'      => __( 'You have no unread notifications.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'fbMarkAllReadError' => __( 'Could not mark all notices as read.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 			),
 		);
 
-		if ( ! EDMINBOOST_ANM_Admin::is_plugin_screen() ) {
+		$show_inline_hide = is_admin()
+			&& ! EDMINBOOST_ANM_Admin::is_plugin_screen()
+			&& EDMINBOOST_ANM_Settings::should_apply_notice_hiding_for_user();
+
+		if ( $show_inline_hide ) {
+			wp_enqueue_style( 'dashicons' );
 			wp_enqueue_script(
 				'edminboost-anm-notice-inline',
 				EDMINBOOST_ANM_PLUGIN_URL . 'admin/js/edminboost-anm-notice-inline.js',
@@ -140,6 +140,17 @@ class EDMINBOOST_ANM_Notices {
 					'cssIgnoreSelectors' => EDMINBOOST_ANM_Settings::get_css_ignore_selectors(),
 				)
 			);
+		}
+
+		if ( ! $can_manage ) {
+			return;
+		}
+
+		if ( ! is_admin() ) {
+			if ( $needs_admin_bar && EDMINBOOST_ANM_Settings::notice_panel_style_is_dropdown( $panel['style'] ?? 'link' ) ) {
+				$this->enqueue_admin_bar_dropdown_script( $panel );
+			}
+			return;
 		}
 
 		if ( ! $show_admin_bar || ! EDMINBOOST_ANM_Settings::notice_panel_style_is_dropdown( $panel['style'] ?? 'link' ) ) {
@@ -159,13 +170,18 @@ class EDMINBOOST_ANM_Notices {
 	private function enqueue_admin_bar_dropdown_script( $panel, $localized = null ) {
 		if ( null === $localized ) {
 			$localized = array(
-				'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
-				'nonce'      => wp_create_nonce( 'edminboost_anm_admin' ),
-				'badgeStyle' => sanitize_key( $panel['badge_style'] ?? 'count' ),
-				'i18n'       => array(
-					'actionError' => __( 'Could not update this notice. Please try again.', EDMINBOOST_ANM_TEXT_DOMAIN ),
-					'hideForMe'   => __( 'Hide for me', EDMINBOOST_ANM_TEXT_DOMAIN ),
-					'hideForAll'  => __( 'Hide for all', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
+				'inboxUrl'    => admin_url( 'admin.php?page=' . EDMINBOOST_ANM_Admin::PAGE_SLUG . '-inbox' ),
+				'settingsUrl'     => admin_url( 'admin.php?page=' . EDMINBOOST_ANM_Admin::PAGE_SLUG . '-settings&tab=admin_bar' ),
+				'nonce'           => wp_create_nonce( 'edminboost_anm_admin' ),
+				'badgeStyle'      => sanitize_key( $panel['badge_style'] ?? 'count' ),
+				'badgeCountKey'   => EDMINBOOST_ANM_Settings::get_notice_panel_badge_counts_key( $panel ),
+				'i18n'        => array(
+					'actionError'       => __( 'Could not update this notice. Please try again.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+					'hideForMe'         => __( 'Hide for me', EDMINBOOST_ANM_TEXT_DOMAIN ),
+					'hideForAll'        => __( 'Hide for all', EDMINBOOST_ANM_TEXT_DOMAIN ),
+					'fbUnreadEmpty'     => __( 'You have no unread notifications.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+					'fbMarkAllReadError' => __( 'Could not mark all notices as read.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				),
 			);
 		}
@@ -261,8 +277,10 @@ class EDMINBOOST_ANM_Notices {
 		);
 		$style      = $panel['style'] ?? 'link';
 		$position   = $panel['position'] ?? 'default';
-		$inbox_url  = admin_url( 'admin.php?page=' . EDMINBOOST_ANM_Admin::PAGE_SLUG . '-inbox' );
-		$count_all  = EDMINBOOST_ANM_Inbox::get_active_count();
+		$inbox_url     = admin_url( 'admin.php?page=' . EDMINBOOST_ANM_Admin::PAGE_SLUG . '-inbox' );
+		$settings_url  = admin_url( 'admin.php?page=' . EDMINBOOST_ANM_Admin::PAGE_SLUG . '-settings&tab=admin_bar' );
+		$count_all     = EDMINBOOST_ANM_Inbox::get_active_count();
+		$badge_count   = EDMINBOOST_ANM_Settings::get_notice_panel_badge_count( $panel );
 		$meta_class = 'edminboost-anm-notices-trigger';
 
 		if ( EDMINBOOST_ANM_Settings::notice_panel_style_is_dropdown( $style ) ) {
@@ -274,8 +292,12 @@ class EDMINBOOST_ANM_Notices {
 			$meta_class .= ' edminboost-anm-notices--bell';
 		}
 
+		if ( EDMINBOOST_ANM_Settings::uses_facebook_notifications_panel() ) {
+			$meta_class .= ' edminboost-anm-notices--facebook';
+		}
+
 		if ( EDMINBOOST_ANM_Settings::notice_panel_position_uses_facebook_slot( $position ) ) {
-			$meta_class .= ' edminboost-anm-notices--before-profile edminboost-anm-notices--facebook';
+			$meta_class .= ' edminboost-anm-notices--before-profile';
 		}
 
 		if ( EDMINBOOST_ANM_Settings::notice_panel_position_uses_left_admin_bar( $position ) ) {
@@ -284,7 +306,7 @@ class EDMINBOOST_ANM_Notices {
 
 		$node = array(
 			'id'    => 'edminboost-anm-notices',
-			'title' => $this->build_admin_bar_title( $panel, $count_all ),
+			'title' => $this->build_admin_bar_title( $panel, $badge_count ),
 			'meta'  => array(
 				'class' => $meta_class,
 			),
@@ -298,7 +320,7 @@ class EDMINBOOST_ANM_Notices {
 		if ( EDMINBOOST_ANM_Settings::notice_panel_style_is_dropdown( $style ) ) {
 			$node['href'] = '#';
 			ob_start();
-			$this->render_dropdown_panel( $count_all, $inbox_url, $style );
+			$this->render_dropdown_panel( $count_all, $inbox_url, $settings_url, $style );
 			$node['meta']['html'] = ob_get_clean();
 		} else {
 			$node['href'] = $inbox_url;
@@ -421,12 +443,13 @@ class EDMINBOOST_ANM_Notices {
 	/**
 	 * Render dropdown panel HTML for the admin bar node.
 	 *
-	 * @param int    $total     Total active inbox count.
-	 * @param string $inbox_url Inbox admin URL.
-	 * @param string $style     Panel style slug.
+	 * @param int    $total        Total active inbox count.
+	 * @param string $inbox_url    Inbox admin URL.
+	 * @param string $settings_url Plugin settings URL (Admin bar tab).
+	 * @param string $style        Panel style slug.
 	 * @return void
 	 */
-	private function render_dropdown_panel( $total, $inbox_url, $style = 'dropdown' ) {
+	private function render_dropdown_panel( $total, $inbox_url, $settings_url, $style = 'dropdown' ) {
 		$notices = EDMINBOOST_ANM_Inbox::query(
 			array(
 				'filter'   => 'all',
@@ -438,8 +461,14 @@ class EDMINBOOST_ANM_Notices {
 
 		$edminboost_anm_notices        = $notices;
 		$edminboost_anm_inbox_url      = $inbox_url;
+		$edminboost_anm_settings_url   = $settings_url;
 		$edminboost_anm_total          = (int) $total;
-		$edminboost_anm_panel_layout   = 'dropdown_compact' === sanitize_key( $style ) ? 'compact' : 'detailed';
+		if ( EDMINBOOST_ANM_Settings::uses_facebook_notifications_panel() ) {
+			include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-notice-panel-facebook.php';
+			return;
+		}
+
+		$edminboost_anm_panel_layout = 'dropdown_compact' === sanitize_key( $style ) ? 'compact' : 'detailed';
 
 		include EDMINBOOST_ANM_PLUGIN_DIR . 'admin/partials/edminboost-anm-notice-panel-dropdown.php';
 	}

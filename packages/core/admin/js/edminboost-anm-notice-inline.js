@@ -62,7 +62,12 @@
 		bar.setAttribute('role', 'group');
 		bar.setAttribute('aria-label', config.i18n && config.i18n.hideForMe ? config.i18n.hideForMe : 'Notice actions');
 
-		['hide_for_me', 'hide_for_all'].forEach(function (scope) {
+		var scopes = ['hide_for_me'];
+		if (config.canHideForAll) {
+			scopes.push('hide_for_all');
+		}
+
+		scopes.forEach(function (scope) {
 			var btn = document.createElement('button');
 			btn.type = 'button';
 			btn.className = 'edminboost-anm-notice-inline-actions__btn';

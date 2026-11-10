@@ -61,10 +61,22 @@ class EDMINBOOST_ANM_Importer {
 			return new WP_Error( 'no_legacy', __( 'No legacy plugin data detected.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
 		}
 
+		$importable_keys = array();
 		foreach ( $legacy as $key ) {
 			if ( 'admin-notices-manager' === $key ) {
 				continue;
 			}
+			$importable_keys[] = $key;
+		}
+
+		if ( empty( $importable_keys ) ) {
+			return new WP_Error(
+				'no_importable_legacy',
+				__( 'No importable legacy plugin options were found. Install a supported competitor or import rules via JSON.', EDMINBOOST_ANM_TEXT_DOMAIN )
+			);
+		}
+
+		foreach ( $importable_keys as $key ) {
 
 			$data = get_option( $key, array() );
 			if ( ! is_array( $data ) ) {
@@ -106,33 +118,10 @@ class EDMINBOOST_ANM_Importer {
 		}
 
 		if ( 0 === $imported ) {
-			$defaults = array(
-				array(
-					'name'         => 'Upgrade to Pro',
-					'match_string' => 'upgrade to pro',
-				),
-				array(
-					'name'         => 'Black Friday',
-					'match_string' => 'black friday',
-				),
-				array(
-					'name'         => 'Leave a review',
-					'match_string' => 'leave a review',
-				),
+			return new WP_Error(
+				'no_rules_imported',
+				__( 'Legacy plugin data was found but no rules could be imported.', EDMINBOOST_ANM_TEXT_DOMAIN )
 			);
-
-			foreach ( $defaults as $rule ) {
-				EDMINBOOST_ANM_Rules::save(
-					array(
-						'name'         => $rule['name'],
-						'match_type'   => 'keyword',
-						'match_string' => $rule['match_string'],
-						'action'       => 'auto_dismiss_inbox',
-						'enabled'      => true,
-					)
-				);
-				++$imported;
-			}
 		}
 
 		return array(

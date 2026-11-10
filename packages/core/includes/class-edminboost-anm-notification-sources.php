@@ -270,6 +270,7 @@ class EDMINBOOST_ANM_Notification_Sources {
 
 		$leaf_ids = self::get_leaf_source_ids();
 		$output   = array();
+		$is_pro   = function_exists( 'edminboost_anm_is_pro' ) && edminboost_anm_is_pro();
 
 		foreach ( $leaf_ids as $source_id ) {
 			$row = isset( $posted_sources[ $source_id ] ) && is_array( $posted_sources[ $source_id ] )
@@ -278,6 +279,18 @@ class EDMINBOOST_ANM_Notification_Sources {
 
 			$output[ $source_id ] = array();
 			foreach ( self::CHANNELS as $channel ) {
+				// Free edition: webhook cells are disabled in the UI (not posted). Preserve stored/default webhook prefs.
+				if ( 'webhook' === $channel && ! $is_pro ) {
+					if ( array_key_exists( $channel, $row ) ) {
+						$output[ $source_id ][ $channel ] = ! empty( $row[ $channel ] );
+					} elseif ( isset( $stored_sources[ $source_id ][ $channel ] ) ) {
+						$output[ $source_id ][ $channel ] = ! empty( $stored_sources[ $source_id ][ $channel ] );
+					} else {
+						$output[ $source_id ][ $channel ] = true;
+					}
+					continue;
+				}
+
 				$output[ $source_id ][ $channel ] = ! empty( $row[ $channel ] );
 			}
 		}
@@ -300,6 +313,7 @@ class EDMINBOOST_ANM_Notification_Sources {
 
 		$allowed = array_flip( self::get_leaf_source_ids() );
 		$clean   = array();
+		$is_pro  = function_exists( 'edminboost_anm_is_pro' ) && edminboost_anm_is_pro();
 
 		foreach ( $sources as $source_id => $channels ) {
 			$source_id = sanitize_key( (string) $source_id );
@@ -308,6 +322,12 @@ class EDMINBOOST_ANM_Notification_Sources {
 			}
 			$clean[ $source_id ] = array();
 			foreach ( self::CHANNELS as $channel ) {
+				if ( 'webhook' === $channel && ! $is_pro ) {
+					$clean[ $source_id ][ $channel ] = array_key_exists( $channel, $channels )
+						? ! empty( $channels[ $channel ] )
+						: true;
+					continue;
+				}
 				$clean[ $source_id ][ $channel ] = ! empty( $channels[ $channel ] );
 			}
 		}
@@ -353,6 +373,18 @@ class EDMINBOOST_ANM_Notification_Sources {
 
 		if ( ! in_array( $channel, self::CHANNELS, true ) ) {
 			return true;
+		}
+
+		// Free: per-source webhook matrix is Pro-only; type-based routing uses Notifications defaults.
+		if ( 'webhook' === $channel && function_exists( 'edminboost_anm_is_pro' ) && ! edminboost_anm_is_pro() ) {
+			/**
+			 * Filter whether a notification channel is enabled for a source ID.
+			 *
+			 * @param bool   $enabled   Whether enabled.
+			 * @param string $source_id Source ID.
+			 * @param string $channel   Channel slug.
+			 */
+			return (bool) apply_filters( 'edminboost_anm_notification_channel_enabled', true, $source_id, $channel );
 		}
 
 		$prefs = self::get_merged_source_preferences();

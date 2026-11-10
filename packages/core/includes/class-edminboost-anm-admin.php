@@ -463,7 +463,22 @@ class EDMINBOOST_ANM_Admin {
 				'displayExperiencePreviewCaptionHideSelected'  => __( 'Matching notices leave the dashboard and appear in the inbox and admin bar panel.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'displayExperiencePreviewCaptionHideAll'       => __( 'Every notice is suppressed on the dashboard unless a rule allows it through.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'displayExperiencePreviewCaptionInboxFeed'     => __( 'Dashboard stays clean; captured notices appear in the GitHub-style inbox feed and admin bar entry.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewCaptionFacebook'      => __( 'Dashboard stays clear; captured notices open in a Facebook-style bell dropdown beside your profile. Saving applies recommended admin bar placement and badge defaults.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'displayExperiencePreviewCaptionEcomDashboard' => __( 'Shows WooCommerce, Easy Digital Downloads, and other store plugin notices on the dashboard. Everything else is sent to the inbox and admin bar panel.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewFbHint'               => __( 'Open the bell beside Howdy to browse grouped notifications, or visit the full inbox for snooze and rules.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewFbTitle'              => __( 'Notifications', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewFbTabAll'             => __( 'All', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewFbTabUnread'          => __( 'Unread', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewFbSectionNew'         => __( 'New', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewFbSectionEarlier'     => __( 'Earlier', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewFbSeeAll'           => __( 'See all', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewFbFooter'           => __( 'See previous notifications', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewFbSample1'          => __( 'WordPress 6.7 is available. Please update now.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewFbSample2'          => __( 'Please activate your SEO plugin license to receive updates.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewFbSample3'          => __( 'You have a new form submission waiting in your inbox.', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewFbSample1Source'    => __( 'WordPress', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewFbSample2Source'    => __( 'Yoast SEO', EDMINBOOST_ANM_TEXT_DOMAIN ),
+				'displayExperiencePreviewFbSample3Source'    => __( 'WPForms', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'displayExperiencePreviewNoticeWooStock'       => __( 'WooCommerce: 2 products are low in stock.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'displayExperiencePreviewNoticeEddPayment'     => __( 'Easy Digital Downloads: complete your payment gateway setup.', EDMINBOOST_ANM_TEXT_DOMAIN ),
 				'displayExperiencePreviewNoticeEcomOther'      => __( 'Your store plugin needs a quick configuration step.', EDMINBOOST_ANM_TEXT_DOMAIN ),
@@ -623,7 +638,7 @@ class EDMINBOOST_ANM_Admin {
 			$orderby = 'date';
 		}
 		if ( ! in_array( $order, array( 'asc', 'desc' ), true ) ) {
-			$order = 'date' === $orderby ? 'desc' : 'asc';
+			$order = 'desc';
 		}
 
 		return array(

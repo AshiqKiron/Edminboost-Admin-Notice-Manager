@@ -96,7 +96,39 @@ class EDMINBOOST_ANM_Inbox {
 
 		$inbox = get_option( EDMINBOOST_ANM_Settings::INBOX_OPTION, array() );
 
-		self::$all_notices_cache = is_array( $inbox ) ? $inbox : array();
+		if ( ! is_array( $inbox ) ) {
+			self::$all_notices_cache = array();
+			return self::$all_notices_cache;
+		}
+
+		$now     = time();
+		$changed = false;
+
+		foreach ( $inbox as $index => $notice ) {
+			if ( ! is_array( $notice ) ) {
+				continue;
+			}
+
+			if ( 'snoozed' !== ( $notice['status'] ?? '' ) ) {
+				continue;
+			}
+
+			$until = (int) ( $notice['snoozed_until'] ?? 0 );
+			if ( $until <= 0 || $until > $now ) {
+				continue;
+			}
+
+			$inbox[ $index ]['snoozed_until']   = 0;
+			$inbox[ $index ]['snooze_duration'] = '';
+			$inbox[ $index ]['status']          = self::is_marked_read( $notice ) ? 'read' : 'new';
+			$changed                            = true;
+		}
+
+		if ( $changed ) {
+			update_option( EDMINBOOST_ANM_Settings::INBOX_OPTION, $inbox, false );
+		}
+
+		self::$all_notices_cache = $inbox;
 
 		return self::$all_notices_cache;
 	}
@@ -393,6 +425,32 @@ class EDMINBOOST_ANM_Inbox {
 	}
 
 	/**
+	 * Count active inbox notices that are not marked read (bell badge).
+	 *
+	 * @return int
+	 */
+	public static function get_unread_active_count() {
+		if ( null !== self::$counts_cache ) {
+			return (int) ( self::$counts_cache['unread'] ?? 0 );
+		}
+
+		$now   = time();
+		$count = 0;
+
+		foreach ( self::get_all() as $notice ) {
+			if ( ! self::notice_matches_list_filter( $notice, 'all', $now ) ) {
+				continue;
+			}
+			if ( self::is_marked_read( $notice ) ) {
+				continue;
+			}
+			++$count;
+		}
+
+		return $count;
+	}
+
+	/**
 	 * Get filter tab counts.
 	 *
 	 * @return array
@@ -408,13 +466,17 @@ class EDMINBOOST_ANM_Inbox {
 			'alerts'  => 0,
 			'snoozed' => 0,
 			'upsells' => 0,
+			'unread'  => 0,
 		);
 
 		foreach ( self::get_all() as $notice ) {
-			foreach ( array_keys( $counts ) as $filter ) {
+			foreach ( array( 'all', 'alerts', 'snoozed', 'upsells' ) as $filter ) {
 				if ( self::notice_matches_list_filter( $notice, $filter, $now ) ) {
 					++$counts[ $filter ];
 				}
+			}
+			if ( self::notice_matches_list_filter( $notice, 'all', $now ) && ! self::is_marked_read( $notice ) ) {
+				++$counts['unread'];
 			}
 		}
 
@@ -511,6 +573,43 @@ class EDMINBOOST_ANM_Inbox {
 		}
 
 		$notice['read_at'] = time();
+	}
+
+	/**
+	 * Mark every active inbox notice as read.
+	 *
+	 * @return int Number of notices updated.
+	 */
+	public static function mark_all_read() {
+		$notices = self::get_all();
+		$now     = time();
+		$changed = false;
+		$count   = 0;
+
+		foreach ( $notices as $index => $notice ) {
+			if ( ! self::notice_matches_list_filter( $notice, 'all', $now ) ) {
+				continue;
+			}
+
+			if ( self::is_marked_read( $notice ) ) {
+				continue;
+			}
+
+			$notices[ $index ]['read_at'] = $now;
+
+			if ( ! self::is_actively_snoozed( $notice ) ) {
+				$notices[ $index ]['status'] = 'read';
+			}
+
+			$changed = true;
+			++$count;
+		}
+
+		if ( $changed ) {
+			self::save_all( $notices );
+		}
+
+		return $count;
 	}
 
 	/**
@@ -661,12 +760,15 @@ class EDMINBOOST_ANM_Inbox {
 	 * @param string $action Action slug.
 	 * @return int Number affected.
 	 */
-	public static function bulk_action( $ids, $action ) {
+	public static function bulk_action( $ids, $action, $duration_key = '1d' ) {
 		$action = sanitize_key( $action );
 		$allowed = array( 'read', 'snooze', 'archive' );
 		if ( ! in_array( $action, $allowed, true ) ) {
 			return 0;
 		}
+
+		$duration_key = '7d' === sanitize_key( $duration_key ) ? '7d' : '1d';
+		$seconds      = '7d' === $duration_key ? WEEK_IN_SECONDS : DAY_IN_SECONDS;
 
 		$count = 0;
 
@@ -683,7 +785,7 @@ class EDMINBOOST_ANM_Inbox {
 					}
 					break;
 				case 'snooze':
-					if ( self::snooze( $id ) ) {
+					if ( self::snooze( $id, $seconds, $duration_key ) ) {
 						++$count;
 					}
 					break;
@@ -1164,6 +1266,108 @@ class EDMINBOOST_ANM_Inbox {
 	}
 
 	/**
+	 * Short relative time for compact panels (e.g. "2h", "1d").
+	 *
+	 * @param int $timestamp Unix timestamp.
+	 * @return string
+	 */
+	public static function format_panel_relative_time( $timestamp ) {
+		$timestamp = (int) $timestamp;
+		if ( $timestamp <= 0 ) {
+			return '';
+		}
+
+		$diff = max( 0, time() - $timestamp );
+		if ( $diff < MINUTE_IN_SECONDS ) {
+			return __( 'Just now', EDMINBOOST_ANM_TEXT_DOMAIN );
+		}
+		if ( $diff < HOUR_IN_SECONDS ) {
+			$minutes = max( 1, (int) floor( $diff / MINUTE_IN_SECONDS ) );
+
+			/* translators: %d: number of minutes */
+			return sprintf( _n( '%dm', '%dm', $minutes, EDMINBOOST_ANM_TEXT_DOMAIN ), $minutes );
+		}
+		if ( $diff < DAY_IN_SECONDS ) {
+			$hours = max( 1, (int) floor( $diff / HOUR_IN_SECONDS ) );
+
+			/* translators: %d: number of hours */
+			return sprintf( _n( '%dh', '%dh', $hours, EDMINBOOST_ANM_TEXT_DOMAIN ), $hours );
+		}
+		if ( $diff < WEEK_IN_SECONDS ) {
+			$days = max( 1, (int) floor( $diff / DAY_IN_SECONDS ) );
+
+			/* translators: %d: number of days */
+			return sprintf( _n( '%dd', '%dd', $days, EDMINBOOST_ANM_TEXT_DOMAIN ), $days );
+		}
+
+		return human_time_diff( $timestamp, time() );
+	}
+
+	/**
+	 * Dashicons class for Facebook-style notification type badges.
+	 *
+	 * @param string $type Inbox type slug.
+	 * @return string
+	 */
+	public static function get_facebook_notice_icon_class( $type ) {
+		$type = self::sanitize_notice_type_slug( $type );
+		$map  = array(
+			'success'  => 'dashicons-yes-alt',
+			'critical' => 'dashicons-warning',
+			'warning'  => 'dashicons-warning',
+			'error'    => 'dashicons-warning',
+			'upsell'   => 'dashicons-megaphone',
+			'info'     => 'dashicons-admin-comments',
+		);
+
+		return $map[ $type ] ?? 'dashicons-bell';
+	}
+
+	/**
+	 * Short plain-text line for the Facebook-style admin bar notification row.
+	 *
+	 * @param string $message Stored notice message (may contain HTML).
+	 * @param string $html    Stored notice HTML fallback.
+	 * @return string
+	 */
+	public static function get_facebook_panel_message_excerpt( $message, $html = '' ) {
+		$plain = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( (string) $message ) ) );
+		if ( '' === $plain && '' !== trim( (string) $html ) ) {
+			$plain = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( (string) $html ) ) );
+		}
+		if ( '' === $plain ) {
+			return '';
+		}
+
+		$plain = self::facebook_panel_first_segment_plain( $plain );
+
+		return wp_html_excerpt( $plain, 56, '…' );
+	}
+
+	/**
+	 * When multiple notices were concatenated into one message, keep the first segment only.
+	 *
+	 * @param string $plain Collapsed plain text.
+	 * @return string
+	 */
+	private static function facebook_panel_first_segment_plain( $plain ) {
+		if ( preg_match( '/^(.+?)(?<=[\w\)\.:!])(?=Test Notice:)/i', $plain, $matches ) ) {
+			$candidate = trim( $matches[1] );
+			if ( strlen( $candidate ) >= 10 ) {
+				return $candidate;
+			}
+		}
+
+		$marker = 'Test Notice:';
+		$pos    = stripos( $plain, $marker, strlen( $marker ) );
+		if ( false !== $pos && $pos >= 10 ) {
+			return trim( substr( $plain, 0, $pos ) );
+		}
+
+		return $plain;
+	}
+
+	/**
 	 * WordPress notice class string for a panel preview.
 	 *
 	 * @param string $type Inbox type slug.
@@ -1325,6 +1529,9 @@ class EDMINBOOST_ANM_Inbox {
 
 			case 'hide_for_all':
 			case 'hide_forever':
+				if ( ! current_user_can( EDMINBOOST_ANM_Settings::CAPABILITY ) ) {
+					return new WP_Error( 'forbidden', __( 'Permission denied.', EDMINBOOST_ANM_TEXT_DOMAIN ) );
+				}
 				return self::apply_hide_scope( $hash, 'hide_for_all', $id );
 
 			case 'panel_dismiss':

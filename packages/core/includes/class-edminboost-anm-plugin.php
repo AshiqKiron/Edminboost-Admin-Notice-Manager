@@ -110,6 +110,8 @@ class EDMINBOOST_ANM_Plugin {
 		if ( class_exists( 'EDMINBOOST_ANM_Debug' ) ) {
 			add_action( 'init', array( 'EDMINBOOST_ANM_Debug', 'register_hooks' ) );
 		}
+
+		add_action( 'admin_init', 'edminboost_anm_agent_debug_admin_context', 999 );
 	}
 
 	/**

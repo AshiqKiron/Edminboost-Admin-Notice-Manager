@@ -263,6 +263,7 @@ if ( $edminboost_anm_inbox_feed ) {
 					<div class="edminboost-anm-empty edminboost-anm-inbox-feed__empty">
 						<p><?php esc_html_e( 'No notices in the inbox yet. Intercepted notices will appear here.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
 					</div>
+					<ul id="edminboost-anm-inbox-rows" class="edminboost-anm-inbox-feed__list" hidden aria-hidden="true"></ul>
 				<?php endif; ?>
 			</div>
 		</div>
@@ -270,6 +271,7 @@ if ( $edminboost_anm_inbox_feed ) {
 	<?php else : ?>
 	<div class="edminboost-anm-card edminboost-anm-card--flush edminboost-anm-card--list-table">
 		<?php if ( ! empty( $notices ) || $total > 0 ) : ?>
+			<div class="edminboost-anm-inbox-table-scroll">
 			<table class="wp-list-table widefat fixed striped edminboost-anm-table edminboost-anm-inbox-table<?php echo esc_attr( $edminboost_anm_inbox_density_class ); ?>">
 				<thead>
 					<tr>
@@ -297,6 +299,7 @@ if ( $edminboost_anm_inbox_feed ) {
 					</tr>
 				</tfoot>
 			</table>
+			</div>
 		<?php else : ?>
 			<div class="edminboost-anm-empty">
 				<p><?php esc_html_e( 'No notices in the inbox yet. Intercepted notices will appear here.', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></p>
@@ -311,7 +314,8 @@ if ( $edminboost_anm_inbox_feed ) {
 			<select id="edminboost-anm-bulk-action">
 				<option value=""><?php esc_html_e( 'Bulk Actions', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
 				<option value="read"><?php esc_html_e( 'Mark as Read', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
-				<option value="snooze"><?php esc_html_e( 'Snooze', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+				<option value="snooze"><?php esc_html_e( 'Snooze 1 day', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
+				<option value="snooze_7d"><?php esc_html_e( 'Snooze 7 days', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
 				<option value="archive"><?php esc_html_e( 'Archive', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></option>
 			</select>
 			<button type="button" class="button edminboost-anm-bulk-apply"><?php esc_html_e( 'Apply', EDMINBOOST_ANM_TEXT_DOMAIN ); ?></button>

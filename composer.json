@@ -12,5 +12,10 @@
 		"allow-plugins": {
 			"yoast/phpunit-polyfills": true
 		}
+	},
+	"scripts": {
+		"test": "phpunit",
+		"test:unit": "phpunit --testsuite unit",
+		"test:integration": "phpunit --testsuite integration"
 	}
 }

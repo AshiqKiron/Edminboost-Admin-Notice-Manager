@@ -1,6 +1,6 @@
 # Edminboost Admin Notice Manager — Agent Guide
 
-WordPress plugin that intercepts, filters, and organizes admin notices from a central dashboard. PHP 7.4+, WordPress 6.0+, GPL-3.0. Version **1.1.2**.
+WordPress plugin that intercepts, filters, and organizes admin notices from a central dashboard. PHP 7.4+, WordPress 6.0+, GPL-3.0. Version **1.1.3**.
 
 ## Quick Reference
 
@@ -10,6 +10,7 @@ WordPress plugin that intercepts, filters, and organizes admin notices from a ce
 | Bootstrap (Free zip) | `packages/free/edminboost-admin-notice-manager.php` |
 | Bootstrap (Pro zip) | `packages/pro/edminboost-admin-notice-manager-pro.php` |
 | Build | `npm run build` → `dist/zips/*.zip` (see `MONOREPO.md`) |
+| Tests | `npm run test:php` / `npm run test:e2e` (see `TESTING.md`) |
 | Slug / text domain | `edminboost-admin-notice-manager` |
 | Class prefix | `EDMINBOOST_ANM_*` |
 | Function prefix | `edminboost_anm_*` |
@@ -57,6 +58,7 @@ admin/
   partials/edminboost-anm-inbox-feed-rows.php   # GitHub-style inbox list items (inbox_feed mode)
   partials/edminboost-anm-settings-channels-panel.php
   partials/edminboost-anm-notice-panel-dropdown.php
+  partials/edminboost-anm-notice-panel-facebook.php  # Facebook-style admin bar when manage_notices_mode is facebook_notifications
   partials/edminboost-anm-network-policy-page.php
   partials/edminboost-anm-multisite-policy-{fields,next-steps}.php
 languages/  # under packages/core/ — .pot, locale .po/.mo; optional build-translations.py
@@ -74,16 +76,16 @@ composer.json  package.json  MONOREPO.md
 - Options API only — no custom tables. No REST API.
 - AJAX for dashboard/rules/inbox (including `edminboost_anm_inbox_list` sort; inbox snooze toggle and read state), importer, capture, WP preset conversion, user search, notice hide/reset hidden; weekly digest via WP-Cron (`send_weekday`, custom `weekly` schedule); optional webhook (user URL preserved when disabled, off by default). Webhook send and digest recent list respect `alert_routing` type filters and upsell skip flags.
 - **Inbox (1.1.2)**: filters `all`, `alerts` (critical + warning, excludes actively snoozed; legacy `critical` slug maps to `alerts`), `snoozed`, `upsells`; Feature Notifications–aligned severity labels; optional compact density (`inbox_ui.density`); duplicate captures bump `repeat_count` (badge in row partial); optional Alt+Shift+N shortcut (`inbox_ui.keyboard_shortcut_enabled`); list keyboard nav (j/k, arrows) on inbox screen. **Inbox feed UI** when Display experience uses `inbox_feed` (`uses_inbox_feed_layout()`): GitHub-style sidebar + card list; AJAX/page rows via `render_inbox_list_rows_html()` → `edminboost-anm-inbox-feed-rows.php`.
-- **Display experience (1.1.2)**: presets include **Notifications like GitHub** (`inbox_feed`) and **Ecommerce notifications only** (`ecom_dashboard` + `ecommerce_display_scope` for WooCommerce/EDD/other); live General tab preview mirrors both layouts.
-- **Settings (1.1.2)**: **Channels** tab — `notification_channels` source × channel matrix (`EDMINBOOST_ANM_Notification_Sources` registry: WordPress, WooCommerce, EDD, active plugins); routes inbox (`admin`), digest (`email`), webhook per source; channel mute presets (`channel_mutes`); severity anti-spam (`severity_policy`); alert routing on Notifications tab; Feature Notifications coexistence on Migration (`feature_notifications.coexist_mode`: `coexist`|`anm_primary`|`legacy_only`).
+- **Display experience (1.1.2)**: presets include **Notifications like GitHub** (`inbox_feed`), **Notifications like Facebook** (`facebook_notifications` — text-only bell dropdown beside profile, New/Earlier groups, 56-char excerpts + 2-line clamp, 16px side padding; save seeds `notice_panel` `dropdown` + `before_profile` + dot badge; General preview uses `displayExperiencePreviewFb*` i18n), and **Ecommerce notifications only** (`ecom_dashboard` + `ecommerce_display_scope` for WooCommerce/EDD/other); live General tab preview mirrors all preset layouts.
+- **Settings (1.1.2)**: **Channels** tab — `notification_channels` source × channel matrix in a CSS grid UI (`.edminboost-anm-notification-channels-matrix`; `EDMINBOOST_ANM_Notification_Sources` registry: WordPress, WooCommerce, EDD, active plugins); routes inbox (`admin`), digest (`email`), webhook per source; channel mute presets (`channel_mutes`); severity anti-spam (`severity_policy`); alert routing on Notifications tab; Feature Notifications coexistence on Migration (`feature_notifications.coexist_mode`: `coexist`|`anm_primary`|`legacy_only`).
 - **Feature Notifications**: `EDMINBOOST_ANM_Feature_Notifications` listens for core feature-plugin hooks when enabled; Pro ingests into inbox (`origin` `core_feature_notifications`); filters core payload severity when supported; detection filter `edminboost_anm_core_feature_notifications_active`.
 - **Multisite (Pro)**: network policy page shows per-site inbox alert rollup via `EDMINBOOST_ANM_Multisite::get_network_inbox_rollup()`.
 - Auto-Rules: `keyword`, `regex`, and `css` selector match types; custom upsell blacklist phrases apply even when Kill All Upsells preset is off.
 - **Ad redirects**: optional `block_ad_redirects` URL blocklist — admin-only redirect filtering via `EDMINBOOST_ANM_Ad_Redirects`.
-- **Inline notice controls**: `edminboost-anm-notice-inline.js` on non–plugin-screen wp-admin for “Hide for me” / “Hide for all”.
+- **Inline notice controls**: `edminboost-anm-notice-inline.js` on non–plugin-screen wp-admin when `should_apply_notice_hiding_for_user()` — “Hide for me” for eligible users; “Hide for all” only with `manage_options` (`canHideForAll`). Capture/hide AJAX uses `verify_notice_intercept_request()`.
 - **Notifications previews**: Settings Notifications tab — two-column digest form + sticky structured email preview; live webhook text/JSON preview (no send on preview).
-- **Admin bar panel**: Always enabled when plugin is on (`notice_panel.enabled` on save); Admin bar tab is style/position/badge/colors only (no separate enable checkbox). Styles `link`, `bell_link`, `dropdown`, `dropdown_compact`; six position slots; badge caps and dot/pulse/none. Assets when `should_show_admin_bar_notice_panel()`. Settings preview via `initNoticePanelPreview()` (always renders mock). Dropdown JS via `enqueue_admin_bar_dropdown_script()`.
-- **Settings UX**: Global **Enable** only on Dashboard Quick Status (not Settings save). No **Hidden notices in toolbar** option (removed). General tab: two-column **Display experience** + **Update & hidden notices** live previews; **Access** (ACL + user pickers); **Notices** tab (short Inbox/Hide/Default selects); **Admin bar** tab panel preview. Enqueues `list-tables`, `dashicons`, plugin-screen notice-hide inline CSS on plugin screens.
+- **Admin bar panel**: Always enabled when plugin is on (`notice_panel.enabled` on save); Admin bar tab is style/position/badge/colors only (no separate enable checkbox). Styles `link`, `bell_link`, `dropdown`, `dropdown_compact`; six position slots; badge caps and dot/pulse/none. When `facebook_notifications` mode is active, panel partial is `edminboost-anm-notice-panel-facebook.php` (no avatar rows; excerpts via `get_facebook_panel_message_excerpt()`). Assets when `should_show_admin_bar_notice_panel()`. Settings preview via `initNoticePanelPreview()` / Facebook display mock on General tab. Dropdown JS via `enqueue_admin_bar_dropdown_script()` — `edminboostAnmNotices.inboxUrl`, `applyFacebookFilter()` for All/Unread (`fbUnreadEmpty` message), row click opens inbox.
+- **Settings UX**: Global **Enable** only on Dashboard Quick Status (not Settings save). No **Hidden notices in toolbar** option (removed). General tab: two-column **Display experience** + **Update & hidden notices** live previews (`manage_notices_mode` includes `facebook_notifications` with Facebook-style admin bar panel partial); **Access** (ACL + user pickers); **Notices** tab (short Inbox/Hide/Default selects); **Admin bar** tab panel preview. Enqueues `list-tables`, `dashicons`, plugin-screen notice-hide inline CSS on plugin screens.
 - **Plugin screens**: CSS + JS hide stray WP notices; settings preview mocks exempt; debug live-test queue cleared when visiting plugin screens.
 - **Dashboard**: Quick Status enable toggle reloads the page after successful AJAX save (when site may edit settings).
 - **AJAX**: rule mutations accept posted `context` (`site`|`network`); `verify_request()` checks `manage_network_options` for network context; settings toggles use `verify_site_settings_mutation()`.
@@ -110,16 +112,16 @@ Use `EDMINBOOST_ANM_Admin::PAGE_SLUG` — never hardcode slug strings.
 
 ## Notable AJAX actions
 
-Registered in `EDMINBOOST_ANM_Ajax::register_hooks()` — all use `verify_request()` unless noted.
+Registered in `EDMINBOOST_ANM_Ajax::register_hooks()` — privileged actions use `verify_request()` unless noted.
 
 | Action | Purpose |
 |--------|---------|
 | `edminboost_anm_inbox_list` | Return sorted/filtered inbox `<tr>` HTML |
-| `edminboost_anm_inbox_action` | Row/bulk inbox mutations (read, snooze/unsnooze toggle, archive, etc.) |
+| `edminboost_anm_inbox_action` | Row/bulk inbox mutations (read, `mark_all_read`, snooze/unsnooze toggle, archive, etc.; bulk snooze accepts `duration` `1d`\|`7d`) |
 | `edminboost_anm_convert_wp_preset` | Create/undo rule from WP preset |
-| `edminboost_anm_capture_notice` | Interceptor capture endpoint |
+| `edminboost_anm_capture_notice` | Interceptor capture endpoint — `verify_notice_intercept_request()` |
 | `edminboost_anm_search_users` | User picker for hiding-notifications settings |
-| `edminboost_anm_notice_hide` | Per-user or site-wide hide from inline UI or dropdown |
+| `edminboost_anm_notice_hide` | Per-user or site-wide hide from inline UI or dropdown — `verify_notice_intercept_request()`; `hide_for_all` requires capability |
 | `edminboost_anm_reset_hidden_notices` | Reset hidden-notice preferences (user or site) |
 | `edminboost_anm_digest_preview` | Digest preview: to/from/subject, plain `body`, structured `content`, and `next_send` (posted `digest` sanitized via `sanitize_digest_settings()` merged with stored digest) |
 | `edminboost_anm_webhook_preview` | Webhook alert text and JSON payload preview using latest inbox notice or sample data (posted fields sanitized via `sanitize_webhook_settings()` merged with stored webhook; preview UI typically posts unsaved `message` only) |
@@ -161,5 +163,5 @@ Persistent AI guidance lives in `.cursor/rules/`:
 - Edit shared source under `packages/core/`; edition bootstraps in `packages/free/` and `packages/pro/`. Run `npm run build` for release zips (`dist/` is gitignored).
 - Update `packages/free/readme.txt` changelog for user-facing changes; keep `.cursor/rules/` and `AGENTS.md` in sync when behavior or architecture changes.
 - Update `packages/core/uninstall.php` (and deactivator for cron) when adding stored options or schedules; multisite uninstall uses `EDMINBOOST_ANM_Multisite::uninstall_all_sites()`.
-- New AJAX actions: register in `EDMINBOOST_ANM_Ajax`, use `verify_request()` (or `verify_debug_request()` for debug-only).
+- New AJAX actions: register in `EDMINBOOST_ANM_Ajax`, use `verify_request()` (or `verify_notice_intercept_request()` for capture/hide, or `verify_debug_request()` for debug-only).
 - Shared inbox row markup: update `edminboost-anm-inbox-table-rows.php` and/or `edminboost-anm-inbox-feed-rows.php` (via `render_inbox_list_rows_html()`) for both full page and AJAX list responses.

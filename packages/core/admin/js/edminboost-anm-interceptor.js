@@ -70,7 +70,11 @@
 		}).then(function (response) {
 			return response.json();
 		}).then(function (result) {
-			if (result.success && result.data && result.data.suppress) {
+			if (!result.success) {
+				delete processed[key];
+				return;
+			}
+			if (result.data && result.data.suppress) {
 				node.classList.add('edminboost-anm-notice-hidden');
 			}
 		}).catch(function () {

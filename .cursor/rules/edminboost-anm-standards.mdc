@@ -38,14 +38,15 @@ Cross-cutting quality standards. See also: `edminboost-anm-project.mdc`, `edminb
 - General settings previews (`display-experience`, `general-options`): `aria-live="polite"`; client-built HTML must use `anmPreviewEscapeHtml` / equivalent; cross-tab Admin bar field changes may refresh display-experience mock without saving.
 - White label preview (`#edminboost-anm-white-label-preview`): `aria-live="polite"`; client-built mock must escape all dynamic strings (`anmPreviewEscapeHtml`).
 - Admin bar dropdown: use `aria-haspopup`, `aria-expanded`, `aria-controls`, and screen-reader text for counts; panel `#edminboost-anm-notices-panel` uses `hidden` when closed.
-- Channels matrix: `role="grid"` table with `aria-describedby` caption; labeled column/group toggles; disabled inputs when settings are network read-only.
+- Facebook admin bar panel: `role="region"` + `aria-label` on the panel; All/Unread filters use `role="tablist"` / `role="tab"` with `aria-selected`; Unread filter sets `aria-hidden` on filtered rows and sections; header options menu uses `aria-haspopup`, `aria-expanded`, and `role="menu"` / `role="menuitem"` for **Mark all as read** and settings link.
+- Channels matrix: CSS grid layout (`.edminboost-anm-notification-channels-matrix`) with `role="grid"`, `aria-describedby` caption; labeled column/group toggles; disabled inputs when settings are network read-only.
 
 ## Admin UX
 
 - Add notices sparingly and only when relevant.
 - Load plugin-screen assets only on this plugin's pages (`is_plugin_screen()` or `EDMINBOOST_ANM_Multisite::is_network_plugin_screen()` on multisite).
 - Notice CSS may load on wp-admin when the plugin is enabled, and on the front-end admin bar when the notice panel is active for capable users.
-- Interceptor JS loads on all wp-admin when plugin is enabled — required for live notice capture.
+- Interceptor JS loads on wp-admin when interception is active (`should_intercept_notices()`) and `should_apply_notice_hiding_for_user()` — required for live JS capture alongside PHP buffer hooks; skipped on plugin screens.
 - Features must respect the global `enabled` kill switch via `EDMINBOOST_ANM_Settings::is_enabled()`.
 - Dashboard Quick Status uses AJAX then full page reload on success; other dashboard/rules/inbox actions use AJAX with localized `i18n` feedback.
 
